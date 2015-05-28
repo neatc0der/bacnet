@@ -1,0 +1,261 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>bacnet.sandbox package &mdash; Masterarbeit Grosch 0.4c0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.4c0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Masterarbeit Grosch 0.4c0 documentation" href="index.html" />
+    <link rel="up" title="bacnet package" href="bacnet.html" />
+    <link rel="next" title="bacnet.system package" href="bacnet.system.html" />
+    <link rel="prev" title="bacnet.object.hardware.terra package" href="bacnet.object.hardware.terra.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="bacnet.system.html" title="bacnet.system package"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="bacnet.object.hardware.terra.html" title="bacnet.object.hardware.terra package"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Masterarbeit Grosch 0.4c0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="bacnet.html" accesskey="U">bacnet package</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="bacnet-sandbox-package">
+<h1>bacnet.sandbox package<a class="headerlink" href="#bacnet-sandbox-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul class="simple">
+</ul>
+</div>
+</div>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-bacnet.sandbox.interface">
+<span id="bacnet-sandbox-interface-module"></span><h2>bacnet.sandbox.interface module<a class="headerlink" href="#module-bacnet.sandbox.interface" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="sandbox-interface-module">
+<h3>Sandbox Interface Module<a class="headerlink" href="#sandbox-interface-module" title="Permalink to this headline">¶</a></h3>
+<p>This module contains the Transformation Implementation for the Sandbox interface. It is simply
+copied from the PyPy code and thereby not commented.</p>
+<dl class="function">
+<dt id="bacnet.sandbox.interface.read_message">
+<code class="descclassname">bacnet.sandbox.interface.</code><code class="descname">read_message</code><span class="sig-paren">(</span><em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/sandbox/interface.html#read_message"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.sandbox.interface.read_message" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="bacnet.sandbox.interface.receive">
+<code class="descclassname">bacnet.sandbox.interface.</code><code class="descname">receive</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/sandbox/interface.html#receive"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.sandbox.interface.receive" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function is waiting for arriving messages via an event.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">message</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="bacnet.sandbox.interface.transmit">
+<code class="descclassname">bacnet.sandbox.interface.</code><code class="descname">transmit</code><span class="sig-paren">(</span><em>line</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/sandbox/interface.html#transmit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.sandbox.interface.transmit" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function is transmitting outgoing messages.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="bacnet.sandbox.interface.write_message">
+<code class="descclassname">bacnet.sandbox.interface.</code><code class="descname">write_message</code><span class="sig-paren">(</span><em>*x</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/sandbox/interface.html#write_message"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.sandbox.interface.write_message" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+</div>
+<div class="section" id="bacnet-sandbox-process-module">
+<h2>bacnet.sandbox.process module<a class="headerlink" href="#bacnet-sandbox-process-module" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-bacnet.sandbox">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-bacnet.sandbox" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="sandbox-module">
+<h3>Sandbox Module<a class="headerlink" href="#sandbox-module" title="Permalink to this headline">¶</a></h3>
+<p>This module contains handlers for the pypy sandbox environment.</p>
+<dl class="function">
+<dt id="bacnet.sandbox.get_platform_name">
+<code class="descclassname">bacnet.sandbox.</code><code class="descname">get_platform_name</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/sandbox.html#get_platform_name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.sandbox.get_platform_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function returns the platform name.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">platform name</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="bacnet.sandbox.get_sandbox_process">
+<code class="descclassname">bacnet.sandbox.</code><code class="descname">get_sandbox_process</code><span class="sig-paren">(</span><em>executable</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/sandbox.html#get_sandbox_process"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.sandbox.get_sandbox_process" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function returns a sandbox process object.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>executable</strong> &#8211; relative path to untrusted executable</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">sandbox process</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="bacnet.sandbox.sandbox_interact">
+<code class="descclassname">bacnet.sandbox.</code><code class="descname">sandbox_interact</code><span class="sig-paren">(</span><em>sandbox_process</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/sandbox.html#sandbox_interact"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.sandbox.sandbox_interact" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function interacts with the sandbox process.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>sandbox_process</strong> &#8211; sandbox process object</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="bacnet.sandbox.sandbox_support">
+<code class="descclassname">bacnet.sandbox.</code><code class="descname">sandbox_support</code><span class="sig-paren">(</span><em>platform_name='darwin-x86_64'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/sandbox.html#sandbox_support"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.sandbox.sandbox_support" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function checks if compiled sandbox version of pypy exists for this system.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">sandbox is supported on this system</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">bacnet.sandbox package</a><ul>
+<li><a class="reference internal" href="#subpackages">Subpackages</a></li>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-bacnet.sandbox.interface">bacnet.sandbox.interface module</a><ul>
+<li><a class="reference internal" href="#sandbox-interface-module">Sandbox Interface Module</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#bacnet-sandbox-process-module">bacnet.sandbox.process module</a></li>
+<li><a class="reference internal" href="#module-bacnet.sandbox">Module contents</a><ul>
+<li><a class="reference internal" href="#sandbox-module">Sandbox Module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="bacnet.object.hardware.terra.html"
+                        title="previous chapter">bacnet.object.hardware.terra package</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="bacnet.system.html"
+                        title="next chapter">bacnet.system package</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/bacnet.sandbox.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Tobias Grosch.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.3</a>
+      
+      |
+      <a href="_sources/bacnet.sandbox.txt"
+          rel="nofollow">Page source</a></li>
+    </div>
+
+    
+
+    
+  </body>
+</html>

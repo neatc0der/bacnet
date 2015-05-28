@@ -1,0 +1,23 @@
+{% extends "control/layout.html" %}
+{% load static %}
+{% load menu %}
+
+{% block left_menu %}
+  <ul class="nav nav-red nav-pills nav-stacked" id="left_menu"></ul>
+{% endblock %}
+
+{% block bottom_scripts %}
+  <!-- Parameter Parser Script -->
+  <script type="text/javascript" src="{% static 'js/parameter_parser.js' %}"></script>
+
+  <!-- Device Tree Script -->
+  <script type="text/javascript" src="{% static 'js/device_tree.js' %}"></script>
+
+  <!-- Device Tree -->
+  <script type="text/javascript">
+    $.deviceTree({
+      ajax_url: "{% url "control:device_data" %}",
+      icon_url: "{% static 'icons/' %}"
+    });
+  </script>
+{% endblock %}

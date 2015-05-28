@@ -1,0 +1,353 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>bacnet.webgui &mdash; Masterarbeit Grosch 0.4c0 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.4c0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="Masterarbeit Grosch 0.4c0 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Masterarbeit Grosch 0.4c0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for bacnet.webgui</h1><div class="highlight"><pre>
+<span class="c"># pylint: disable=anomalous-backslash-in-string, broad-except, unused-argument</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">BACnet WebGUI Module</span>
+<span class="sd">--------------------</span>
+
+<span class="sd">This module contains a django project for BACnet interaction.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">json</span> <span class="kn">import</span> <span class="n">dumps</span>
+<span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="kn">import</span> <span class="n">Process</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">signal</span>
+<span class="kn">import</span> <span class="nn">subprocess</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">threading</span> <span class="kn">import</span> <span class="n">Thread</span><span class="p">,</span> <span class="n">Event</span>
+<span class="kn">import</span> <span class="nn">urllib2</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">time</span>
+
+<span class="kn">from</span> <span class="nn">bacnet.debugging</span> <span class="kn">import</span> <span class="n">ModuleLogger</span><span class="p">,</span> <span class="n">bacnet_debug</span>
+
+<span class="kn">from</span> <span class="nn">.bacnet_access</span> <span class="kn">import</span> <span class="n">api_receive</span><span class="p">,</span> <span class="n">api_transmit</span>
+
+
+<span class="c"># enable debugging</span>
+<span class="n">ModuleLogger</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="s">&#39;INFO&#39;</span><span class="p">)</span>
+
+
+<span class="n">AUTHKEY_REGEX</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">&quot;AUTHKEY\s*=\s*&#39;(.*)&#39;&quot;</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">)</span>
+<span class="n">ADDRESS_REGEX</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">&quot;ADDRESS\s*=\s*&#39;(.*)&#39;&quot;</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">)</span>
+<span class="n">IP_ADDRESS_REGEX</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">&quot;IP_ADDRESS\s*=\s*&#39;(.*)&#39;&quot;</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">)</span>
+
+<span class="nd">@bacnet_debug</span>
+<div class="viewcode-block" id="DjangoProcess"><a class="viewcode-back" href="../../bacnet.webgui.html#bacnet.webgui.DjangoProcess">[docs]</a><span class="k">class</span> <span class="nc">DjangoProcess</span><span class="p">(</span><span class="n">Process</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class handles the django process.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">address</span><span class="p">,</span> <span class="n">port</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function initializes the process.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># call predecessor</span>
+        <span class="n">Process</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="c"># reserve variables</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">django_process</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">comm_thread</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="c"># set process to daemon</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">daemon</span> <span class="o">=</span> <span class="bp">True</span>
+
+        <span class="c"># set address and port</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">address</span> <span class="o">=</span> <span class="n">address</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">port</span> <span class="o">=</span> <span class="n">port</span>
+
+        <span class="c"># set receiving event</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start_receiving</span> <span class="o">=</span> <span class="n">Event</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">signal</span><span class="p">,</span> <span class="s">&#39;SIGINT&#39;</span><span class="p">):</span>
+            <span class="n">signal</span><span class="o">.</span><span class="n">signal</span><span class="p">(</span><span class="n">signal</span><span class="o">.</span><span class="n">SIGINT</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">shutdown</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">signal</span><span class="p">,</span> <span class="s">&#39;SIGTERM&#39;</span><span class="p">):</span>
+            <span class="n">signal</span><span class="o">.</span><span class="n">signal</span><span class="p">(</span><span class="n">signal</span><span class="o">.</span><span class="n">SIGTERM</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">shutdown</span><span class="p">)</span>
+
+        <span class="c"># start process</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+<div class="viewcode-block" id="DjangoProcess.receiver"><a class="viewcode-back" href="../../bacnet.webgui.html#bacnet.webgui.DjangoProcess.receiver">[docs]</a>    <span class="k">def</span> <span class="nf">receiver</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function provides the environment for the receiver thread.</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">.control.urls</span> <span class="kn">import</span> <span class="n">OBJECT_UPDATE_URL</span>
+
+        <span class="c"># wait until django is started</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start_receiving</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;running: receiver thread&#39;</span><span class="p">)</span>
+
+        <span class="c"># set update url</span>
+        <span class="n">update_url</span> <span class="o">=</span> <span class="s">&#39;http://</span><span class="si">%s</span><span class="s">:</span><span class="si">%s</span><span class="s">/</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">address</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="p">,</span> <span class="n">OBJECT_UPDATE_URL</span><span class="p">)</span>
+
+        <span class="c"># initialize last iam</span>
+        <span class="n">last_iam</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c"># loop forever</span>
+            <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="c"># receive parsed data</span>
+                    <span class="n">parsed_data</span> <span class="o">=</span> <span class="n">api_receive</span><span class="p">()</span>
+
+                <span class="k">except</span> <span class="p">(</span><span class="ne">IOError</span><span class="p">,</span> <span class="ne">EOFError</span><span class="p">):</span>
+                    <span class="c"># broken pipe</span>
+                    <span class="k">break</span>
+
+                <span class="c"># check if parsed data is a dictionary</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parsed_data</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                    <span class="k">continue</span>
+
+                <span class="c"># check if django sub process is still running</span>
+                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;django_process&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">django_process</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">and</span> \
+                    <span class="bp">self</span><span class="o">.</span><span class="n">django_process</span><span class="o">.</span><span class="n">poll</span><span class="p">()</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="k">break</span>
+
+                <span class="c"># create request</span>
+                <span class="n">req</span> <span class="o">=</span> <span class="n">urllib2</span><span class="o">.</span><span class="n">Request</span><span class="p">(</span>
+                    <span class="n">update_url</span><span class="p">,</span>
+                    <span class="n">dumps</span><span class="p">(</span><span class="n">parsed_data</span><span class="p">),</span>
+                    <span class="p">{</span><span class="s">&#39;Content-Type&#39;</span><span class="p">:</span> <span class="s">&#39;application/json&#39;</span><span class="p">},</span>
+                <span class="p">)</span>
+
+                <span class="c"># send update information</span>
+                <span class="n">urllib2</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="n">req</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">last_iam</span> <span class="o">&gt;</span> <span class="mi">1800</span><span class="p">:</span>
+                    <span class="n">last_iam</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+                    <span class="n">api_transmit</span><span class="p">(</span><span class="s">&#39;whois 1&#39;</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_exception</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
+
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;finished: receiver thread&#39;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="DjangoProcess.shutdown"><a class="viewcode-back" href="../../bacnet.webgui.html#bacnet.webgui.DjangoProcess.shutdown">[docs]</a>    <span class="k">def</span> <span class="nf">shutdown</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function shuts down the process.</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;shutdown&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;django_process&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">django_process</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> \
+            <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">django_process</span><span class="o">.</span><span class="n">poll</span><span class="p">()</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">django_process</span><span class="o">.</span><span class="n">kill</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="DjangoProcess.run"><a class="viewcode-back" href="../../bacnet.webgui.html#bacnet.webgui.DjangoProcess.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function is executed as a separate process.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;running&#39;</span><span class="p">)</span>
+
+        <span class="c"># get current directory</span>
+        <span class="n">start_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
+
+        <span class="c"># change directory</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">))</span>
+
+        <span class="c"># set sys path</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">))</span>
+
+        <span class="c"># start thread</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">comm_thread</span> <span class="o">=</span> <span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">receiver</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">comm_thread</span><span class="o">.</span><span class="n">setDaemon</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">comm_thread</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+        <span class="c"># import AUTHKEY and ADDRESS for manager</span>
+        <span class="kn">from</span> <span class="nn">bacnet.system.managing</span> <span class="kn">import</span> <span class="n">ADDRESS</span><span class="p">,</span> <span class="n">AUTHKEY</span>
+
+        <span class="c"># set private file</span>
+        <span class="n">private_file</span> <span class="o">=</span> <span class="s">&#39;webgui/settings/private.py&#39;</span>
+
+        <span class="c"># load private settings</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">private_file</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">private_fd</span><span class="p">:</span>
+            <span class="n">private_settings</span> <span class="o">=</span> <span class="n">private_fd</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+
+        <span class="c"># replace authkey within private settings</span>
+        <span class="n">match</span> <span class="o">=</span> <span class="n">AUTHKEY_REGEX</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">private_settings</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">match</span><span class="p">:</span>
+            <span class="n">private_settings</span> <span class="o">=</span> <span class="n">private_settings</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">match</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="mi">1</span><span class="p">)]</span> <span class="o">+</span> <span class="n">AUTHKEY</span> <span class="o">+</span> \
+                               <span class="n">private_settings</span><span class="p">[</span><span class="n">match</span><span class="o">.</span><span class="n">end</span><span class="p">(</span><span class="mi">1</span><span class="p">):]</span>
+
+        <span class="c"># replace address within private settings</span>
+        <span class="n">match</span> <span class="o">=</span> <span class="n">ADDRESS_REGEX</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">private_settings</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">match</span><span class="p">:</span>
+            <span class="n">private_settings</span> <span class="o">=</span> <span class="n">private_settings</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">match</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="mi">1</span><span class="p">)]</span> <span class="o">+</span> <span class="n">ADDRESS</span> <span class="o">+</span> \
+                               <span class="n">private_settings</span><span class="p">[</span><span class="n">match</span><span class="o">.</span><span class="n">end</span><span class="p">(</span><span class="mi">1</span><span class="p">):]</span>
+
+        <span class="c"># replace ip address within private settings</span>
+        <span class="n">match</span> <span class="o">=</span> <span class="n">IP_ADDRESS_REGEX</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">private_settings</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">match</span><span class="p">:</span>
+            <span class="n">private_settings</span> <span class="o">=</span> <span class="n">private_settings</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">match</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="mi">1</span><span class="p">)]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">address</span> <span class="o">+</span> \
+                               <span class="n">private_settings</span><span class="p">[</span><span class="n">match</span><span class="o">.</span><span class="n">end</span><span class="p">(</span><span class="mi">1</span><span class="p">):]</span>
+
+        <span class="c"># store private settings</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">private_file</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">private_fd</span><span class="p">:</span>
+            <span class="n">private_fd</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">private_settings</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c"># set execution arguments</span>
+            <span class="n">argv</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="s">&#39;./manage.py&#39;</span><span class="p">,</span>
+                <span class="s">&#39;runserver&#39;</span><span class="p">,</span>
+                <span class="s">&#39;</span><span class="si">%s</span><span class="s">:</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">address</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="p">),</span>
+                <span class="c"># &#39;--noreload&#39;,</span>
+            <span class="p">]</span>
+
+            <span class="c"># initialize django sub process</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">django_process</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span><span class="n">argv</span><span class="p">)</span>
+
+            <span class="c"># wait until sub process terminates</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">django_process</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+
+        <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+            <span class="c"># interrupt system call</span>
+            <span class="k">pass</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_exception</span><span class="p">(</span><span class="s">&#39;an error has occurred: </span><span class="si">%s</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">error</span><span class="p">)</span>
+
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="c"># load private settings</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">private_file</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">private_fd</span><span class="p">:</span>
+                <span class="n">private_settings</span> <span class="o">=</span> <span class="n">private_fd</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+
+            <span class="c"># remove authkey within private settings</span>
+            <span class="n">match</span> <span class="o">=</span> <span class="n">AUTHKEY_REGEX</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">private_settings</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">match</span><span class="p">:</span>
+                <span class="n">private_settings</span> <span class="o">=</span> <span class="n">private_settings</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">match</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="mi">1</span><span class="p">)]</span> <span class="o">+</span> \
+                                   <span class="n">private_settings</span><span class="p">[</span><span class="n">match</span><span class="o">.</span><span class="n">end</span><span class="p">(</span><span class="mi">1</span><span class="p">):]</span>
+
+            <span class="c"># remove address within private settings</span>
+            <span class="n">match</span> <span class="o">=</span> <span class="n">ADDRESS_REGEX</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">private_settings</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">match</span><span class="p">:</span>
+                <span class="n">private_settings</span> <span class="o">=</span> <span class="n">private_settings</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">match</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="mi">1</span><span class="p">)]</span> <span class="o">+</span> \
+                                   <span class="n">private_settings</span><span class="p">[</span><span class="n">match</span><span class="o">.</span><span class="n">end</span><span class="p">(</span><span class="mi">1</span><span class="p">):]</span>
+
+            <span class="c"># remove ip address within private settings</span>
+            <span class="n">match</span> <span class="o">=</span> <span class="n">IP_ADDRESS_REGEX</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">private_settings</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">match</span><span class="p">:</span>
+                <span class="n">private_settings</span> <span class="o">=</span> <span class="n">private_settings</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">match</span><span class="o">.</span><span class="n">start</span><span class="p">(</span><span class="mi">1</span><span class="p">)]</span> <span class="o">+</span> \
+                                   <span class="n">private_settings</span><span class="p">[</span><span class="n">match</span><span class="o">.</span><span class="n">end</span><span class="p">(</span><span class="mi">1</span><span class="p">):]</span>
+
+            <span class="c"># store private settings</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">private_file</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">private_fd</span><span class="p">:</span>
+                <span class="n">private_fd</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">private_settings</span><span class="p">)</span>
+
+            <span class="c"># change directory</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">start_dir</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;finished&#39;</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="create_webgui"><a class="viewcode-back" href="../../bacnet.webgui.html#bacnet.webgui.create_webgui">[docs]</a><span class="k">def</span> <span class="nf">create_webgui</span><span class="p">(</span><span class="n">address</span><span class="p">,</span> <span class="n">port</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function creates a django subprocess.</span>
+
+<span class="sd">    :return: webgui process</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># create webgui process</span>
+    <span class="n">process</span> <span class="o">=</span> <span class="n">DjangoProcess</span><span class="p">(</span><span class="n">address</span><span class="o">=</span><span class="n">address</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">port</span><span class="p">)</span>
+
+    <span class="c"># return webgui process</span>
+    <span class="k">return</span> <span class="n">process</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Tobias Grosch.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.3</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

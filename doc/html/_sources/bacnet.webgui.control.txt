@@ -1,0 +1,38 @@
+bacnet.webgui.control package
+=============================
+
+Subpackages
+-----------
+
+.. toctree::
+
+    bacnet.webgui.control.templatetags
+    bacnet.webgui.control.views
+
+Submodules
+----------
+
+bacnet.webgui.control.models module
+-----------------------------------
+
+.. automodule:: bacnet.webgui.control.models
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+bacnet.webgui.control.urls module
+---------------------------------
+
+.. automodule:: bacnet.webgui.control.urls
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: bacnet.webgui.control
+    :members:
+    :undoc-members:
+    :show-inheritance:

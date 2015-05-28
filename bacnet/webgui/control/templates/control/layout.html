@@ -1,0 +1,104 @@
+{% load staticfiles %}
+{% load menu %}
+
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <!-- Compiled and minified Bootstrap CSS -->
+    <link rel="stylesheet" href="{% static 'css/bootstrap.css' %}">
+
+    <!-- Custom Bootstrap theme -->
+    <link rel="stylesheet" href="{% static 'css/bootstrap.custom.css' %}">
+
+    <!-- TU Braunschweig CSS -->
+    <link rel="stylesheet" href="{% static 'css/tu-bs.css' %}">
+
+    <!-- Deactivate Scaling -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+    <!-- Provide Descriptio -->
+    <meta name="description" content="Masterarbeit Grosch">
+
+    <!-- Define Author -->
+    <meta name="author" content="Tobias Grosch">
+
+    <!-- Define ICON -->
+    <link rel="SHORTCUT ICON" href="{% static 'img/favicon.ico' %}" title="favicon" />
+
+    <!-- Make CSRF Token accessible -->
+    <meta name="csrftoken" content="{{csrf_token}}">
+  </head>
+  <body id="pagetop">
+
+    <div id="wrapper_content">
+      <div id="tu_siegel">
+        <a href="http://www.tu-braunschweig.de" title="TU Start"><img src="{% static 'img/tu-bs.jpg' %}" alt="TU BRAUNSCHWEIG" /></a>
+      </div>
+
+      <div id="logo">
+        <img src="{% static 'img/institute.png' %}" alt="Institutslogo" />
+      </div>
+
+      <div id="symbolpic">
+        <img src="{% static 'img/header.jpg' %}" alt="" width="960" height="170" title="Bild" />
+      </div>
+
+      <div id="tu_navcontainer">
+        <ul id="tu_navlist">
+          <li class="{% url_attr 'control:index' 'active' exact=True %}"><a href="{% url "control:index" %}">Startseite</a></li>
+          <li class="{% url_attr 'control:devices' 'active' %}"><a href="{% url "control:devices" %}">BACnet-Geräte</a></li>
+        </ul>
+      </div>
+
+      {% block full_content %}
+        <div class='linke_spalte'>
+
+          {% block left_menu %}{% endblock %}
+
+        </div>
+
+        <div class='mittlere_spalte'>
+
+          {% if breadcrumbs %}
+            <ol class="breadcrumb">
+              {% for name, link, active in breadcrumbs %}
+                <li {% if active %}class="active"{% endif %}>
+                  {% if not active %}
+                    <a href="{{ link }}">{{ name }}</a>
+                  {% else %}
+                    {{ name }}
+                  {% endif %}
+                </li>
+              {% endfor %}
+            </ol>
+          {% endif %}
+
+          {% block content %}{% endblock %}
+
+          <div class="fusszeile">
+            <br><br>
+            <hr noshade>
+            &copy; Tobias Grosch 2015
+            <hr noshade>
+          </div>
+        </div>
+
+        <div class='rechte_spalte'>
+
+          {% block right_menu %}{% endblock %}
+
+        </div>
+      {% endblock %}
+
+    </div>
+
+    <!-- Compiled and minified jQuery -->
+    <script type="text/javascript" src="{% static 'js/jquery-2.1.3.js' %}"></script>
+
+    <!-- Compiled and minified Bootstrap Javascript -->
+    <script src="{% static 'js/bootstrap.min.js' %}"></script>
+
+    {% block bottom_scripts %}{% endblock %}
+  </body>
+</html>

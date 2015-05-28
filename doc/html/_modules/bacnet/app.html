@@ -1,0 +1,240 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>bacnet.app &mdash; Masterarbeit Grosch 0.4c0 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.4c0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="Masterarbeit Grosch 0.4c0 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Masterarbeit Grosch 0.4c0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for bacnet.app</h1><div class="highlight"><pre>
+<span class="c"># pylint: disable=invalid-name, star-args, too-many-locals, too-few-public-methods</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Application Module</span>
+<span class="sd">------------------</span>
+
+<span class="sd">This module contains just a single public function for creating a basic device and application to</span>
+<span class="sd">ensure BACnet conform communications by using BACpypes.</span>
+
+<span class="sd">Function for creating device and application:</span>
+<span class="sd">    create_device_and_app(args)</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+
+<span class="kn">from</span> <span class="nn">bacpypes.basetypes</span> <span class="kn">import</span> <span class="n">ServicesSupported</span>
+<span class="kn">from</span> <span class="nn">bacpypes.pdu</span> <span class="kn">import</span> <span class="n">Address</span>
+
+<span class="kn">from</span> <span class="nn">bacnet.debugging</span> <span class="kn">import</span> <span class="n">bacnet_debug</span><span class="p">,</span> <span class="n">ModuleLogger</span>
+
+<span class="kn">from</span> <span class="nn">bacnet.console.creator</span> <span class="kn">import</span> <span class="n">request_creator</span>
+
+<span class="kn">from</span> <span class="nn">bacnet.object</span> <span class="kn">import</span> <span class="n">get_object_list</span><span class="p">,</span> <span class="n">LocalDeviceObject</span>
+
+<span class="kn">from</span> <span class="nn">.define</span> <span class="kn">import</span> <span class="n">Application</span>
+
+
+<span class="c"># enable logging</span>
+<span class="n">ModuleLogger</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="s">&#39;INFO&#39;</span><span class="p">)</span>
+
+
+<span class="nd">@bacnet_debug</span><span class="p">(</span><span class="n">formatter</span><span class="o">=</span><span class="s">&#39;</span><span class="si">%(levelname)s</span><span class="s">:application: </span><span class="si">%(message)s</span><span class="s">&#39;</span><span class="p">)</span>
+<div class="viewcode-block" id="create_app"><a class="viewcode-back" href="../../bacnet.app.html#bacnet.app.create_app">[docs]</a><span class="k">def</span> <span class="nf">create_app</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">device_init</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function creates two BACpypes objects needed for BACnet communications. This includes a</span>
+<span class="sd">    local device for identification of the BACnet device and grouping of related BACnet objects as</span>
+<span class="sd">    well as an application for message handling from the network.</span>
+
+<span class="sd">    :param args: configuration arguments</span>
+<span class="sd">    :return: device, application</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="bp">self</span> <span class="o">=</span> <span class="n">create_app</span>
+
+    <span class="c"># check if address was defined</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">ini</span><span class="p">,</span> <span class="s">&#39;address&#39;</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s">&#39;address was not defined in argument nor config file&#39;</span><span class="p">)</span>
+
+    <span class="c"># define standard device parameters and their class (None equals string)</span>
+    <span class="n">device_args</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="s">&#39;objectName&#39;</span><span class="p">),</span>
+        <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="s">&#39;objectIdentifier&#39;</span><span class="p">),</span>
+        <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="s">&#39;maxApduLengthAccepted&#39;</span><span class="p">),</span>
+        <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="s">&#39;segmentationSupported&#39;</span><span class="p">),</span>
+        <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="s">&#39;vendorIdentifier&#39;</span><span class="p">),</span>
+    <span class="p">)</span>
+
+    <span class="c"># populate device parameter dictionary</span>
+    <span class="n">device_kwargs</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">arg_type</span><span class="p">,</span> <span class="n">argument</span> <span class="ow">in</span> <span class="n">device_args</span><span class="p">:</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">ini</span><span class="p">,</span> <span class="n">argument</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span> <span class="bp">None</span><span class="p">)</span>
+
+        <span class="c"># intercept missing parameters</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="c"># cast value</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">arg_type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+            <span class="n">device_kwargs</span><span class="p">[</span><span class="n">argument</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="c"># update device initials</span>
+    <span class="k">if</span> <span class="n">device_init</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">device_kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">device_init</span><span class="p">)</span>
+
+    <span class="c"># create local device object</span>
+    <span class="n">device</span> <span class="o">=</span> <span class="n">LocalDeviceObject</span><span class="p">(</span>
+        <span class="o">**</span><span class="n">device_kwargs</span>
+    <span class="p">)</span>
+
+    <span class="n">device</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="s">&#39;objectIdentifier&#39;</span><span class="p">,</span> <span class="n">device</span><span class="o">.</span><span class="n">get_value</span><span class="p">(</span><span class="s">&#39;objectIdentifier&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+
+    <span class="c"># collect supported services</span>
+    <span class="n">pss</span> <span class="o">=</span> <span class="n">ServicesSupported</span><span class="p">()</span>
+
+    <span class="c"># define standard services for support check</span>
+    <span class="n">services</span> <span class="o">=</span> <span class="n">ServicesSupported</span><span class="o">.</span><span class="n">bitNames</span>
+
+    <span class="c"># get supported functions from application</span>
+    <span class="n">supported_functions</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">Application</span><span class="p">)]</span>
+    <span class="c"># set supported services</span>
+    <span class="k">for</span> <span class="n">service_name</span> <span class="ow">in</span> <span class="n">services</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s">&#39;do_</span><span class="si">%s</span><span class="s">request&#39;</span> <span class="o">%</span> <span class="n">service_name</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="n">supported_functions</span><span class="p">:</span>
+            <span class="n">pss</span><span class="p">[</span><span class="n">service_name</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="c"># set supported services</span>
+    <span class="n">device</span><span class="o">.</span><span class="n">protocolServicesSupported</span> <span class="o">=</span> <span class="n">pss</span><span class="o">.</span><span class="n">value</span>
+
+    <span class="c"># create address</span>
+    <span class="n">address</span> <span class="o">=</span> <span class="n">Address</span><span class="p">(</span>
+        <span class="n">args</span><span class="o">.</span><span class="n">ini</span><span class="o">.</span><span class="n">address</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">ini</span><span class="p">,</span> <span class="s">&#39;port&#39;</span><span class="p">)</span> <span class="k">else</span>
+        <span class="s">&#39;</span><span class="si">%s</span><span class="s">:</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">ini</span><span class="o">.</span><span class="n">address</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">ini</span><span class="o">.</span><span class="n">port</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="c"># get the list of objects to add to application</span>
+    <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;object_list&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_object_list</span><span class="p">()</span>
+
+    <span class="c"># create specific application</span>
+    <span class="n">application</span> <span class="o">=</span> <span class="n">Application</span><span class="p">(</span><span class="n">device</span><span class="p">,</span> <span class="n">address</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="n">stdout</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="n">commands</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c"># check if examples are enabled and print info</span>
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">examples</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="p">(</span><span class="s">&#39;adding example hardware objects&#39;</span><span class="p">)</span>
+
+        <span class="c"># loop through hardware objects</span>
+        <span class="k">for</span> <span class="n">obj_id</span><span class="p">,</span> <span class="n">obj_dict</span> <span class="ow">in</span> <span class="n">application</span><span class="o">.</span><span class="n">known_hardware</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+            <span class="c"># get object class</span>
+            <span class="n">options</span> <span class="o">=</span> <span class="s">&#39;objectIdentifier &quot;</span><span class="si">%s</span><span class="s"> </span><span class="si">%i</span><span class="s">&quot;&#39;</span> <span class="o">%</span> <span class="n">obj_id</span>
+
+            <span class="c"># loop through initials</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">obj_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;initials&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+                <span class="c"># add options</span>
+                <span class="n">options</span> <span class="o">+=</span> <span class="s">&#39; </span><span class="si">%s</span><span class="s"> &quot;</span><span class="si">%s</span><span class="s">&quot;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+            <span class="c"># add command</span>
+            <span class="n">commands</span><span class="o">.</span><span class="n">append</span><span class="p">((</span>
+                <span class="s">&#39;create 1 </span><span class="si">%s</span><span class="s"> </span><span class="si">%i</span><span class="s"> </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">obj_id</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">obj_dict</span><span class="p">[</span><span class="s">&#39;vendor&#39;</span><span class="p">],</span> <span class="n">options</span><span class="p">),</span>
+                <span class="s">&#39;added: &quot;</span><span class="si">%s</span><span class="s">&quot; as </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">obj_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;initials&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;objectName&#39;</span><span class="p">,</span> <span class="s">&#39;?&#39;</span><span class="p">),</span> <span class="n">obj_id</span><span class="p">),</span>
+            <span class="p">))</span>
+
+    <span class="c"># sort commands</span>
+    <span class="n">commands</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="c"># add startup command for config</span>
+    <span class="n">commands</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s">&#39;write 1 program 1 programChange load&#39;</span><span class="p">,</span> <span class="s">&#39;load config&#39;</span><span class="p">))</span>
+
+    <span class="c"># loop through commands</span>
+    <span class="k">for</span> <span class="n">line</span><span class="p">,</span> <span class="n">comment</span> <span class="ow">in</span> <span class="n">commands</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">comment</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="p">(</span><span class="n">comment</span><span class="p">)</span>
+
+        <span class="c"># create request</span>
+        <span class="n">request</span> <span class="o">=</span> <span class="n">request_creator</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="n">local_id</span><span class="o">=</span><span class="mi">255</span><span class="p">)</span>
+
+        <span class="c"># queue request</span>
+        <span class="n">application</span><span class="o">.</span><span class="n">requests</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+
+    <span class="c"># return created device and application</span>
+    <span class="k">return</span> <span class="n">device</span><span class="p">,</span> <span class="n">application</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Tobias Grosch.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.3</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,400 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>bacnet.object.primitivedata &mdash; Masterarbeit Grosch 0.4c0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.4c0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="Masterarbeit Grosch 0.4c0 documentation" href="../../../index.html" />
+    <link rel="up" title="bacnet.object" href="../object.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Masterarbeit Grosch 0.4c0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="../object.html" accesskey="U">bacnet.object</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for bacnet.object.primitivedata</h1><div class="highlight"><pre>
+<span class="c"># pylint: disable=invalid-name, too-few-public-methods, star-args</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Primitive Data Module</span>
+<span class="sd">---------------------</span>
+
+<span class="sd">This module contains improved bacpypes primitive data classes.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>
+<span class="kn">import</span> <span class="nn">dateutil.parser</span>
+<span class="kn">import</span> <span class="nn">struct</span>
+
+<span class="kn">from</span> <span class="nn">bacpypes</span> <span class="kn">import</span> <span class="n">primitivedata</span><span class="p">,</span> <span class="n">constructeddata</span><span class="p">,</span> <span class="n">basetypes</span>
+
+
+<div class="viewcode-block" id="RingList"><a class="viewcode-back" href="../../../bacnet.object.html#bacnet.object.primitivedata.RingList">[docs]</a><span class="k">class</span> <span class="nc">RingList</span><span class="p">(</span><span class="nb">list</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class is a ring buffer without overriding protection.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">seq</span><span class="o">=</span><span class="p">()):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function initializes the ring buffer with size.</span>
+
+<span class="sd">        :param size: number of entries</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="nb">list</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seq</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">size</span> <span class="o">*</span> <span class="p">[</span><span class="bp">None</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__size</span> <span class="o">=</span> <span class="n">size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__pos</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function returns the size of the ring buffer.</span>
+
+<span class="sd">        :return: buffer size</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__size</span>
+
+<div class="viewcode-block" id="RingList.append"><a class="viewcode-back" href="../../../bacnet.object.html#bacnet.object.primitivedata.RingList.append">[docs]</a>    <span class="k">def</span> <span class="nf">append</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function adds data to ring buffer.</span>
+
+<span class="sd">        :param data: data to be added</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">__pos</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__pos</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__pos</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">__size</span>
+</div>
+<div class="viewcode-block" id="RingList.first_value"><a class="viewcode-back" href="../../../bacnet.object.html#bacnet.object.primitivedata.RingList.first_value">[docs]</a>    <span class="k">def</span> <span class="nf">first_value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function returns the value last appended.</span>
+
+<span class="sd">        :return: last value</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="p">[(</span><span class="bp">self</span><span class="o">.</span><span class="n">__pos</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">__size</span><span class="p">]</span>
+</div>
+<div class="viewcode-block" id="RingList.last_value"><a class="viewcode-back" href="../../../bacnet.object.html#bacnet.object.primitivedata.RingList.last_value">[docs]</a>    <span class="k">def</span> <span class="nf">last_value</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function returns the value last appended.</span>
+
+<span class="sd">        :return: last value</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="p">[(</span><span class="bp">self</span><span class="o">.</span><span class="n">__pos</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">__size</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">__size</span><span class="p">]</span>
+
+</div></div>
+<div class="viewcode-block" id="RingDict"><a class="viewcode-back" href="../../../bacnet.object.html#bacnet.object.primitivedata.RingDict">[docs]</a><span class="k">class</span> <span class="nc">RingDict</span><span class="p">(</span><span class="n">OrderedDict</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class is a dictionary ring buffer without overriding protection.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function initializes the ring buffer with size.</span>
+
+<span class="sd">        :param size: number of entries</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__size</span> <span class="o">=</span> <span class="n">size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__pos</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="n">OrderedDict</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function returns the size of the ring buffer.</span>
+
+<span class="sd">        :return: buffer size</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__size</span>
+
+    <span class="k">def</span> <span class="nf">__delitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function sets the specified item for key.</span>
+
+<span class="sd">        :param key: key</span>
+<span class="sd">        :param value: value</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># check if key is in dictionary already</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__pos</span> <span class="o">-=</span> <span class="mi">1</span>
+
+        <span class="k">return</span> <span class="n">OrderedDict</span><span class="o">.</span><span class="n">__delitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function sets the specified item for key.</span>
+
+<span class="sd">        :param key: key</span>
+<span class="sd">        :param value: value</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># check if key is in dictionary already</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__pos</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__size</span><span class="p">:</span>
+                <span class="c"># remove key from dictionary</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__delattr__</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__root</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">__pos</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="k">return</span> <span class="n">OrderedDict</span><span class="o">.</span><span class="n">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="Unsigned"><a class="viewcode-back" href="../../../bacnet.object.html#bacnet.object.primitivedata.Unsigned">[docs]</a><span class="k">class</span> <span class="nc">Unsigned</span><span class="p">(</span><span class="n">primitivedata</span><span class="o">.</span><span class="n">Unsigned</span><span class="p">,</span> <span class="nb">long</span><span class="p">):</span>
+    <span class="c"># pylint: disable=super-init-not-called</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class has an integer extension to support builtin functions like div float.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__new__</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function creates the object.</span>
+
+<span class="sd">        :return: instance</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># check if value is a Tag</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">primitivedata</span><span class="o">.</span><span class="n">Tag</span><span class="p">):</span>
+            <span class="c"># make Tag to long-readable number</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">primitivedata</span><span class="o">.</span><span class="n">Unsigned</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+
+        <span class="c"># check if value is an Array</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">constructeddata</span><span class="o">.</span><span class="n">Array</span><span class="p">):</span>
+            <span class="c"># get length of array</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+        <span class="c"># return created instance</span>
+        <span class="k">return</span> <span class="nb">long</span><span class="o">.</span><span class="n">__new__</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function initializes the object.</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># check if value was provided</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c"># get value</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+            <span class="c"># check if value is an Array</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">constructeddata</span><span class="o">.</span><span class="n">Array</span><span class="p">):</span>
+                <span class="c"># get length of array</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+            <span class="c"># call predecessor</span>
+            <span class="n">primitivedata</span><span class="o">.</span><span class="n">Unsigned</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c"># call predecessor</span>
+            <span class="n">primitivedata</span><span class="o">.</span><span class="n">Unsigned</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="Remaining"><a class="viewcode-back" href="../../../bacnet.object.html#bacnet.object.primitivedata.Remaining">[docs]</a><span class="k">class</span> <span class="nc">Remaining</span><span class="p">(</span><span class="n">primitivedata</span><span class="o">.</span><span class="n">CharacterString</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class is an extended version of Unsigned.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">_app_tag</span> <span class="o">=</span> <span class="n">primitivedata</span><span class="o">.</span><span class="n">Tag</span><span class="o">.</span><span class="n">unsignedAppTag</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function initializes the object</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># check if time is Remaining</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">Remaining</span><span class="p">):</span>
+            <span class="n">time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">value</span>
+
+        <span class="c"># check if time is Tag</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">primitivedata</span><span class="o">.</span><span class="n">Tag</span><span class="p">):</span>
+            <span class="n">time</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">time</span><span class="p">)</span>
+
+        <span class="c"># check if time is int</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="p">(</span><span class="n">primitivedata</span><span class="o">.</span><span class="n">Unsigned</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">long</span><span class="p">)):</span>
+            <span class="n">time</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">()</span> <span class="o">+</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">time</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">datetime</span><span class="p">):</span>
+            <span class="c"># convert time to iso format</span>
+            <span class="n">time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span>
+
+        <span class="c"># call predecessor</span>
+        <span class="n">primitivedata</span><span class="o">.</span><span class="n">CharacterString</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">remaining_time</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function calculates the remaining time till defined datetime</span>
+
+<span class="sd">        :return: remaining time in seconds</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># parse time</span>
+        <span class="n">time</span> <span class="o">=</span> <span class="n">dateutil</span><span class="o">.</span><span class="n">parser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+
+        <span class="c"># get remaining time</span>
+        <span class="n">remaining</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">time</span> <span class="o">-</span> <span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">())</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">())</span>
+
+        <span class="c"># check if remaining is smaller than zero</span>
+        <span class="k">if</span> <span class="n">remaining</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">remaining</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c"># return remaining time</span>
+        <span class="k">return</span> <span class="n">remaining</span>
+
+<div class="viewcode-block" id="Remaining.encode"><a class="viewcode-back" href="../../../bacnet.object.html#bacnet.object.primitivedata.Remaining.encode">[docs]</a>    <span class="k">def</span> <span class="nf">encode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tag</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function encodes the value for network transmission.</span>
+
+<span class="sd">        :param tag: Tag</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># rip apart the number</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="nb">ord</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="s">&#39;&gt;L&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">remaining_time</span><span class="p">)]</span>
+
+        <span class="c"># reduce the value to the smallest number of octets</span>
+        <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">del</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="c"># encode the tag</span>
+        <span class="n">tag</span><span class="o">.</span><span class="n">set_app_data</span><span class="p">(</span><span class="n">primitivedata</span><span class="o">.</span><span class="n">Tag</span><span class="o">.</span><span class="n">unsignedAppTag</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">chr</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">data</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="Remaining.decode"><a class="viewcode-back" href="../../../bacnet.object.html#bacnet.object.primitivedata.Remaining.decode">[docs]</a>    <span class="k">def</span> <span class="nf">decode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tag</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function decodes the value from network transmission.</span>
+
+<span class="sd">        :param tag: Tag</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># check if tag is appropriate</span>
+        <span class="k">if</span> <span class="n">tag</span><span class="o">.</span><span class="n">tagClass</span> <span class="o">!=</span> <span class="n">primitivedata</span><span class="o">.</span><span class="n">Tag</span><span class="o">.</span><span class="n">applicationTagClass</span> <span class="ow">or</span> \
+            <span class="n">tag</span><span class="o">.</span><span class="n">tagNumber</span> <span class="o">!=</span> <span class="n">primitivedata</span><span class="o">.</span><span class="n">Tag</span><span class="o">.</span><span class="n">unsignedAppTag</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;unsigned application tag required&#39;</span><span class="p">)</span>
+
+        <span class="c"># get data</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="il">0L</span>
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">tag</span><span class="o">.</span><span class="n">tagData</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="p">(</span><span class="n">result</span> <span class="o">&lt;&lt;</span> <span class="mi">8</span><span class="p">)</span> <span class="o">+</span> <span class="nb">ord</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+
+        <span class="c"># return result</span>
+        <span class="k">return</span> <span class="n">result</span>
+
+</div></div>
+<div class="viewcode-block" id="ObjectPropertyReference"><a class="viewcode-back" href="../../../bacnet.object.html#bacnet.object.primitivedata.ObjectPropertyReference">[docs]</a><span class="k">class</span> <span class="nc">ObjectPropertyReference</span><span class="p">(</span><span class="n">constructeddata</span><span class="o">.</span><span class="n">Sequence</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class has an extension to support instances without property identifier.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">sequenceElements</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">constructeddata</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="s">&#39;objectIdentifier&#39;</span><span class="p">,</span> <span class="n">primitivedata</span><span class="o">.</span><span class="n">ObjectIdentifier</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+        <span class="n">constructeddata</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="s">&#39;propertyIdentifier&#39;</span><span class="p">,</span> <span class="n">basetypes</span><span class="o">.</span><span class="n">PropertyIdentifier</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="bp">True</span><span class="p">),</span>
+        <span class="n">constructeddata</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="s">&#39;propertyArrayIndex&#39;</span><span class="p">,</span> <span class="n">Unsigned</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="bp">True</span><span class="p">),</span>
+    <span class="p">]</span>
+
+</div>
+<div class="viewcode-block" id="COVSubscription"><a class="viewcode-back" href="../../../bacnet.object.html#bacnet.object.primitivedata.COVSubscription">[docs]</a><span class="k">class</span> <span class="nc">COVSubscription</span><span class="p">(</span><span class="n">basetypes</span><span class="o">.</span><span class="n">COVSubscription</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class has specific updates.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">sequenceElements</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">constructeddata</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="s">&#39;recipient&#39;</span><span class="p">,</span> <span class="n">basetypes</span><span class="o">.</span><span class="n">RecipientProcess</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+        <span class="n">constructeddata</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="s">&#39;monitoredPropertyReference&#39;</span><span class="p">,</span> <span class="n">ObjectPropertyReference</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="n">constructeddata</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="s">&#39;issueConfirmedNotifications&#39;</span><span class="p">,</span> <span class="n">primitivedata</span><span class="o">.</span><span class="n">Boolean</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+        <span class="n">constructeddata</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="s">&#39;timeRemaining&#39;</span><span class="p">,</span> <span class="n">Remaining</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
+        <span class="n">constructeddata</span><span class="o">.</span><span class="n">Element</span><span class="p">(</span><span class="s">&#39;covIncrement&#39;</span><span class="p">,</span> <span class="n">primitivedata</span><span class="o">.</span><span class="n">Real</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="bp">True</span><span class="p">),</span>
+    <span class="p">]</span>
+</div>
+<span class="n">SequenceOfCOVSubscription</span> <span class="o">=</span> <span class="n">constructeddata</span><span class="o">.</span><span class="n">SequenceOf</span><span class="p">(</span><span class="n">COVSubscription</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Tobias Grosch.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.3</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

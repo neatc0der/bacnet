@@ -1,0 +1,292 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>bacnet.api &mdash; Masterarbeit Grosch 0.4c0 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.4c0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="Masterarbeit Grosch 0.4c0 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Masterarbeit Grosch 0.4c0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for bacnet.api</h1><div class="highlight"><pre>
+<span class="c"># pylint: disable=broad-except</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">BACnet API Module</span>
+<span class="sd">-----------------</span>
+
+<span class="sd">This module provides basic api functionality.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+
+<span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="kn">import</span> <span class="n">Lock</span>
+<span class="kn">from</span> <span class="nn">Queue</span> <span class="kn">import</span> <span class="n">Empty</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+<span class="kn">from</span> <span class="nn">bacpypes.apdu</span> <span class="kn">import</span> <span class="n">APDU</span>
+
+<span class="kn">from</span> <span class="nn">bacnet.debugging</span> <span class="kn">import</span> <span class="n">ModuleLogger</span><span class="p">,</span> <span class="n">bacnet_debug</span>
+
+<span class="kn">from</span> <span class="nn">bacnet.system.managing</span> <span class="kn">import</span> <span class="n">client_manager</span>
+
+<span class="kn">from</span> <span class="nn">bacnet.console.creator</span> <span class="kn">import</span> <span class="n">request_creator</span>
+<span class="kn">from</span> <span class="nn">bacnet.console.parser</span> <span class="kn">import</span> <span class="n">response_parser</span>
+
+
+<span class="c"># enable logging</span>
+<span class="n">ModuleLogger</span><span class="p">()</span>
+
+
+<span class="c"># define minimum waiting times</span>
+<span class="c"># max 1.000 local attempts per second</span>
+<span class="n">LOCAL_WAIT</span> <span class="o">=</span> <span class="mf">0.001</span>
+<span class="c"># max 100 network attempts per second</span>
+<span class="n">NETWORK_WAIT</span> <span class="o">=</span> <span class="mf">0.05</span>
+
+
+<span class="nd">@bacnet_debug</span>
+<div class="viewcode-block" id="BACnetAPI"><a class="viewcode-back" href="../../bacnet.api.html#bacnet.api.BACnetAPI">[docs]</a><span class="k">class</span> <span class="nc">BACnetAPI</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class unifies all API accessible functions.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function initializes the object.</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># check if arguments were given</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s">&#39;API takes either 2 queues and an optional local id or no arguments at all&#39;</span>
+            <span class="p">)</span>
+
+        <span class="c"># get semaphore for waiting</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__wait_lock</span> <span class="o">=</span> <span class="n">Lock</span><span class="p">()</span>
+
+        <span class="c"># set variable</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__last_sent</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="c"># set local id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__local_id</span> <span class="o">=</span> <span class="mi">2</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="c"># set app queue</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__app</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+            <span class="c"># set request queue</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__requests</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+            <span class="c"># check if local id was defined</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="c"># set local id</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__local_id</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c"># get manager</span>
+            <span class="n">manager</span> <span class="o">=</span> <span class="n">client_manager</span><span class="p">()</span>
+
+            <span class="c"># initialize app queue</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__app</span> <span class="o">=</span> <span class="n">manager</span><span class="o">.</span><span class="n">app</span><span class="p">()</span>
+
+            <span class="c"># initialize request queue</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__requests</span> <span class="o">=</span> <span class="n">manager</span><span class="o">.</span><span class="n">config</span><span class="p">()</span>
+
+<div class="viewcode-block" id="BACnetAPI.create"><a class="viewcode-back" href="../../bacnet.api.html#bacnet.api.BACnetAPI.create">[docs]</a>    <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">line</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function creates a request for the specified command.</span>
+
+<span class="sd">        :param line: command line</span>
+<span class="sd">        :return: request object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># strip line</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+        <span class="c"># initialize request</span>
+        <span class="n">request</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c"># create request</span>
+            <span class="n">request</span> <span class="o">=</span> <span class="n">request_creator</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="n">local_id</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__local_id</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_exception</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
+
+        <span class="c"># return request</span>
+        <span class="k">return</span> <span class="n">request</span>
+</div>
+<div class="viewcode-block" id="BACnetAPI.send"><a class="viewcode-back" href="../../bacnet.api.html#bacnet.api.BACnetAPI.send">[docs]</a>    <span class="k">def</span> <span class="nf">send</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">block</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function transmits the request.</span>
+
+<span class="sd">        :param request: outgoing request</span>
+<span class="sd">        :param block: block</span>
+<span class="sd">        :param timeout: timeout</span>
+<span class="sd">        :return: request was queued</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># ignore empty requests</span>
+        <span class="k">if</span> <span class="n">request</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span>
+
+        <span class="c"># wait until request is allowed to be sent</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__wait</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c"># queue request</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__app</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">block</span><span class="p">,</span> <span class="n">timeout</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_exception</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="bp">False</span>
+</div>
+    <span class="k">def</span> <span class="nf">__wait</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">request</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function waits until next request is allowed to be sent.</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># enter critical area</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__wait_lock</span><span class="o">.</span><span class="n">acquire</span><span class="p">()</span>
+
+        <span class="c"># check if last sent is set</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__last_sent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="c"># check if request is local</span>
+            <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">pduDestination</span><span class="o">.</span><span class="n">addrIP</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="c"># check if process has to wait</span>
+                <span class="k">if</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">__last_sent</span> <span class="o">&lt;</span> <span class="n">LOCAL_WAIT</span><span class="p">:</span>
+                    <span class="c"># sleep</span>
+                    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">LOCAL_WAIT</span> <span class="o">-</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">__last_sent</span><span class="p">)</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c"># check if process has to wait</span>
+                <span class="k">if</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">__last_sent</span> <span class="o">&lt;</span> <span class="n">NETWORK_WAIT</span><span class="p">:</span>
+                    <span class="c"># sleep</span>
+                    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">NETWORK_WAIT</span> <span class="o">-</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">__last_sent</span><span class="p">)</span>
+
+        <span class="c"># set current time</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__last_sent</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+        <span class="c"># leave critical area</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__wait_lock</span><span class="o">.</span><span class="n">release</span><span class="p">()</span>
+
+<div class="viewcode-block" id="BACnetAPI.receive"><a class="viewcode-back" href="../../bacnet.api.html#bacnet.api.BACnetAPI.receive">[docs]</a>    <span class="k">def</span> <span class="nf">receive</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">block</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function checks for available incoming requests</span>
+
+<span class="sd">        :param block: block</span>
+<span class="sd">        :param timeout: timeout</span>
+<span class="sd">        :return: incoming response or None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c"># return response</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">block</span><span class="p">,</span> <span class="n">timeout</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="p">(</span><span class="ne">IOError</span><span class="p">,</span> <span class="ne">EOFError</span><span class="p">):</span>
+            <span class="c"># broken pipe</span>
+            <span class="k">return</span>
+
+        <span class="k">except</span> <span class="n">Empty</span><span class="p">:</span>
+            <span class="c"># return</span>
+            <span class="k">return</span>
+</div>
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="BACnetAPI.parse"><a class="viewcode-back" href="../../bacnet.api.html#bacnet.api.BACnetAPI.parse">[docs]</a>    <span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="n">apdu</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function returns a parsed dictionary from provided message.</span>
+<span class="sd">        :param apdu: message</span>
+<span class="sd">        :return: parsed dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">apdu</span><span class="p">,</span> <span class="n">APDU</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;invalid apdu&#39;</span><span class="p">)</span>
+
+        <span class="c"># return parsed response</span>
+        <span class="k">return</span> <span class="n">response_parser</span><span class="p">(</span><span class="n">apdu</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Tobias Grosch.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.3</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

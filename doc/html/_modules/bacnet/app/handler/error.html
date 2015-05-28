@@ -1,0 +1,204 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>bacnet.app.handler.error &mdash; Masterarbeit Grosch 0.4c0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.4c0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="Masterarbeit Grosch 0.4c0 documentation" href="../../../../index.html" />
+    <link rel="up" title="bacnet.app.handler" href="../handler.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">Masterarbeit Grosch 0.4c0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="../../app.html" >bacnet.app</a> &raquo;</li>
+          <li class="nav-item nav-item-3"><a href="../handler.html" accesskey="U">bacnet.app.handler</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for bacnet.app.handler.error</h1><div class="highlight"><pre>
+<span class="c"># pylint: disable=invalid-name</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Error Module</span>
+<span class="sd">--------------------------</span>
+
+<span class="sd">This module provides error handlers.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+
+<span class="kn">import</span> <span class="nn">copy</span>
+
+<span class="kn">from</span> <span class="nn">bacpypes.apdu</span> <span class="kn">import</span> <span class="n">SubscribeCOVPropertyRequest</span><span class="p">,</span> <span class="n">SubscribeCOVRequest</span>
+
+
+<div class="viewcode-block" id="do_AbortPDU"><a class="viewcode-back" href="../../../../bacnet.app.handler.html#bacnet.app.handler.error.do_AbortPDU">[docs]</a><span class="k">def</span> <span class="nf">do_AbortPDU</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">apdu</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function handles abortions.</span>
+
+<span class="sd">    :param apdu: incoming message</span>
+<span class="sd">    :return: None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">initiators</span> <span class="o">=</span> <span class="p">()</span>
+
+    <span class="c"># loop through all request message ids</span>
+    <span class="k">for</span> <span class="n">message_id</span><span class="p">,</span> <span class="n">message</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">request_dict</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+        <span class="c"># check if source and invoke id are identical</span>
+        <span class="k">if</span> <span class="n">message_id</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="n">apdu</span><span class="o">.</span><span class="n">pduSource</span><span class="p">)</span> <span class="ow">and</span> <span class="n">message_id</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="n">apdu</span><span class="o">.</span><span class="n">apduInvokeID</span><span class="p">:</span>
+            <span class="c"># set initiator</span>
+            <span class="n">initiators</span> <span class="o">+=</span> <span class="p">(</span><span class="n">message_id</span><span class="p">,)</span>
+
+    <span class="c"># check if initiators were found</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">initiators</span><span class="p">):</span>
+        <span class="k">return</span>
+
+    <span class="c"># loop through initiators</span>
+    <span class="k">for</span> <span class="n">initiator</span> <span class="ow">in</span> <span class="n">initiators</span><span class="p">:</span>
+        <span class="c"># get aborted message</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request_dict</span><span class="p">[</span><span class="n">initiator</span><span class="p">]</span>
+
+        <span class="c"># check if message was subscription</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="p">(</span><span class="n">SubscribeCOVPropertyRequest</span><span class="p">,</span> <span class="n">SubscribeCOVRequest</span><span class="p">)):</span>
+            <span class="c"># copy message</span>
+            <span class="n">altered_apdu</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+
+            <span class="c"># set life time to zero = remove subscription</span>
+            <span class="n">altered_apdu</span><span class="o">.</span><span class="n">lifetime</span> <span class="o">=</span> <span class="mi">0</span>
+
+            <span class="c"># remove subscription</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">handle_remote_subscription</span><span class="p">(</span><span class="n">altered_apdu</span><span class="p">)</span>
+
+            <span class="c"># remove altered message</span>
+            <span class="k">del</span> <span class="n">altered_apdu</span>
+
+</div>
+<div class="viewcode-block" id="do_RejectPDU"><a class="viewcode-back" href="../../../../bacnet.app.handler.html#bacnet.app.handler.error.do_RejectPDU">[docs]</a><span class="k">def</span> <span class="nf">do_RejectPDU</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">apdu</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function handles rejections.</span>
+
+<span class="sd">    :param apdu: incoming message</span>
+<span class="sd">    :return: None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">initiators</span> <span class="o">=</span> <span class="p">()</span>
+
+    <span class="c"># create message id</span>
+    <span class="n">message_id</span> <span class="o">=</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">apdu</span><span class="o">.</span><span class="n">pduSource</span><span class="p">),</span> <span class="bp">False</span><span class="p">,</span> <span class="n">apdu</span><span class="o">.</span><span class="n">apduService</span><span class="p">,</span> <span class="n">apdu</span><span class="o">.</span><span class="n">apduInvokeID</span><span class="p">)</span>
+
+    <span class="c"># check if message was stored in ring buffer</span>
+    <span class="k">if</span> <span class="n">message_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">request_dict</span><span class="p">:</span>
+        <span class="c"># set initiator</span>
+        <span class="n">initiators</span> <span class="o">+=</span> <span class="p">(</span><span class="n">message_id</span><span class="p">,)</span>
+
+    <span class="c"># check if initiators were found</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">initiators</span><span class="p">):</span>
+        <span class="k">return</span>
+
+    <span class="c"># loop through initiators</span>
+    <span class="k">for</span> <span class="n">initiator</span> <span class="ow">in</span> <span class="n">initiators</span><span class="p">:</span>
+        <span class="c"># get aborted message</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">request_dict</span><span class="p">[</span><span class="n">initiator</span><span class="p">]</span>
+
+        <span class="c"># check if message was subscription</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="p">(</span><span class="n">SubscribeCOVPropertyRequest</span><span class="p">,</span> <span class="n">SubscribeCOVRequest</span><span class="p">)):</span>
+            <span class="c"># copy message</span>
+            <span class="n">altered_apdu</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+
+            <span class="c"># set life time to zero = remove subscription</span>
+            <span class="n">altered_apdu</span><span class="o">.</span><span class="n">lifetime</span> <span class="o">=</span> <span class="mi">0</span>
+
+            <span class="c"># remove subscription</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">handle_remote_subscription</span><span class="p">(</span><span class="n">altered_apdu</span><span class="p">)</span>
+
+            <span class="c"># remove altered message</span>
+            <span class="k">del</span> <span class="n">altered_apdu</span>
+
+</div>
+<div class="viewcode-block" id="do_Error"><a class="viewcode-back" href="../../../../bacnet.app.handler.html#bacnet.app.handler.error.do_Error">[docs]</a><span class="k">def</span> <span class="nf">do_Error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">apdu</span><span class="p">):</span>
+    <span class="c"># pylint: disable=unused-argument</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function handles rejections.</span>
+
+<span class="sd">    :param apdu: incoming message</span>
+<span class="sd">    :return: None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># got Error, but ErrorPDU is required for full error handling - service, type, etc. missing!</span>
+
+    <span class="k">return</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Tobias Grosch.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.3</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

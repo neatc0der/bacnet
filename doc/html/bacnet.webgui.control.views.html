@@ -1,0 +1,220 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>bacnet.webgui.control.views package &mdash; Masterarbeit Grosch 0.4c0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.4c0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Masterarbeit Grosch 0.4c0 documentation" href="index.html" />
+    <link rel="up" title="bacnet.webgui.control package" href="bacnet.webgui.control.html" />
+    <link rel="next" title="bacnet.webgui.webgui package" href="bacnet.webgui.webgui.html" />
+    <link rel="prev" title="bacnet.webgui.control.templatetags package" href="bacnet.webgui.control.templatetags.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="bacnet.webgui.webgui.html" title="bacnet.webgui.webgui package"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="bacnet.webgui.control.templatetags.html" title="bacnet.webgui.control.templatetags package"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Masterarbeit Grosch 0.4c0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="bacnet.html" >bacnet package</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="bacnet.webgui.html" >bacnet.webgui package</a> &raquo;</li>
+          <li class="nav-item nav-item-3"><a href="bacnet.webgui.control.html" accesskey="U">bacnet.webgui.control package</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="bacnet-webgui-control-views-package">
+<h1>bacnet.webgui.control.views package<a class="headerlink" href="#bacnet-webgui-control-views-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="bacnet-webgui-control-views-access-module">
+<h2>bacnet.webgui.control.views.access module<a class="headerlink" href="#bacnet-webgui-control-views-access-module" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="bacnet-webgui-control-views-devices-module">
+<h2>bacnet.webgui.control.views.devices module<a class="headerlink" href="#bacnet-webgui-control-views-devices-module" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-bacnet.webgui.control.views">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-bacnet.webgui.control.views" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="views-module">
+<h3>Views Module<a class="headerlink" href="#views-module" title="Permalink to this headline">¶</a></h3>
+<p>This module contains all descriptions of web access interfaces.</p>
+<dl class="function">
+<dt id="bacnet.webgui.control.views.breadcrumbs">
+<code class="descclassname">bacnet.webgui.control.views.</code><code class="descname">breadcrumbs</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/webgui/control/views.html#breadcrumbs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.webgui.control.views.breadcrumbs" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function provides the breadcrumbs for a path.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>path</strong> &#8211; path</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">list of breadcrumbs</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="bacnet.webgui.control.views.control_views_render">
+<code class="descclassname">bacnet.webgui.control.views.</code><code class="descname">control_views_render</code><span class="sig-paren">(</span><em>request</em>, <em>template_file</em>, <em>arg_dict={}</em>, <em>local=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/webgui/control/views.html#control_views_render"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.webgui.control.views.control_views_render" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function provides general rendering for all templates.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>request</strong> &#8211; Django request</li>
+<li><strong>template_file</strong> &#8211; template filename</li>
+<li><strong>arg_dict</strong> &#8211; arguments</li>
+<li><strong>local</strong> &#8211; is local template</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">HTTP response</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="bacnet.webgui.control.views.get_crumb_name">
+<code class="descclassname">bacnet.webgui.control.views.</code><code class="descname">get_crumb_name</code><span class="sig-paren">(</span><em>link</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/webgui/control/views.html#get_crumb_name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.webgui.control.views.get_crumb_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function provides the breadcrumb name for a link</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>link</strong> &#8211; link</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">breadcrumb name</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="bacnet.webgui.control.views.index">
+<code class="descclassname">bacnet.webgui.control.views.</code><code class="descname">index</code><span class="sig-paren">(</span><em>request</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/webgui/control/views.html#index"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.webgui.control.views.index" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function provides the index page of the project.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>request</strong> &#8211; Django request</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">HTTP response</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">bacnet.webgui.control.views package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#bacnet-webgui-control-views-access-module">bacnet.webgui.control.views.access module</a></li>
+<li><a class="reference internal" href="#bacnet-webgui-control-views-devices-module">bacnet.webgui.control.views.devices module</a></li>
+<li><a class="reference internal" href="#module-bacnet.webgui.control.views">Module contents</a><ul>
+<li><a class="reference internal" href="#views-module">Views Module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="bacnet.webgui.control.templatetags.html"
+                        title="previous chapter">bacnet.webgui.control.templatetags package</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="bacnet.webgui.webgui.html"
+                        title="next chapter">bacnet.webgui.webgui package</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/bacnet.webgui.control.views.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Tobias Grosch.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.3</a>
+      
+      |
+      <a href="_sources/bacnet.webgui.control.views.txt"
+          rel="nofollow">Page source</a></li>
+    </div>
+
+    
+
+    
+  </body>
+</html>

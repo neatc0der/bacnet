@@ -1,0 +1,584 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>bacnet.console.creator package &mdash; Masterarbeit Grosch 0.4c0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.4c0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Masterarbeit Grosch 0.4c0 documentation" href="index.html" />
+    <link rel="up" title="bacnet.console package" href="bacnet.console.html" />
+    <link rel="next" title="bacnet.console.parser package" href="bacnet.console.parser.html" />
+    <link rel="prev" title="bacnet.console package" href="bacnet.console.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="bacnet.console.parser.html" title="bacnet.console.parser package"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="bacnet.console.html" title="bacnet.console package"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Masterarbeit Grosch 0.4c0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="bacnet.html" >bacnet package</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="bacnet.console.html" accesskey="U">bacnet.console package</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="bacnet-console-creator-package">
+<h1>bacnet.console.creator package<a class="headerlink" href="#bacnet-console-creator-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-bacnet.console.creator.events">
+<span id="bacnet-console-creator-events-module"></span><h2>bacnet.console.creator.events module<a class="headerlink" href="#module-bacnet.console.creator.events" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="event-handler-module">
+<h3>Event Handler Module<a class="headerlink" href="#event-handler-module" title="Permalink to this headline">¶</a></h3>
+<p>This module provides COV and event requests.</p>
+<dl class="function">
+<dt id="bacnet.console.creator.events.subscribe_request">
+<code class="descclassname">bacnet.console.creator.events.</code><code class="descname">subscribe_request</code><span class="sig-paren">(</span><em>args</em>, <em>console=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/console/creator/events.html#subscribe_request"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.console.creator.events.subscribe_request" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function creates a write file stream request.</p>
+<p>Usage: subscribe &lt;address&gt; &lt;lifetime&gt; &lt;confirmed&gt; &lt;type&gt; &lt;instance&gt; [ &lt;property&gt; &lt;increment&gt; [ &lt;index&gt; ] ]</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>args</strong> &#8211; list of parameters</li>
+<li><strong>console</strong> &#8211; console object</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">request</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="module-bacnet.console.creator.fileaccess">
+<span id="bacnet-console-creator-fileaccess-module"></span><h2>bacnet.console.creator.fileaccess module<a class="headerlink" href="#module-bacnet.console.creator.fileaccess" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="file-access-handler-module">
+<h3>File Access Handler Module<a class="headerlink" href="#file-access-handler-module" title="Permalink to this headline">¶</a></h3>
+<p>This module provides file access requests.</p>
+<dl class="function">
+<dt id="bacnet.console.creator.fileaccess.rdrec_request">
+<code class="descclassname">bacnet.console.creator.fileaccess.</code><code class="descname">rdrec_request</code><span class="sig-paren">(</span><em>args</em>, <em>console=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/console/creator/fileaccess.html#rdrec_request"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.console.creator.fileaccess.rdrec_request" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function creates a read file record request.</p>
+<p>Usage: rdrec &lt;address&gt; &lt;instance&gt; &lt;start&gt; &lt;count&gt;</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>args</strong> &#8211; list of parameters</li>
+<li><strong>console</strong> &#8211; console object</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">request</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="bacnet.console.creator.fileaccess.rdstr_request">
+<code class="descclassname">bacnet.console.creator.fileaccess.</code><code class="descname">rdstr_request</code><span class="sig-paren">(</span><em>args</em>, <em>console=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/console/creator/fileaccess.html#rdstr_request"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.console.creator.fileaccess.rdstr_request" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function creates a read file stream request.</p>
+<p>Usage: rdstr &lt;address&gt; &lt;instance&gt; &lt;start&gt; &lt;count&gt;</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>args</strong> &#8211; list of parameters</li>
+<li><strong>console</strong> &#8211; console object</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">request</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="bacnet.console.creator.fileaccess.wrrec_request">
+<code class="descclassname">bacnet.console.creator.fileaccess.</code><code class="descname">wrrec_request</code><span class="sig-paren">(</span><em>args</em>, <em>console=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/console/creator/fileaccess.html#wrrec_request"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.console.creator.fileaccess.wrrec_request" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function creates a write file record request.</p>
+<p>Usage: wrrec &lt;address&gt; &lt;instance&gt; &lt;start&gt; &lt;count&gt; ( &lt;data&gt; )* ...</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>args</strong> &#8211; list of parameters</li>
+<li><strong>console</strong> &#8211; console object</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">request</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="bacnet.console.creator.fileaccess.wrstr_request">
+<code class="descclassname">bacnet.console.creator.fileaccess.</code><code class="descname">wrstr_request</code><span class="sig-paren">(</span><em>args</em>, <em>console=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/console/creator/fileaccess.html#wrstr_request"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.console.creator.fileaccess.wrstr_request" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function creates a write file stream request.</p>
+<p>Usage: wrstr &lt;address&gt; &lt;instance&gt; &lt;start&gt; &lt;data&gt;</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>args</strong> &#8211; list of parameters</li>
+<li><strong>console</strong> &#8211; console object</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">request</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="module-bacnet.console.creator.local">
+<span id="bacnet-console-creator-local-module"></span><h2>bacnet.console.creator.local module<a class="headerlink" href="#module-bacnet.console.creator.local" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="local-handler-module">
+<h3>Local Handler Module<a class="headerlink" href="#local-handler-module" title="Permalink to this headline">¶</a></h3>
+<p>This module provides local access requests. - DEPRECATED !</p>
+<dl class="function">
+<dt id="bacnet.console.creator.local.local_list">
+<code class="descclassname">bacnet.console.creator.local.</code><code class="descname">local_list</code><span class="sig-paren">(</span><em>args</em>, <em>i</em>, <em>obj=None</em>, <em>objs=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/console/creator/local.html#local_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.console.creator.local.local_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function lists all objects within the application, all properties within an object, or the
+property value of a property.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>args</strong> &#8211; list of parameters</li>
+<li><strong>obj</strong> &#8211; object</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="bacnet.console.creator.local.local_set">
+<code class="descclassname">bacnet.console.creator.local.</code><code class="descname">local_set</code><span class="sig-paren">(</span><em>args</em>, <em>i</em>, <em>obj</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/console/creator/local.html#local_set"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.console.creator.local.local_set" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function sets the property value of a local property.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>args</strong> &#8211; list of parameters</li>
+<li><strong>obj</strong> &#8211; object</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="bacnet.console.creator.local.print_values">
+<code class="descclassname">bacnet.console.creator.local.</code><code class="descname">print_values</code><span class="sig-paren">(</span><em>values</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/console/creator/local.html#print_values"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.console.creator.local.print_values" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function prints all arguments.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>values</strong> &#8211; list of argument tuples</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="module-bacnet.console.creator.objects">
+<span id="bacnet-console-creator-objects-module"></span><h2>bacnet.console.creator.objects module<a class="headerlink" href="#module-bacnet.console.creator.objects" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="objects-handler-module">
+<h3>Objects Handler Module<a class="headerlink" href="#objects-handler-module" title="Permalink to this headline">¶</a></h3>
+<p>This module provides object requests.</p>
+<dl class="function">
+<dt id="bacnet.console.creator.objects.create_request">
+<code class="descclassname">bacnet.console.creator.objects.</code><code class="descname">create_request</code><span class="sig-paren">(</span><em>args</em>, <em>console=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/console/creator/objects.html#create_request"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.console.creator.objects.create_request" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function creates a create object request.</p>
+<p>Usage: create &lt;address&gt; &lt;type&gt; [ &lt;vendor&gt; ] ( &lt;property&gt; &lt;value&gt; [ &lt;index&gt; [ priority ] ] )* ...</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>args</strong> &#8211; list of parameters</li>
+<li><strong>console</strong> &#8211; console object</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">request</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="bacnet.console.creator.objects.delete_request">
+<code class="descclassname">bacnet.console.creator.objects.</code><code class="descname">delete_request</code><span class="sig-paren">(</span><em>args</em>, <em>console=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/console/creator/objects.html#delete_request"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.console.creator.objects.delete_request" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function creates a delete object request.</p>
+<p>Usage: delete &lt;address&gt; &lt;type&gt; &lt;instance&gt;</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>args</strong> &#8211; list of parameters</li>
+<li><strong>console</strong> &#8211; console object</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">request</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="module-bacnet.console.creator.simple">
+<span id="bacnet-console-creator-simple-module"></span><h2>bacnet.console.creator.simple module<a class="headerlink" href="#module-bacnet.console.creator.simple" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="simple-handler-module">
+<h3>Simple Handler Module<a class="headerlink" href="#simple-handler-module" title="Permalink to this headline">¶</a></h3>
+<p>This module contains rudimentary request functions.</p>
+<dl class="function">
+<dt id="bacnet.console.creator.simple.cast_value">
+<code class="descclassname">bacnet.console.creator.simple.</code><code class="descname">cast_value</code><span class="sig-paren">(</span><em>value</em>, <em>data_type</em>, <em>prop_index=None</em>, <em>prop=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/console/creator/simple.html#cast_value"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.console.creator.simple.cast_value" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function casts value to data type.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>value</strong> &#8211; object</li>
+<li><strong>data_type</strong> &#8211; data type</li>
+<li><strong>prop_index</strong> &#8211; property array index</li>
+<li><strong>prop</strong> &#8211; property instance</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">casted value</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="bacnet.console.creator.simple.iam_request">
+<code class="descclassname">bacnet.console.creator.simple.</code><code class="descname">iam_request</code><span class="sig-paren">(</span><em>args</em>, <em>console=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/console/creator/simple.html#iam_request"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.console.creator.simple.iam_request" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function creates a iam request.</p>
+<p>Usage: iam [ &lt;address&gt; ]</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>args</strong> &#8211; list of parameters</li>
+<li><strong>console</strong> &#8211; console object</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">request</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="bacnet.console.creator.simple.ihave_request">
+<code class="descclassname">bacnet.console.creator.simple.</code><code class="descname">ihave_request</code><span class="sig-paren">(</span><em>args</em>, <em>console=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/console/creator/simple.html#ihave_request"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.console.creator.simple.ihave_request" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function creates a ihave request.</p>
+<p>Usage: ihave [ &lt;address&gt; ] ( &lt;name&gt; | &lt;type&gt; &lt;instance&gt; )</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>args</strong> &#8211; list of parameters</li>
+<li><strong>console</strong> &#8211; console object</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">request</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="bacnet.console.creator.simple.read_request">
+<code class="descclassname">bacnet.console.creator.simple.</code><code class="descname">read_request</code><span class="sig-paren">(</span><em>args</em>, <em>console=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/console/creator/simple.html#read_request"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.console.creator.simple.read_request" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function creates a read request for multiple objects.</p>
+<p>Usage: read &lt;address&gt; ( &lt;type&gt; &lt;instance&gt; ( &lt;property&gt; [ &lt;index&gt; ] )+ ... )+ ...</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>args</strong> &#8211; list of parameters</li>
+<li><strong>console</strong> &#8211; console object</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">request</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="bacnet.console.creator.simple.whohas_request">
+<code class="descclassname">bacnet.console.creator.simple.</code><code class="descname">whohas_request</code><span class="sig-paren">(</span><em>args</em>, <em>console=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/console/creator/simple.html#whohas_request"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.console.creator.simple.whohas_request" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function creates a whohas request.</p>
+<p>Usage: whohas [ &lt;address&gt; ] ( &lt;name&gt; | &lt;type&gt; &lt;instance&gt; ) [ &lt;lowlimit&gt; &lt;highlimit&gt; ]</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>args</strong> &#8211; list of parameters</li>
+<li><strong>console</strong> &#8211; console object</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">request</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="bacnet.console.creator.simple.whois_request">
+<code class="descclassname">bacnet.console.creator.simple.</code><code class="descname">whois_request</code><span class="sig-paren">(</span><em>args</em>, <em>console=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/console/creator/simple.html#whois_request"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.console.creator.simple.whois_request" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function creates a whois request.</p>
+<p>Usage: whois [ &lt;address&gt; ] [ &lt;lowlimit&gt; &lt;highlimit&gt; ]</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>args</strong> &#8211; list of parameters</li>
+<li><strong>console</strong> &#8211; console object</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">request</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="bacnet.console.creator.simple.write_request">
+<code class="descclassname">bacnet.console.creator.simple.</code><code class="descname">write_request</code><span class="sig-paren">(</span><em>args</em>, <em>console=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/console/creator/simple.html#write_request"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.console.creator.simple.write_request" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function creates a write request for multiple objects.</p>
+<p>Usage: write &lt;address&gt; ( &lt;type&gt; &lt;instance&gt; ( &lt;property&gt; &lt;value&gt; [ &lt;index&gt; [ &lt;priority&gt; ] ] )+ ... )+ ...</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>args</strong> &#8211; list of parameters</li>
+<li><strong>console</strong> &#8211; console object</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">request</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="module-bacnet.console.creator">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-bacnet.console.creator" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="console-handler-module">
+<h3>Console Handler Module<a class="headerlink" href="#console-handler-module" title="Permalink to this headline">¶</a></h3>
+<p>This module provides requests and parser.</p>
+<dl class="function">
+<dt id="bacnet.console.creator.request_creator">
+<code class="descclassname">bacnet.console.creator.</code><code class="descname">request_creator</code><span class="sig-paren">(</span><em>line</em>, <em>console=None</em>, <em>local_id=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/console/creator.html#request_creator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.console.creator.request_creator" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function parses arguments and calls specific command.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>line</strong> &#8211; string of command line</li>
+<li><strong>console</strong> &#8211; console object</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">request object</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">bacnet.console.creator package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-bacnet.console.creator.events">bacnet.console.creator.events module</a><ul>
+<li><a class="reference internal" href="#event-handler-module">Event Handler Module</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-bacnet.console.creator.fileaccess">bacnet.console.creator.fileaccess module</a><ul>
+<li><a class="reference internal" href="#file-access-handler-module">File Access Handler Module</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-bacnet.console.creator.local">bacnet.console.creator.local module</a><ul>
+<li><a class="reference internal" href="#local-handler-module">Local Handler Module</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-bacnet.console.creator.objects">bacnet.console.creator.objects module</a><ul>
+<li><a class="reference internal" href="#objects-handler-module">Objects Handler Module</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-bacnet.console.creator.simple">bacnet.console.creator.simple module</a><ul>
+<li><a class="reference internal" href="#simple-handler-module">Simple Handler Module</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-bacnet.console.creator">Module contents</a><ul>
+<li><a class="reference internal" href="#console-handler-module">Console Handler Module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="bacnet.console.html"
+                        title="previous chapter">bacnet.console package</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="bacnet.console.parser.html"
+                        title="next chapter">bacnet.console.parser package</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/bacnet.console.creator.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Tobias Grosch.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.3</a>
+      
+      |
+      <a href="_sources/bacnet.console.creator.txt"
+          rel="nofollow">Page source</a></li>
+    </div>
+
+    
+
+    
+  </body>
+</html>

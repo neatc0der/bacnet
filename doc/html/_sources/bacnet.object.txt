@@ -1,0 +1,46 @@
+bacnet.object package
+=====================
+
+Subpackages
+-----------
+
+.. toctree::
+
+    bacnet.object.basic
+    bacnet.object.hardware
+
+Submodules
+----------
+
+bacnet.object.define module
+---------------------------
+
+.. automodule:: bacnet.object.define
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+bacnet.object.primitivedata module
+----------------------------------
+
+.. automodule:: bacnet.object.primitivedata
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+bacnet.object.properties module
+-------------------------------
+
+.. automodule:: bacnet.object.properties
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: bacnet.object
+    :members:
+    :undoc-members:
+    :show-inheritance:

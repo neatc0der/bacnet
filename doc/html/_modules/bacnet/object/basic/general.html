@@ -1,0 +1,862 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>bacnet.object.basic.general &mdash; Masterarbeit Grosch 0.4c0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.4c0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="Masterarbeit Grosch 0.4c0 documentation" href="../../../../index.html" />
+    <link rel="up" title="bacnet.object" href="../../object.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">Masterarbeit Grosch 0.4c0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="../../object.html" accesskey="U">bacnet.object</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for bacnet.object.basic.general</h1><div class="highlight"><pre>
+<span class="c"># pylint: disable=invalid-name, too-many-arguments, star-args</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Object Basic Module</span>
+<span class="sd">--------------------</span>
+
+<span class="sd">This module contains basic definitions of BACpypes Object.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">Iterable</span>
+
+<span class="kn">import</span> <span class="nn">bacpypes</span>
+
+<span class="kn">from</span> <span class="nn">bacpypes.primitivedata</span> <span class="kn">import</span> <span class="n">Unsigned</span><span class="p">,</span> <span class="n">Real</span><span class="p">,</span> <span class="n">ObjectIdentifier</span><span class="p">,</span> <span class="n">CharacterString</span>
+<span class="kn">from</span> <span class="nn">bacpypes.constructeddata</span> <span class="kn">import</span> <span class="n">Array</span><span class="p">,</span> <span class="n">ArrayOf</span><span class="p">,</span> <span class="n">Any</span>
+<span class="kn">from</span> <span class="nn">bacpypes.basetypes</span> <span class="kn">import</span> <span class="n">PropertyValue</span><span class="p">,</span> <span class="n">PropertyIdentifier</span>
+
+<span class="kn">from</span> <span class="nn">bacpypes.pdu</span> <span class="kn">import</span> <span class="n">Address</span>
+<span class="kn">from</span> <span class="nn">bacpypes.apdu</span> <span class="kn">import</span> <span class="n">ReadPropertyACK</span>
+
+<span class="kn">from</span> <span class="nn">bacnet.debugging</span> <span class="kn">import</span> <span class="n">bacnet_debug</span><span class="p">,</span> <span class="n">ModuleLogger</span>
+
+<span class="kn">from</span> <span class="nn">..</span> <span class="kn">import</span> <span class="n">properties</span><span class="p">,</span> <span class="n">primitivedata</span>
+
+<span class="kn">from</span> <span class="nn">.cov_support</span> <span class="kn">import</span> <span class="n">COV_SUPPORT</span>
+
+
+<span class="c"># enable logging</span>
+<span class="n">ModuleLogger</span><span class="p">()</span>
+
+
+<span class="c"># list of all redefined bacpypes objects</span>
+<span class="n">COVObjectClasses</span> <span class="o">=</span> <span class="p">[]</span>
+
+
+<span class="nd">@bacnet_debug</span>
+<div class="viewcode-block" id="Object"><a class="viewcode-back" href="../../../../bacnet.object.basic.html#bacnet.object.basic.general.Object">[docs]</a><span class="k">class</span> <span class="nc">Object</span><span class="p">(</span><span class="n">bacpypes</span><span class="o">.</span><span class="n">object</span><span class="o">.</span><span class="n">Object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class is an extension of the bacpypes Object class to support COV notifications.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">properties</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">properties</span><span class="o">.</span><span class="n">ObjectIdentifierProperty</span><span class="p">(</span><span class="s">&#39;objectIdentifier&#39;</span><span class="p">,</span> <span class="n">ObjectIdentifier</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="bp">False</span><span class="p">),</span>
+        <span class="n">properties</span><span class="o">.</span><span class="n">ReadableProperty</span><span class="p">(</span><span class="s">&#39;objectName&#39;</span><span class="p">,</span> <span class="n">CharacterString</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="bp">False</span><span class="p">),</span>
+        <span class="n">properties</span><span class="o">.</span><span class="n">ReadableProperty</span><span class="p">(</span><span class="s">&#39;description&#39;</span><span class="p">,</span> <span class="n">CharacterString</span><span class="p">),</span>
+        <span class="n">properties</span><span class="o">.</span><span class="n">OptionalProperty</span><span class="p">(</span><span class="s">&#39;profileName&#39;</span><span class="p">,</span> <span class="n">CharacterString</span><span class="p">),</span>
+        <span class="n">properties</span><span class="o">.</span><span class="n">ReadableProperty</span><span class="p">(</span><span class="s">&#39;propertyList&#39;</span><span class="p">,</span> <span class="n">ArrayOf</span><span class="p">(</span><span class="n">PropertyIdentifier</span><span class="p">)),</span>
+    <span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="c"># pylint: disable=super-init-not-called</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function initializes the property.</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;__init__ </span><span class="si">%s</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="c"># set cov support</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_hardware</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;hardware&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+
+        <span class="c"># get application</span>
+        <span class="n">application</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;app&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+
+        <span class="c"># set application</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_application</span><span class="p">(</span><span class="n">application</span><span class="p">)</span>
+
+        <span class="c"># remove unnecessary keys from keywords</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;hardware&#39;</span><span class="p">,</span> <span class="s">&#39;app&#39;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+                <span class="k">del</span> <span class="n">kwargs</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+
+        <span class="c"># set cov support</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cov_support</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span> <span class="ow">in</span> <span class="n">COV_SUPPORT</span>
+
+        <span class="c"># set cov dictionary</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cov_dict</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c"># call predecessor</span>
+        <span class="c"># bacpypes.object.Object.__init__(self, **kwargs)</span>
+
+        <span class="n">initargs</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_properties</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">bacpypes</span><span class="o">.</span><span class="n">object</span><span class="o">.</span><span class="n">PropertyError</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+            <span class="n">initargs</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+        <span class="c"># start with a clean dict of values</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_values</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c"># start with a clean array of property identifiers</span>
+        <span class="k">if</span> <span class="s">&#39;propertyList&#39;</span> <span class="ow">in</span> <span class="n">initargs</span><span class="p">:</span>
+            <span class="n">propertyList</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">propertyList</span> <span class="o">=</span> <span class="n">ArrayOf</span><span class="p">(</span><span class="n">PropertyIdentifier</span><span class="p">)()</span>
+            <span class="n">initargs</span><span class="p">[</span><span class="s">&#39;propertyList&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">propertyList</span>
+
+        <span class="c"># initialize the object</span>
+        <span class="k">for</span> <span class="n">propid</span><span class="p">,</span> <span class="n">prop</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_properties</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">propid</span> <span class="ow">in</span> <span class="n">initargs</span><span class="p">:</span>
+                <span class="c"># defer to the property object for error checking</span>
+                <span class="n">prop</span><span class="o">.</span><span class="n">WriteProperty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">initargs</span><span class="p">[</span><span class="n">propid</span><span class="p">],</span> <span class="n">direct</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+            <span class="k">elif</span> <span class="n">prop</span><span class="o">.</span><span class="n">default</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="c"># default values bypass property interface</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_values</span><span class="p">[</span><span class="n">propid</span><span class="p">]</span> <span class="o">=</span> <span class="n">prop</span><span class="o">.</span><span class="n">default</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_values</span><span class="p">[</span><span class="n">propid</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span>
+
+            <span class="c"># add it to the property list if we are building one</span>
+            <span class="k">if</span> <span class="n">propertyList</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">propertyList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">propid</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function returns a unicode representation of the instance.</span>
+
+<span class="sd">        :return: unicode representation</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s">u&#39;&lt;</span><span class="si">%s</span><span class="s">.</span><span class="si">%s</span><span class="s"> </span><span class="se">\&#39;</span><span class="si">%s</span><span class="s"> </span><span class="si">%s</span><span class="se">\&#39;</span><span class="s">&gt;&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__module__</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">objectType</span><span class="p">,</span>
+            <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_value</span><span class="p">(</span><span class="s">&#39;objectIdentifier&#39;</span><span class="p">)),</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function returns a unicode representation of the instance.</span>
+
+<span class="sd">        :return: unicode representation</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__repr__</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__unicode__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function returns a unicode representation of the instance.</span>
+
+<span class="sd">        :return: unicode representation</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__repr__</span><span class="p">()</span>
+
+<div class="viewcode-block" id="Object.set_application"><a class="viewcode-back" href="../../../../bacnet.object.basic.html#bacnet.object.basic.general.Object.set_application">[docs]</a>    <span class="k">def</span> <span class="nf">set_application</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">application</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function defines the application associated to this object.</span>
+
+<span class="sd">        :param application: application object</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># set application</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_application</span> <span class="o">=</span> <span class="n">application</span>
+</div>
+<div class="viewcode-block" id="Object.get_property"><a class="viewcode-back" href="../../../../bacnet.object.basic.html#bacnet.object.basic.general.Object.get_property">[docs]</a>    <span class="k">def</span> <span class="nf">get_property</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identifier</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function returns the property for identifier.</span>
+<span class="sd">        :param identifier: property identifier</span>
+<span class="sd">        :return: property</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># get property</span>
+        <span class="n">prop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_properties</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">identifier</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+
+        <span class="c"># return property</span>
+        <span class="k">return</span> <span class="n">prop</span>
+</div>
+<div class="viewcode-block" id="Object.get_value"><a class="viewcode-back" href="../../../../bacnet.object.basic.html#bacnet.object.basic.general.Object.get_value">[docs]</a>    <span class="k">def</span> <span class="nf">get_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identifier</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function returns the value for property identifier.</span>
+<span class="sd">        :param identifier: property identifier</span>
+<span class="sd">        :return: value</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># return value</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_values</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">identifier</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Object.set_value"><a class="viewcode-back" href="../../../../bacnet.object.basic.html#bacnet.object.basic.general.Object.set_value">[docs]</a>    <span class="k">def</span> <span class="nf">set_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identifier</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function sets the value for property identifier.</span>
+<span class="sd">        :param identifier: property identifier</span>
+<span class="sd">        :param value: property value</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># set value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_values</span><span class="p">[</span><span class="n">identifier</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+</div>
+<div class="viewcode-block" id="Object.poll_hardware"><a class="viewcode-back" href="../../../../bacnet.object.basic.html#bacnet.object.basic.general.Object.poll_hardware">[docs]</a>    <span class="k">def</span> <span class="nf">poll_hardware</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function checks for value updates for hardware.</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># check if object has hardware</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hardware</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="c"># get hardware value</span>
+            <span class="n">hw_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_hardware</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+
+            <span class="c"># get present value property</span>
+            <span class="n">present_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_property</span><span class="p">(</span><span class="s">&#39;presentValue&#39;</span><span class="p">)</span>
+
+            <span class="c"># cast value</span>
+            <span class="n">hw_value</span> <span class="o">=</span> <span class="n">present_value</span><span class="o">.</span><span class="n">datatype</span><span class="p">(</span><span class="n">hw_value</span><span class="p">)</span>
+
+            <span class="c"># get current property value</span>
+            <span class="n">current_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ReadProperty</span><span class="p">(</span><span class="s">&#39;presentValue&#39;</span><span class="p">)</span>
+
+            <span class="c"># check if value has changed</span>
+            <span class="k">if</span> <span class="n">hw_value</span> <span class="o">!=</span> <span class="n">current_value</span><span class="p">:</span>
+                <span class="c"># write value</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">WriteProperty</span><span class="p">(</span><span class="s">&#39;presentValue&#39;</span><span class="p">,</span> <span class="n">hw_value</span><span class="p">,</span> <span class="n">direct</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="Object.cov_supported"><a class="viewcode-back" href="../../../../bacnet.object.basic.html#bacnet.object.basic.general.Object.cov_supported">[docs]</a>    <span class="k">def</span> <span class="nf">cov_supported</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prop</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function checks if COV subscription is supported.</span>
+
+<span class="sd">        :param prop: property object or identifier</span>
+<span class="sd">        :return: COV is supported</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># check if object supports cov</span>
+        <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;_cov_support&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">:</span>
+            <span class="c"># check if property was defined</span>
+            <span class="k">if</span> <span class="n">prop</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">True</span>
+
+            <span class="c"># check if property is identifier</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">property</span><span class="p">,</span> <span class="p">(</span><span class="n">CharacterString</span><span class="p">,</span> <span class="nb">basestring</span><span class="p">)):</span>
+                <span class="c"># get property by identifier</span>
+                <span class="n">prop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_property</span><span class="p">(</span><span class="n">prop</span><span class="p">)</span>
+
+            <span class="c"># check if property supportes cov</span>
+            <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">prop</span><span class="p">,</span> <span class="s">&#39;cov_support&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">True</span>
+
+        <span class="k">return</span> <span class="bp">False</span>
+</div>
+    <span class="k">def</span> <span class="nf">__get_property_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prop_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">prop_index</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function returns a tuple of supported cov properties.</span>
+
+<span class="sd">        :param prop_id: property identifier</span>
+<span class="sd">        :return: properties</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># check if subscription is property specific</span>
+        <span class="k">if</span> <span class="n">prop_id</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="c"># initialize properties</span>
+            <span class="n">props</span> <span class="o">=</span> <span class="p">()</span>
+
+            <span class="c"># loop through supported cov properties</span>
+            <span class="k">for</span> <span class="n">prop_id</span> <span class="ow">in</span> <span class="n">COV_SUPPORT</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="c"># get property by identifier</span>
+                <span class="n">prop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_property</span><span class="p">(</span><span class="n">prop_id</span><span class="p">)</span>
+
+                <span class="c"># check if property exists</span>
+                <span class="k">if</span> <span class="n">prop</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="c"># initialize property array</span>
+                    <span class="n">prop_array</span> <span class="o">=</span> <span class="p">(</span><span class="bp">None</span><span class="p">,)</span>
+
+                    <span class="c"># check if property is array</span>
+                    <span class="k">if</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">prop</span><span class="o">.</span><span class="n">datatype</span><span class="p">,</span> <span class="n">Array</span><span class="p">):</span>
+                        <span class="c"># reset property array</span>
+                        <span class="n">prop_array</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">prop</span><span class="o">.</span><span class="n">ReadProperty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+                    <span class="c"># loop through property array index</span>
+                    <span class="k">for</span> <span class="n">prop_index</span> <span class="ow">in</span> <span class="n">prop_array</span><span class="p">:</span>
+                        <span class="c"># add property to properties</span>
+                        <span class="n">props</span> <span class="o">+=</span> <span class="p">((</span><span class="n">prop</span><span class="p">,</span> <span class="n">prop_index</span><span class="p">),)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c"># create properties</span>
+            <span class="n">props</span> <span class="o">=</span> <span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">get_property</span><span class="p">(</span><span class="n">prop_id</span><span class="p">),</span> <span class="n">prop_index</span><span class="p">),)</span>
+
+        <span class="c"># return properties</span>
+        <span class="k">return</span> <span class="n">props</span>
+
+<div class="viewcode-block" id="Object.delete_cov_subscription"><a class="viewcode-back" href="../../../../bacnet.object.basic.html#bacnet.object.basic.general.Object.delete_cov_subscription">[docs]</a>    <span class="k">def</span> <span class="nf">delete_cov_subscription</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">subscriptions</span><span class="p">,</span> <span class="n">inform_app</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function deletes subscription from cov subscription list.</span>
+
+<span class="sd">        :param subscriptions: subscriptions</span>
+<span class="sd">        :param inform_app: inform application</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># check if subscriptions is iterable</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">subscriptions</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">):</span>
+            <span class="n">subscriptions</span> <span class="o">=</span> <span class="p">(</span><span class="n">subscriptions</span><span class="p">,)</span>
+
+        <span class="c"># get properties</span>
+        <span class="n">props</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_property_list</span><span class="p">()</span>
+
+        <span class="c"># loop through all subscribed properties</span>
+        <span class="k">for</span> <span class="n">prop</span><span class="p">,</span> <span class="n">prop_index</span> <span class="ow">in</span> <span class="n">props</span><span class="p">:</span>
+            <span class="c"># get property dictionary from cov dictionary</span>
+            <span class="n">prop_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cov_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">prop</span><span class="o">.</span><span class="n">identifier</span><span class="p">,</span> <span class="p">{})</span>
+
+            <span class="c"># get property array index list from property dictionary</span>
+            <span class="n">prop_index_list</span> <span class="o">=</span> <span class="n">prop_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">prop_index</span><span class="p">,</span> <span class="p">[])</span>
+
+            <span class="c"># initialize loop variable</span>
+            <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+
+            <span class="c"># loop through subscriptions</span>
+            <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">prop_index_list</span><span class="p">):</span>
+                <span class="c"># get entry</span>
+                <span class="n">entry</span> <span class="o">=</span> <span class="n">prop_index_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+                <span class="c"># check if subscription is stored within the entry</span>
+                <span class="k">if</span> <span class="n">entry</span><span class="p">[</span><span class="s">&#39;subscription&#39;</span><span class="p">]</span> <span class="ow">in</span> <span class="n">subscriptions</span><span class="p">:</span>
+                    <span class="c"># remove entry by index</span>
+                    <span class="k">del</span> <span class="n">prop_index_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+                    <span class="k">continue</span>
+
+                <span class="c"># go to next subscription</span>
+                <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="c"># store property array index list</span>
+            <span class="n">prop_dict</span><span class="p">[</span><span class="n">prop_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">prop_index_list</span>
+
+            <span class="c"># check if property array index list is empty</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">prop_index_list</span><span class="p">):</span>
+                <span class="c"># remove property array index from property dictionary</span>
+                <span class="k">del</span> <span class="n">prop_dict</span><span class="p">[</span><span class="n">prop_index</span><span class="p">]</span>
+
+            <span class="c"># store property dictionary</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_cov_dict</span><span class="p">[</span><span class="n">prop</span><span class="o">.</span><span class="n">identifier</span><span class="p">]</span> <span class="o">=</span> <span class="n">prop_dict</span>
+
+            <span class="c"># check if property dictionary is empty</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">prop_index_list</span><span class="p">):</span>
+                <span class="c"># remove property dictionary from cov dictionary</span>
+                <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cov_dict</span><span class="p">[</span><span class="n">prop</span><span class="o">.</span><span class="n">identifier</span><span class="p">]</span>
+
+        <span class="c"># check if inform_app was set</span>
+        <span class="k">if</span> <span class="n">inform_app</span><span class="p">:</span>
+            <span class="c"># inform app to delete subscriptions</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_application</span><span class="o">.</span><span class="n">delete_cov_subscriptions</span><span class="p">(</span><span class="n">subscriptions</span><span class="p">,</span> <span class="n">inform_object</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+</div>
+    <span class="k">def</span> <span class="nf">__create_cov_entry</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">subscription</span><span class="p">,</span> <span class="n">prop</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">prop_index</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function creates a cov entry for a subscription.</span>
+
+<span class="sd">        :param subscription: subscription</span>
+<span class="sd">        :param prop: property</span>
+<span class="sd">        :return: entry dictionary</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># create entry dictionary</span>
+        <span class="n">entry</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s">&#39;subscription&#39;</span><span class="p">:</span> <span class="n">subscription</span><span class="p">,</span>
+            <span class="s">&#39;value&#39;</span><span class="p">:</span> <span class="bp">None</span>
+        <span class="p">}</span>
+
+        <span class="c"># check if property exists</span>
+        <span class="k">if</span> <span class="n">prop</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="c"># store current value to entry dictionary</span>
+            <span class="n">entry</span><span class="p">[</span><span class="s">&#39;value&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">prop</span><span class="o">.</span><span class="n">ReadProperty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prop_index</span><span class="p">)</span>
+
+        <span class="c"># return entry dictionary</span>
+        <span class="k">return</span> <span class="n">entry</span>
+
+<div class="viewcode-block" id="Object.renew_cov_subscription"><a class="viewcode-back" href="../../../../bacnet.object.basic.html#bacnet.object.basic.general.Object.renew_cov_subscription">[docs]</a>    <span class="k">def</span> <span class="nf">renew_cov_subscription</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">subscription</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function checks if subscription can be renewed and returns boolean of this action.</span>
+
+<span class="sd">        :param subscription: subscription</span>
+<span class="sd">        :return: subscription renewed</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># read property reference</span>
+        <span class="n">prop_ref</span> <span class="o">=</span> <span class="n">subscription</span><span class="o">.</span><span class="n">monitoredPropertyReference</span>
+
+        <span class="c"># read property identifier</span>
+        <span class="n">prop_id</span> <span class="o">=</span> <span class="n">prop_ref</span><span class="o">.</span><span class="n">propertyIdentifier</span>
+
+        <span class="c"># get properties</span>
+        <span class="n">props</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_property_list</span><span class="p">(</span><span class="n">prop_id</span><span class="p">,</span> <span class="n">prop_ref</span><span class="o">.</span><span class="n">propertyArrayIndex</span><span class="p">)</span>
+
+        <span class="c"># loop through all subscribed properties</span>
+        <span class="k">for</span> <span class="n">prop</span><span class="p">,</span> <span class="n">prop_index</span> <span class="ow">in</span> <span class="n">props</span><span class="p">:</span>
+            <span class="c"># get property dictionary from cov dictionary</span>
+            <span class="n">prop_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cov_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">prop</span><span class="o">.</span><span class="n">identifier</span><span class="p">,</span> <span class="p">{})</span>
+
+            <span class="c"># get property array index list from property dictionary</span>
+            <span class="n">prop_index_list</span> <span class="o">=</span> <span class="n">prop_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">prop_index</span><span class="p">,</span> <span class="p">[])</span>
+
+            <span class="c"># loop through property array index list</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">prop_index_list</span><span class="p">)):</span>
+                <span class="c"># get subscription entry</span>
+                <span class="n">entry</span> <span class="o">=</span> <span class="n">prop_index_list</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="s">&#39;subscription&#39;</span><span class="p">]</span>
+
+                <span class="c"># check if device and process id match</span>
+                <span class="k">if</span> <span class="n">entry</span><span class="o">.</span><span class="n">recipient</span><span class="o">.</span><span class="n">recipient</span><span class="o">.</span><span class="n">device</span> <span class="o">==</span> <span class="n">subscription</span><span class="o">.</span><span class="n">recipient</span><span class="o">.</span><span class="n">recipient</span><span class="o">.</span><span class="n">device</span> <span class="ow">and</span> \
+                    <span class="n">entry</span><span class="o">.</span><span class="n">recipient</span><span class="o">.</span><span class="n">processIdentifier</span> <span class="o">==</span> <span class="n">subscription</span><span class="o">.</span><span class="n">recipient</span><span class="o">.</span><span class="n">processIdentifier</span><span class="p">:</span>
+                    <span class="c"># add subscription to property array index list</span>
+                    <span class="n">prop_index_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__create_cov_entry</span><span class="p">(</span><span class="n">subscription</span><span class="p">,</span> <span class="n">prop</span><span class="p">,</span> <span class="n">prop_index</span><span class="p">)</span>
+
+            <span class="c"># store property array index list</span>
+            <span class="n">prop_dict</span><span class="p">[</span><span class="n">prop_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">prop_index_list</span>
+
+            <span class="c"># store property dictionary</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_cov_dict</span><span class="p">[</span><span class="n">prop</span><span class="o">.</span><span class="n">identifier</span><span class="p">]</span> <span class="o">=</span> <span class="n">prop_dict</span>
+</div>
+<div class="viewcode-block" id="Object.add_cov_subscription"><a class="viewcode-back" href="../../../../bacnet.object.basic.html#bacnet.object.basic.general.Object.add_cov_subscription">[docs]</a>    <span class="k">def</span> <span class="nf">add_cov_subscription</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">subscription</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function adds subscription to cov subscription list.</span>
+
+<span class="sd">        :param subscription: subscription</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># read property reference</span>
+        <span class="n">prop_ref</span> <span class="o">=</span> <span class="n">subscription</span><span class="o">.</span><span class="n">monitoredPropertyReference</span>
+
+        <span class="c"># read property identifier</span>
+        <span class="n">prop_id</span> <span class="o">=</span> <span class="n">prop_ref</span><span class="o">.</span><span class="n">propertyIdentifier</span>
+
+        <span class="c"># get properties</span>
+        <span class="n">props</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_property_list</span><span class="p">(</span><span class="n">prop_id</span><span class="p">,</span> <span class="n">prop_ref</span><span class="o">.</span><span class="n">propertyArrayIndex</span><span class="p">)</span>
+
+        <span class="c"># loop through all subscribed properties</span>
+        <span class="k">for</span> <span class="n">prop</span><span class="p">,</span> <span class="n">prop_index</span> <span class="ow">in</span> <span class="n">props</span><span class="p">:</span>
+            <span class="c"># get property dictionary from cov dictionary</span>
+            <span class="n">prop_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cov_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">prop</span><span class="o">.</span><span class="n">identifier</span><span class="p">,</span> <span class="p">{})</span>
+
+            <span class="c"># get property array index list from property dictionary</span>
+            <span class="n">prop_index_list</span> <span class="o">=</span> <span class="n">prop_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">prop_index</span><span class="p">,</span> <span class="p">[])</span>
+
+            <span class="c"># add subscription to property array index list</span>
+            <span class="n">prop_index_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__create_cov_entry</span><span class="p">(</span><span class="n">subscription</span><span class="p">,</span> <span class="n">prop</span><span class="p">,</span> <span class="n">prop_index</span><span class="p">))</span>
+
+            <span class="c"># store property array index list</span>
+            <span class="n">prop_dict</span><span class="p">[</span><span class="n">prop_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">prop_index_list</span>
+
+            <span class="c"># store property dictionary</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_cov_dict</span><span class="p">[</span><span class="n">prop</span><span class="o">.</span><span class="n">identifier</span><span class="p">]</span> <span class="o">=</span> <span class="n">prop_dict</span>
+</div>
+    <span class="k">def</span> <span class="nf">__check_cov</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prop</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function checks if cov notification should be sent.</span>
+
+<span class="sd">        :param prop: property</span>
+<span class="sd">        :param value: property value</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># check if application was set</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_application</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="c"># check if application supports config queue</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_application</span><span class="o">.</span><span class="n">requests</span><span class="p">,</span> <span class="s">&#39;put&#39;</span><span class="p">):</span>
+                <span class="c"># create read acknowledgement</span>
+                <span class="n">read_ack</span> <span class="o">=</span> <span class="n">ReadPropertyACK</span><span class="p">(</span>
+                    <span class="n">objectIdentifier</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ReadProperty</span><span class="p">(</span><span class="s">&#39;objectIdentifier&#39;</span><span class="p">),</span>
+                    <span class="n">propertyIdentifier</span><span class="o">=</span><span class="n">value</span><span class="o">.</span><span class="n">propertyIdentifier</span><span class="p">,</span>
+                    <span class="n">propertyArrayIndex</span><span class="o">=</span><span class="n">value</span><span class="o">.</span><span class="n">propertyArrayIndex</span><span class="p">,</span>
+                    <span class="n">propertyValue</span><span class="o">=</span><span class="n">value</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                <span class="p">)</span>
+
+                <span class="c"># set destination address</span>
+                <span class="n">read_ack</span><span class="o">.</span><span class="n">pduDestination</span> <span class="o">=</span> <span class="n">Address</span><span class="p">((</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+
+                <span class="c"># inform config</span>
+                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_application</span><span class="o">.</span><span class="n">requests</span><span class="p">,</span> <span class="s">&#39;put&#39;</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_application</span><span class="o">.</span><span class="n">requests</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">read_ack</span><span class="p">)</span>
+
+                <span class="c"># delete read acknowledgement</span>
+                <span class="k">del</span> <span class="n">read_ack</span>
+
+        <span class="c"># check if cov is supported for this property</span>
+        <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">prop</span><span class="p">,</span> <span class="s">&#39;cov_support&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">:</span>
+            <span class="c"># get property indexes</span>
+            <span class="n">prop_indexes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cov_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">propertyIdentifier</span><span class="p">,</span> <span class="p">{})</span>
+
+            <span class="c"># get subscriptions</span>
+            <span class="n">subscriptions</span> <span class="o">=</span> <span class="n">prop_indexes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                <span class="n">value</span><span class="o">.</span><span class="n">propertyArrayIndex</span><span class="p">,</span>
+                <span class="p">[]</span>
+            <span class="p">)</span>
+
+            <span class="c"># initialize list of removable subscriptions</span>
+            <span class="n">removables</span> <span class="o">=</span> <span class="p">()</span>
+
+            <span class="c"># cast value</span>
+            <span class="n">casted_value</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">value</span><span class="o">.</span><span class="n">cast_out</span><span class="p">(</span><span class="n">prop</span><span class="o">.</span><span class="n">datatype</span><span class="p">)</span>
+
+            <span class="c"># check if value has correct data type</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">casted_value</span><span class="p">,</span> <span class="n">prop</span><span class="o">.</span><span class="n">datatype</span><span class="p">):</span>
+                <span class="n">casted_value</span> <span class="o">=</span> <span class="n">prop</span><span class="o">.</span><span class="n">datatype</span><span class="p">(</span><span class="n">casted_value</span><span class="p">)</span>
+
+            <span class="c"># loop through subscriptions</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">subscriptions</span><span class="p">)):</span>
+                <span class="c"># read entry</span>
+                <span class="n">entry</span> <span class="o">=</span> <span class="n">subscriptions</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+                <span class="c"># check if subscription expired</span>
+                <span class="k">if</span> <span class="n">entry</span><span class="p">[</span><span class="s">&#39;subscription&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">timeRemaining</span><span class="o">.</span><span class="n">remaining_time</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="c"># add subscription to removables</span>
+                    <span class="n">removables</span> <span class="o">+=</span> <span class="p">(</span><span class="n">entry</span><span class="p">[</span><span class="s">&#39;subscription&#39;</span><span class="p">],)</span>
+
+                <span class="c"># check if value has changed</span>
+                <span class="k">elif</span> <span class="n">entry</span><span class="p">[</span><span class="s">&#39;value&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="n">casted_value</span><span class="p">:</span>
+                    <span class="c"># read subscription cov increment</span>
+                    <span class="n">cov_inc</span> <span class="o">=</span> <span class="n">entry</span><span class="p">[</span><span class="s">&#39;subscription&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">covIncrement</span>
+
+                    <span class="c"># get cov increment property</span>
+                    <span class="n">obj_cov_inc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_property</span><span class="p">(</span><span class="s">&#39;covIncrement&#39;</span><span class="p">)</span>
+
+                    <span class="c"># read property if it exists</span>
+                    <span class="k">if</span> <span class="n">obj_cov_inc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                        <span class="n">obj_cov_inc</span> <span class="o">=</span> <span class="n">obj_cov_inc</span><span class="o">.</span><span class="n">ReadProperty</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+                    <span class="c"># check if cov increment is reached</span>
+                    <span class="n">change</span> <span class="o">=</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">casted_value</span><span class="p">,</span> <span class="p">(</span><span class="n">Real</span><span class="p">,</span> <span class="n">Unsigned</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">))</span> <span class="ow">or</span> \
+                             <span class="n">entry</span><span class="p">[</span><span class="s">&#39;value&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> \
+                             <span class="p">((</span><span class="ow">not</span> <span class="n">cov_inc</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">obj_cov_inc</span><span class="p">)</span> <span class="ow">or</span>
+                              <span class="p">(</span><span class="ow">not</span> <span class="n">obj_cov_inc</span> <span class="ow">and</span> <span class="n">cov_inc</span> <span class="o">&lt;=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">entry</span><span class="p">[</span><span class="s">&#39;value&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">casted_value</span><span class="p">))</span> <span class="ow">or</span>
+                              <span class="p">(</span><span class="ow">not</span> <span class="n">cov_inc</span> <span class="ow">and</span> <span class="n">obj_cov_inc</span> <span class="o">&lt;=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">entry</span><span class="p">[</span><span class="s">&#39;value&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">casted_value</span><span class="p">)))</span>
+
+                    <span class="k">if</span> <span class="n">change</span><span class="p">:</span>
+                        <span class="c"># send notification</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_application</span><span class="o">.</span><span class="n">send_cov_notification</span><span class="p">(</span>
+                            <span class="n">entry</span><span class="p">[</span><span class="s">&#39;subscription&#39;</span><span class="p">],</span>
+                            <span class="p">[</span><span class="n">value</span><span class="p">],</span>
+                        <span class="p">)</span>
+
+                        <span class="c"># reset value</span>
+                        <span class="n">entry</span><span class="p">[</span><span class="s">&#39;value&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">casted_value</span>
+
+                        <span class="c"># store entry</span>
+                        <span class="n">subscriptions</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">entry</span>
+
+            <span class="c"># store subscriptions</span>
+            <span class="n">prop_indexes</span><span class="p">[</span><span class="n">value</span><span class="o">.</span><span class="n">propertyArrayIndex</span><span class="p">]</span> <span class="o">=</span> <span class="n">subscriptions</span>
+
+            <span class="c"># store property indexes</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_cov_dict</span><span class="p">[</span><span class="n">value</span><span class="o">.</span><span class="n">propertyIdentifier</span><span class="p">]</span> <span class="o">=</span> <span class="n">prop_indexes</span>
+
+            <span class="c"># check if removables were found</span>
+            <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">removables</span><span class="p">):</span>
+                <span class="c"># remove subscriptions</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">delete_cov_subscription</span><span class="p">(</span><span class="n">removables</span><span class="p">,</span> <span class="n">inform_app</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Object.ReadProperty"><a class="viewcode-back" href="../../../../bacnet.object.basic.html#bacnet.object.basic.general.Object.ReadProperty">[docs]</a>    <span class="k">def</span> <span class="nf">ReadProperty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">propid</span><span class="p">,</span> <span class="n">arrayIndex</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function handles reading of property values.</span>
+
+<span class="sd">        :param propid: property identifier</span>
+<span class="sd">        :param arrayIndex: property index</span>
+<span class="sd">        :return: property value</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;ReadProperty </span><span class="si">%r</span><span class="s"> arrayIndex=</span><span class="si">%r</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">propid</span><span class="p">,</span> <span class="n">arrayIndex</span><span class="p">)</span>
+
+        <span class="c"># get the property</span>
+        <span class="n">prop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_property</span><span class="p">(</span><span class="n">propid</span><span class="p">)</span>
+
+        <span class="c"># check if property exists</span>
+        <span class="k">if</span> <span class="n">prop</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">bacpypes</span><span class="o">.</span><span class="n">object</span><span class="o">.</span><span class="n">PropertyError</span><span class="p">(</span><span class="n">propid</span><span class="p">)</span>
+
+        <span class="c"># get value</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">prop</span><span class="o">.</span><span class="n">ReadProperty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arrayIndex</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="c"># return value</span>
+        <span class="k">return</span> <span class="n">value</span>
+</div>
+<div class="viewcode-block" id="Object.WriteProperty"><a class="viewcode-back" href="../../../../bacnet.object.basic.html#bacnet.object.basic.general.Object.WriteProperty">[docs]</a>    <span class="k">def</span> <span class="nf">WriteProperty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">propid</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">arrayIndex</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">priority</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">direct</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function handles writing of property values.</span>
+
+<span class="sd">        :param propid: property identifier</span>
+<span class="sd">        :param value: property value</span>
+<span class="sd">        :param arrayIndex: property index</span>
+<span class="sd">        :param priority: write priority</span>
+<span class="sd">        :param direct: direct write</span>
+<span class="sd">        :return: property value</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span>
+            <span class="s">&#39;WriteProperty </span><span class="si">%r</span><span class="s"> </span><span class="si">%r</span><span class="s"> arrayIndex=</span><span class="si">%r</span><span class="s"> priority=</span><span class="si">%r</span><span class="s">&#39;</span><span class="p">,</span>
+            <span class="n">propid</span><span class="p">,</span>
+            <span class="n">value</span><span class="p">,</span>
+            <span class="n">arrayIndex</span><span class="p">,</span>
+            <span class="n">priority</span>
+        <span class="p">)</span>
+
+        <span class="c"># get the property</span>
+        <span class="n">prop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_property</span><span class="p">(</span><span class="n">propid</span><span class="p">)</span>
+
+        <span class="c"># check if property exists</span>
+        <span class="k">if</span> <span class="n">prop</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">bacpypes</span><span class="o">.</span><span class="n">object</span><span class="o">.</span><span class="n">PropertyError</span><span class="p">(</span><span class="n">propid</span><span class="p">)</span>
+
+        <span class="c"># set value</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">prop</span><span class="o">.</span><span class="n">WriteProperty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">arrayIndex</span><span class="p">,</span> <span class="n">priority</span><span class="p">,</span> <span class="n">direct</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="c"># check if return value is supported and not an object</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">dict</span><span class="p">,</span> <span class="n">Object</span><span class="p">)):</span>
+            <span class="c"># convert value to any</span>
+            <span class="n">any_value</span> <span class="o">=</span> <span class="n">Any</span><span class="p">()</span>
+            <span class="n">any_value</span><span class="o">.</span><span class="n">cast_in</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">__check_cov</span><span class="p">(</span>
+                <span class="n">prop</span><span class="p">,</span>
+                <span class="n">PropertyValue</span><span class="p">(</span>
+                    <span class="n">propertyIdentifier</span><span class="o">=</span><span class="n">propid</span><span class="p">,</span>
+                    <span class="n">propertyArrayIndex</span><span class="o">=</span><span class="n">arrayIndex</span><span class="p">,</span>
+                    <span class="n">value</span><span class="o">=</span><span class="n">any_value</span><span class="p">,</span>
+                    <span class="n">priority</span><span class="o">=</span><span class="n">priority</span>
+                <span class="p">)</span>
+
+            <span class="p">)</span>
+
+        <span class="c"># return value</span>
+        <span class="k">return</span> <span class="n">value</span>
+
+</div></div>
+<div class="viewcode-block" id="register_object_type"><a class="viewcode-back" href="../../../../bacnet.object.basic.html#bacnet.object.basic.general.register_object_type">[docs]</a><span class="k">def</span> <span class="nf">register_object_type</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">vendor_id</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function stores new object types.</span>
+
+<span class="sd">    :param cls: object class</span>
+<span class="sd">    :return: None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># hand over register data</span>
+    <span class="k">return</span> <span class="n">bacpypes</span><span class="o">.</span><span class="n">object</span><span class="o">.</span><span class="n">register_object_type</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">vendor_id</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="get_object_class"><a class="viewcode-back" href="../../../../bacnet.object.basic.html#bacnet.object.basic.general.get_object_class">[docs]</a><span class="k">def</span> <span class="nf">get_object_class</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">vendor_id</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function returns the object type for a specified class.</span>
+
+<span class="sd">    :param cls: object class</span>
+<span class="sd">    :return: object type</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># return object type</span>
+    <span class="k">return</span> <span class="n">bacpypes</span><span class="o">.</span><span class="n">object</span><span class="o">.</span><span class="n">get_object_class</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">vendor_id</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="get_datatype"><a class="viewcode-back" href="../../../../bacnet.object.basic.html#bacnet.object.basic.general.get_datatype">[docs]</a><span class="k">def</span> <span class="nf">get_datatype</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">prop_id</span><span class="p">,</span> <span class="n">vendor_id</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function returns the data type for a specified class and property identifier.</span>
+
+<span class="sd">    :param cls: object class</span>
+<span class="sd">    :param prop_id: property identifier</span>
+<span class="sd">    :return: object type</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># return object type</span>
+    <span class="k">return</span> <span class="n">bacpypes</span><span class="o">.</span><span class="n">object</span><span class="o">.</span><span class="n">get_datatype</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">prop_id</span><span class="p">,</span> <span class="n">vendor_id</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="new_property"><a class="viewcode-back" href="../../../../bacnet.object.basic.html#bacnet.object.basic.general.new_property">[docs]</a><span class="k">def</span> <span class="nf">new_property</span><span class="p">(</span><span class="n">cls_type</span><span class="p">,</span> <span class="n">old_prop</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function converts bacpypes properties into new bacnet properties.</span>
+
+<span class="sd">    :param cls_type: object type</span>
+<span class="sd">    :param old_prop: old property</span>
+<span class="sd">    :return: new property</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># read property class name</span>
+    <span class="n">cls_name</span> <span class="o">=</span> <span class="n">old_prop</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span>
+
+    <span class="c"># get new class</span>
+    <span class="n">cls</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">properties</span><span class="p">,</span> <span class="n">cls_name</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+
+    <span class="c"># check if class exists</span>
+    <span class="k">if</span> <span class="n">cls</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&#39;class &quot;</span><span class="si">%s</span><span class="s">&quot; not defined in this scope&#39;</span> <span class="o">%</span> <span class="n">cls_name</span><span class="p">)</span>
+
+    <span class="c"># create attribute dictionary</span>
+    <span class="n">prop_attributes</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="c"># loop through necessary attributes</span>
+    <span class="k">for</span> <span class="n">attribute</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;identifier&#39;</span><span class="p">,</span> <span class="s">&#39;datatype&#39;</span><span class="p">,</span> <span class="s">&#39;default&#39;</span><span class="p">,</span> <span class="s">&#39;optional&#39;</span><span class="p">,</span> <span class="s">&#39;mutable&#39;</span><span class="p">):</span>
+        <span class="c"># get instance</span>
+        <span class="n">instance</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">old_prop</span><span class="p">,</span> <span class="n">attribute</span><span class="p">)</span>
+
+        <span class="c"># check if attribute is default</span>
+        <span class="k">if</span> <span class="n">attribute</span> <span class="o">==</span> <span class="s">&#39;default&#39;</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">instance</span><span class="p">,</span> <span class="s">&#39;__class__&#39;</span><span class="p">):</span>
+            <span class="c"># get redefined attribute class</span>
+            <span class="n">attribute_class</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">primitivedata</span><span class="p">,</span> <span class="n">instance</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+
+            <span class="c"># check if new attribute class exists</span>
+            <span class="k">if</span> <span class="n">attribute_class</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="c"># reset instance</span>
+                <span class="n">instance</span> <span class="o">=</span> <span class="n">attribute_class</span><span class="p">(</span><span class="n">instance</span><span class="p">)</span>
+
+            <span class="c"># else:</span>
+            <span class="c">#     # set instance</span>
+            <span class="c">#     try:</span>
+            <span class="c">#         instance = old_prop.datatype(instance)</span>
+            <span class="c">#</span>
+            <span class="c">#     except:</span>
+            <span class="c">#         pass</span>
+
+        <span class="c"># check if attribute is data type</span>
+        <span class="k">if</span> <span class="n">attribute</span> <span class="o">==</span> <span class="s">&#39;datatype&#39;</span><span class="p">:</span>
+            <span class="c"># get redefined attribute class</span>
+            <span class="n">instance</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">primitivedata</span><span class="p">,</span> <span class="n">instance</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="n">instance</span><span class="p">)</span>
+
+        <span class="c"># collect attribute value</span>
+        <span class="n">prop_attributes</span><span class="p">[</span><span class="n">attribute</span><span class="p">]</span> <span class="o">=</span> <span class="n">instance</span>
+
+    <span class="n">prop_attributes</span><span class="p">[</span><span class="s">&#39;cov_support&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">COV_SUPPORT</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cls_type</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+        <span class="n">prop_attributes</span><span class="p">[</span><span class="s">&#39;identifier&#39;</span><span class="p">],</span>
+        <span class="bp">False</span>
+    <span class="p">)</span>
+
+    <span class="c"># check if property is active cov subscriptions</span>
+    <span class="k">if</span> <span class="n">prop_attributes</span><span class="p">[</span><span class="s">&#39;identifier&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;activeCovSubscriptions&#39;</span><span class="p">:</span>
+        <span class="c"># reset new class</span>
+        <span class="n">cls</span> <span class="o">=</span> <span class="n">properties</span><span class="o">.</span><span class="n">ActiveCovSubscriptionsProperty</span>
+        <span class="n">prop_attributes</span><span class="p">[</span><span class="s">&#39;datatype&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">primitivedata</span><span class="o">.</span><span class="n">SequenceOfCOVSubscription</span>
+
+    <span class="c"># check if object type is character string value and property is present value</span>
+    <span class="k">elif</span> <span class="n">cls_type</span><span class="o">.</span><span class="n">objectType</span> <span class="o">==</span> <span class="s">&#39;characterstringValue&#39;</span> <span class="ow">and</span> \
+        <span class="n">prop_attributes</span><span class="p">[</span><span class="s">&#39;identifier&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;presentValue&#39;</span><span class="p">:</span>
+        <span class="c"># reset property to writable</span>
+        <span class="n">cls</span> <span class="o">=</span> <span class="n">properties</span><span class="o">.</span><span class="n">WritableProperty</span>
+
+        <span class="c"># remove mutable attribute</span>
+        <span class="k">del</span> <span class="n">prop_attributes</span><span class="p">[</span><span class="s">&#39;mutable&#39;</span><span class="p">]</span>
+
+    <span class="c"># create new property</span>
+    <span class="n">new_prop</span> <span class="o">=</span> <span class="n">cls</span><span class="p">(</span><span class="o">**</span><span class="n">prop_attributes</span><span class="p">)</span>
+
+    <span class="c"># return new property</span>
+    <span class="k">return</span> <span class="n">new_prop</span>
+
+
+<span class="c"># create new object classes</span></div>
+<span class="k">for</span> <span class="n">cls_obj</span> <span class="ow">in</span> <span class="n">bacpypes</span><span class="o">.</span><span class="n">object</span><span class="o">.</span><span class="n">Object</span><span class="o">.</span><span class="n">__subclasses__</span><span class="p">():</span>
+    <span class="c"># ignore Object defined above</span>
+    <span class="k">if</span> <span class="n">cls_obj</span><span class="o">.</span><span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;Object&#39;</span><span class="p">:</span>
+        <span class="k">continue</span>
+
+    <span class="c"># create new properties</span>
+    <span class="n">cls_properties</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c"># loop through old properties</span>
+    <span class="k">for</span> <span class="n">cls_prop</span> <span class="ow">in</span> <span class="n">Object</span><span class="o">.</span><span class="n">properties</span> <span class="o">+</span> <span class="n">cls_obj</span><span class="o">.</span><span class="n">properties</span><span class="p">:</span>
+        <span class="c"># append new property instance</span>
+        <span class="n">cls_properties</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_property</span><span class="p">(</span><span class="n">cls_obj</span><span class="p">,</span> <span class="n">cls_prop</span><span class="p">))</span>
+
+    <span class="c"># create new class</span>
+    <span class="n">new_class</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span>
+        <span class="n">cls_obj</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span>
+        <span class="p">(</span><span class="n">Object</span><span class="p">,),</span>
+        <span class="p">{</span>
+            <span class="s">&#39;objectType&#39;</span><span class="p">:</span> <span class="n">cls_obj</span><span class="o">.</span><span class="n">objectType</span><span class="p">,</span>
+            <span class="s">&#39;properties&#39;</span><span class="p">:</span> <span class="n">cls_properties</span><span class="p">,</span>
+            <span class="s">&#39;__doc__&#39;</span><span class="p">:</span> <span class="s">&#39;This class is an cov extended version of bacpypes </span><span class="si">%s</span><span class="s">.&#39;</span> <span class="o">%</span> <span class="n">cls_obj</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span>
+        <span class="p">}</span>
+    <span class="p">)</span>
+
+    <span class="c"># register object class</span>
+    <span class="n">register_object_type</span><span class="p">(</span><span class="n">new_class</span><span class="p">)</span>
+
+    <span class="c"># append class to list</span>
+    <span class="n">COVObjectClasses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_class</span><span class="p">)</span>
+    <span class="nb">globals</span><span class="p">()[</span><span class="n">new_class</span><span class="o">.</span><span class="n">__name__</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_class</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Tobias Grosch.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.3</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

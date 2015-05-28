@@ -1,0 +1,22 @@
+bacnet.webgui.control.templatetags package
+==========================================
+
+Submodules
+----------
+
+bacnet.webgui.control.templatetags.menu module
+----------------------------------------------
+
+.. automodule:: bacnet.webgui.control.templatetags.menu
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: bacnet.webgui.control.templatetags
+    :members:
+    :undoc-members:
+    :show-inheritance:

@@ -1,0 +1,36 @@
+bacnet package
+==============
+
+Subpackages
+-----------
+
+.. toctree::
+
+    bacnet.api
+    bacnet.app
+    bacnet.console
+    bacnet.debugging
+    bacnet.object
+    bacnet.sandbox
+    bacnet.system
+    bacnet.webgui
+
+Submodules
+----------
+
+bacnet.settings module
+----------------------
+
+.. automodule:: bacnet.settings
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: bacnet
+    :members:
+    :undoc-members:
+    :show-inheritance:

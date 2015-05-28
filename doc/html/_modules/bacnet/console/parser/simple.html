@@ -1,0 +1,546 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>bacnet.console.parser.simple &mdash; Masterarbeit Grosch 0.4c0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.4c0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="Masterarbeit Grosch 0.4c0 documentation" href="../../../../index.html" />
+    <link rel="up" title="bacnet.console.parser" href="../parser.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">Masterarbeit Grosch 0.4c0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="../../console.html" >bacnet.console</a> &raquo;</li>
+          <li class="nav-item nav-item-3"><a href="../parser.html" accesskey="U">bacnet.console.parser</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for bacnet.console.parser.simple</h1><div class="highlight"><pre>
+<span class="c"># pylint: disable=too-many-branches, too-many-locals, broad-except</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Simple Parser Module</span>
+<span class="sd">--------------------</span>
+
+<span class="sd">This module contains rudimentary parser functions.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+
+<span class="kn">from</span> <span class="nn">bacpypes.primitivedata</span> <span class="kn">import</span> <span class="n">Date</span><span class="p">,</span> <span class="n">Time</span><span class="p">,</span> <span class="n">Boolean</span><span class="p">,</span> <span class="n">CharacterString</span>
+<span class="kn">from</span> <span class="nn">bacpypes.constructeddata</span> <span class="kn">import</span> <span class="n">Array</span>
+<span class="kn">from</span> <span class="nn">bacpypes.basetypes</span> <span class="kn">import</span> <span class="n">ErrorType</span><span class="p">,</span> <span class="n">PropertyIdentifier</span><span class="p">,</span> <span class="n">DateTime</span><span class="p">,</span> <span class="n">TimeStamp</span><span class="p">,</span> <span class="n">AddressBinding</span>
+
+<span class="kn">from</span> <span class="nn">bacpypes.apdu</span> <span class="kn">import</span> <span class="n">ReadPropertyMultipleACK</span><span class="p">,</span> <span class="n">ReadPropertyACK</span>
+
+<span class="kn">from</span> <span class="nn">bacnet.debugging</span> <span class="kn">import</span> <span class="n">bacnet_debug</span><span class="p">,</span> <span class="n">ModuleLogger</span>
+
+<span class="kn">from</span> <span class="nn">bacnet.object</span> <span class="kn">import</span> <span class="n">get_datatype</span><span class="p">,</span> <span class="n">ObjectIdentifier</span>
+<span class="kn">from</span> <span class="nn">bacnet.object.primitivedata</span> <span class="kn">import</span> <span class="n">Unsigned</span>
+
+
+<span class="c"># enable logging</span>
+<span class="n">ModuleLogger</span><span class="p">()</span>
+
+
+<span class="k">def</span> <span class="nf">__date_to_str</span><span class="p">(</span><span class="n">val</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    convert Date to str</span>
+
+<span class="sd">    :param val: tuple</span>
+<span class="sd">    :return: date string</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">weekday</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Montag&#39;</span><span class="p">,</span> <span class="s">&#39;Dienstag&#39;</span><span class="p">,</span> <span class="s">&#39;Mittwoch&#39;</span><span class="p">,</span> <span class="s">&#39;Donnerstag&#39;</span><span class="p">,</span> <span class="s">&#39;Freitag&#39;</span><span class="p">,</span> <span class="s">&#39;Samstag&#39;</span><span class="p">,</span> <span class="s">&#39;Sonntag&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">, </span><span class="si">%02i</span><span class="s">.</span><span class="si">%02i</span><span class="s">.</span><span class="si">%4i</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">weekday</span><span class="p">[</span><span class="n">val</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">],</span> <span class="n">val</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">val</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">val</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1900</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">__time_to_str</span><span class="p">(</span><span class="n">val</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    convert Time to str</span>
+
+<span class="sd">    :param val: tuple</span>
+<span class="sd">    :return: time string</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="s">&#39;</span><span class="si">%02i</span><span class="s">:</span><span class="si">%02i</span><span class="s">:</span><span class="si">%02.2f</span><span class="s"> Uhr&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">val</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">val</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">val</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="nb">float</span><span class="p">(</span><span class="n">val</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span> <span class="o">/</span> <span class="mi">100</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">__datetime_to_str</span><span class="p">(</span><span class="n">val</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    convert DateTime to str</span>
+
+<span class="sd">    :param val: tuple</span>
+<span class="sd">    :return: (date string, time string)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">__date_to_str</span><span class="p">(</span><span class="n">val</span><span class="o">.</span><span class="n">date</span><span class="o">.</span><span class="n">value</span><span class="p">),</span> <span class="n">__time_to_str</span><span class="p">(</span><span class="n">val</span><span class="o">.</span><span class="n">time</span><span class="o">.</span><span class="n">value</span><span class="p">))</span>
+
+
+<span class="nd">@bacnet_debug</span>
+<span class="k">def</span> <span class="nf">__convert_value</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">obj_type</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">prop_id</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">datatype</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function converts value into a human readable value.</span>
+
+<span class="sd">    :param value: value</span>
+<span class="sd">    :return: human readable value</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="bp">self</span> <span class="o">=</span> <span class="n">__convert_value</span>
+
+    <span class="c"># check if data type was defined</span>
+    <span class="k">if</span> <span class="n">datatype</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">data_type</span> <span class="o">=</span> <span class="n">datatype</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c"># get data type</span>
+        <span class="n">data_type</span> <span class="o">=</span> <span class="n">get_datatype</span><span class="p">(</span><span class="n">obj_type</span><span class="p">,</span> <span class="n">prop_id</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">data_type</span><span class="p">,</span> <span class="n">Array</span><span class="p">):</span>
+        <span class="n">data_type</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">data_type</span><span class="p">,</span> <span class="s">&#39;subtype&#39;</span><span class="p">,</span> <span class="n">data_type</span><span class="p">)</span>
+
+    <span class="c"># check if value is error</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">ErrorType</span><span class="p">):</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="s">&#39;(error) </span><span class="si">%s</span><span class="s">: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">errorClass</span><span class="p">,</span> <span class="n">value</span><span class="o">.</span><span class="n">errorCode</span><span class="p">)</span>
+
+    <span class="c"># check if value is character string</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">CharacterString</span><span class="p">):</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">strValue</span>
+
+    <span class="c"># check if value is object identifier</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">ObjectIdentifier</span><span class="p">):</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">value</span>
+
+    <span class="c"># check if value is date time</span>
+    <span class="k">elif</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">data_type</span><span class="p">,</span> <span class="n">DateTime</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">data_type</span><span class="p">):</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">__datetime_to_str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+    <span class="c"># check if value is date</span>
+    <span class="k">elif</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">data_type</span><span class="p">,</span> <span class="n">Date</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">data_type</span><span class="p">):</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">value</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">basestring</span><span class="p">):</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">__date_to_str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+    <span class="c"># check if value is time</span>
+    <span class="k">elif</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">data_type</span><span class="p">,</span> <span class="n">Time</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">data_type</span><span class="p">):</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">value</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">basestring</span><span class="p">):</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">__time_to_str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+    <span class="c"># check if value is time stamp</span>
+    <span class="k">elif</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">data_type</span><span class="p">,</span> <span class="n">TimeStamp</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">TimeStamp</span><span class="p">):</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">__time_to_str</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">time</span><span class="o">.</span><span class="n">value</span><span class="p">),</span>
+                <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">sequenceNumber</span><span class="p">),</span>
+                <span class="n">__datetime_to_str</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">dateTime</span><span class="p">)</span>
+            <span class="p">)</span>
+
+    <span class="c"># check if value is boolean</span>
+    <span class="k">elif</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">data_type</span><span class="p">,</span> <span class="n">Boolean</span><span class="p">):</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+    <span class="c"># check if value is address binding</span>
+    <span class="k">elif</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">data_type</span><span class="p">,</span> <span class="n">AddressBinding</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">data_type</span><span class="p">):</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">value</span><span class="o">.</span><span class="n">deviceObjectIdentifier</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                <span class="p">(</span>
+                    <span class="n">value</span><span class="o">.</span><span class="n">deviceAddress</span><span class="o">.</span><span class="n">networkNumber</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                    <span class="n">value</span><span class="o">.</span><span class="n">deviceAddress</span><span class="o">.</span><span class="n">macAddress</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                <span class="p">),</span>
+            <span class="p">)</span>
+
+    <span class="c"># check if value is sequence of another class</span>
+    <span class="k">elif</span> <span class="n">data_type</span><span class="o">.</span><span class="n">__name__</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;SequenceOf&#39;</span><span class="p">):</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">__convert_value</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">datatype</span><span class="o">=</span><span class="n">data_type</span><span class="o">.</span><span class="n">subtype</span><span class="p">)</span> <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">value</span><span class="p">)</span>
+
+    <span class="c"># check if value is instance of its own data type</span>
+    <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">data_type</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">data_type</span> <span class="ow">in</span> <span class="p">(</span><span class="n">ObjectIdentifier</span><span class="p">,</span>
+                                                                <span class="n">PropertyIdentifier</span><span class="p">):</span>
+        <span class="c"># cast value</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">data_type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_error</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_error</span><span class="p">(</span><span class="n">data_type</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_error</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
+
+    <span class="c"># return converted value</span>
+    <span class="k">return</span> <span class="n">value</span>
+
+
+<span class="k">def</span> <span class="nf">__read_ack</span><span class="p">(</span><span class="n">apdu</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function parses read property (multiple) acknowledgements.</span>
+
+<span class="sd">    :param apdu: ReadPropertyMultipleACK or ReadPropertyACK</span>
+<span class="sd">    :returns: parsed data, output</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="c"># check if ack is read property</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">apdu</span><span class="p">,</span> <span class="n">ReadPropertyACK</span><span class="p">):</span>
+        <span class="c"># get object identifier</span>
+        <span class="n">obj_id</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">apdu</span><span class="o">.</span><span class="n">objectIdentifier</span><span class="p">,</span> <span class="s">&#39;value&#39;</span><span class="p">,</span> <span class="n">apdu</span><span class="o">.</span><span class="n">objectIdentifier</span><span class="p">)</span>
+
+        <span class="c"># check if array length was defined</span>
+        <span class="k">if</span> <span class="n">apdu</span><span class="o">.</span><span class="n">propertyArrayIndex</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c"># cast to unsigned integer</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">apdu</span><span class="o">.</span><span class="n">propertyValue</span><span class="o">.</span><span class="n">cast_out</span><span class="p">(</span><span class="n">Unsigned</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c"># cast to proper data type</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">apdu</span><span class="o">.</span><span class="n">propertyValue</span><span class="o">.</span><span class="n">cast_out</span><span class="p">(</span>
+                <span class="n">get_datatype</span><span class="p">(</span>
+                    <span class="n">obj_id</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                    <span class="n">apdu</span><span class="o">.</span><span class="n">propertyIdentifier</span><span class="p">,</span>
+                <span class="p">),</span>
+            <span class="p">)</span>
+
+        <span class="n">value</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s">&#39;value&#39;</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+        <span class="c"># set result dictionary for object and priority identifier</span>
+        <span class="n">result</span><span class="p">[</span><span class="n">obj_id</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">obj_id</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span> <span class="p">{</span>
+                <span class="n">apdu</span><span class="o">.</span><span class="n">propertyIdentifier</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="n">apdu</span><span class="o">.</span><span class="n">propertyArrayIndex</span><span class="p">:</span> <span class="n">value</span><span class="p">,</span>
+                <span class="p">}</span>
+            <span class="p">},</span>
+        <span class="p">}</span>
+
+    <span class="c"># check if ack is read property multiple</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">apdu</span><span class="p">,</span> <span class="n">ReadPropertyMultipleACK</span><span class="p">):</span>
+        <span class="c"># loop through objects</span>
+        <span class="k">for</span> <span class="n">obj_access</span> <span class="ow">in</span> <span class="n">apdu</span><span class="o">.</span><span class="n">listOfReadAccessResults</span><span class="p">:</span>
+            <span class="c"># initialize type and object dictionary</span>
+            <span class="n">type_dict</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">obj_access</span><span class="o">.</span><span class="n">objectIdentifier</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">{})</span>
+            <span class="n">obj_dict</span> <span class="o">=</span> <span class="n">type_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">obj_access</span><span class="o">.</span><span class="n">objectIdentifier</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="p">{})</span>
+
+            <span class="c"># loop through properties</span>
+            <span class="k">for</span> <span class="n">prop_access</span> <span class="ow">in</span> <span class="n">obj_access</span><span class="o">.</span><span class="n">listOfResults</span><span class="p">:</span>
+                <span class="c"># initialize property dictionary</span>
+                <span class="n">property_dict</span> <span class="o">=</span> <span class="n">obj_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">prop_access</span><span class="o">.</span><span class="n">propertyIdentifier</span><span class="p">,</span> <span class="p">{})</span>
+
+                <span class="c"># check if property had access error</span>
+                <span class="k">if</span> <span class="n">prop_access</span><span class="o">.</span><span class="n">readResult</span><span class="o">.</span><span class="n">propertyAccessError</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="n">value</span> <span class="o">=</span> <span class="n">prop_access</span><span class="o">.</span><span class="n">readResult</span><span class="o">.</span><span class="n">propertyAccessError</span>
+
+                <span class="c"># check if array length was defined</span>
+                <span class="k">elif</span> <span class="n">prop_access</span><span class="o">.</span><span class="n">propertyArrayIndex</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="c"># cast to unsigned integer</span>
+                    <span class="n">value</span> <span class="o">=</span> <span class="n">prop_access</span><span class="o">.</span><span class="n">readResult</span><span class="o">.</span><span class="n">propertyValue</span><span class="o">.</span><span class="n">cast_out</span><span class="p">(</span><span class="n">Unsigned</span><span class="p">)</span>
+
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c"># get data type</span>
+                    <span class="n">data_type</span> <span class="o">=</span> <span class="n">get_datatype</span><span class="p">(</span>
+                        <span class="n">obj_access</span><span class="o">.</span><span class="n">objectIdentifier</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                        <span class="n">prop_access</span><span class="o">.</span><span class="n">propertyIdentifier</span><span class="p">,</span>
+                    <span class="p">)</span>
+
+                    <span class="c"># check if data_type is array</span>
+                    <span class="k">if</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">data_type</span><span class="p">,</span> <span class="n">Array</span><span class="p">):</span>
+                        <span class="n">data_type</span> <span class="o">=</span> <span class="n">data_type</span><span class="o">.</span><span class="n">subtype</span>
+
+                    <span class="c"># cast to proper data type</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">value</span> <span class="o">=</span> <span class="n">prop_access</span><span class="o">.</span><span class="n">readResult</span><span class="o">.</span><span class="n">propertyValue</span><span class="o">.</span><span class="n">cast_out</span><span class="p">(</span>
+                            <span class="n">data_type</span><span class="p">,</span>
+                        <span class="p">)</span>
+
+                        <span class="k">if</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">data_type</span><span class="p">,</span> <span class="n">Date</span><span class="p">):</span>
+                            <span class="n">value</span> <span class="o">=</span> <span class="n">__date_to_str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+                        <span class="k">elif</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">data_type</span><span class="p">,</span> <span class="n">Time</span><span class="p">):</span>
+                            <span class="n">value</span> <span class="o">=</span> <span class="n">__time_to_str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+                    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                        <span class="n">value</span> <span class="o">=</span> <span class="bp">None</span>
+
+                <span class="c"># update property dictionary for property array index</span>
+                <span class="n">property_dict</span><span class="p">[</span><span class="n">prop_access</span><span class="o">.</span><span class="n">propertyArrayIndex</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+                <span class="c"># update object dictionary for property identifier</span>
+                <span class="n">obj_dict</span><span class="p">[</span><span class="n">prop_access</span><span class="o">.</span><span class="n">propertyIdentifier</span><span class="p">]</span> <span class="o">=</span> <span class="n">property_dict</span>
+
+            <span class="c"># update type dictionary for object identifier</span>
+            <span class="n">type_dict</span><span class="p">[</span><span class="n">obj_access</span><span class="o">.</span><span class="n">objectIdentifier</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="n">obj_dict</span>
+
+            <span class="c"># update result dictionary for type identifier</span>
+            <span class="n">result</span><span class="p">[</span><span class="n">obj_access</span><span class="o">.</span><span class="n">objectIdentifier</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="n">type_dict</span>
+
+    <span class="c"># unsupported ack type</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c"># create error message</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&#39;Unsupported ACK: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">apdu</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">)</span>
+
+
+    <span class="c"># initialize output</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="s">&#39;read response:&#39;</span>
+
+    <span class="c"># loop through object types</span>
+    <span class="k">for</span> <span class="n">obj_type</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">iterkeys</span><span class="p">():</span>
+        <span class="c"># loop through object instances</span>
+        <span class="k">for</span> <span class="n">obj_inst</span> <span class="ow">in</span> <span class="n">result</span><span class="p">[</span><span class="n">obj_type</span><span class="p">]</span><span class="o">.</span><span class="n">iterkeys</span><span class="p">():</span>
+            <span class="c"># loop through property identifiers</span>
+            <span class="k">for</span> <span class="n">prop_id</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">result</span><span class="p">[</span><span class="n">obj_type</span><span class="p">][</span><span class="n">obj_inst</span><span class="p">]</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+                <span class="c"># create prefix</span>
+                <span class="n">prefix</span> <span class="o">=</span> <span class="s">&#39;(</span><span class="si">%s</span><span class="s">, </span><span class="si">%s</span><span class="s">): </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">obj_type</span><span class="p">,</span> <span class="n">obj_inst</span><span class="p">,</span> <span class="n">prop_id</span><span class="p">)</span>
+
+                <span class="c"># check if property is array</span>
+                <span class="k">if</span> <span class="bp">None</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>
+                    <span class="c"># check if value must be converted</span>
+                    <span class="n">index_value</span> <span class="o">=</span> <span class="n">__convert_value</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="bp">None</span><span class="p">],</span> <span class="n">obj_type</span><span class="p">,</span> <span class="n">prop_id</span><span class="p">)</span>
+
+                    <span class="c"># add values to output</span>
+                    <span class="n">output</span> <span class="o">+=</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">    </span><span class="si">%s</span><span class="s"> = </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">prefix</span><span class="p">,</span> <span class="n">index_value</span><span class="p">)</span>
+
+                <span class="k">else</span><span class="p">:</span>
+
+                    <span class="c"># loop through property array index</span>
+                    <span class="k">for</span> <span class="n">prop_index</span><span class="p">,</span> <span class="n">index_value</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+                        <span class="c"># check if value must be converted</span>
+                        <span class="n">index_value</span> <span class="o">=</span> <span class="n">__convert_value</span><span class="p">(</span><span class="n">index_value</span><span class="p">,</span> <span class="n">obj_type</span><span class="p">,</span> <span class="n">prop_id</span><span class="p">)</span>
+
+                        <span class="c"># add values to output</span>
+                        <span class="n">output</span> <span class="o">+=</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">    </span><span class="si">%s</span><span class="s"> [</span><span class="si">%s</span><span class="s">] = </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">prefix</span><span class="p">,</span> <span class="n">prop_index</span><span class="p">,</span> <span class="n">index_value</span><span class="p">)</span>
+
+    <span class="c"># return parsed data, output</span>
+    <span class="k">return</span> <span class="n">result</span><span class="p">,</span> <span class="n">output</span>
+
+
+<div class="viewcode-block" id="read_property_ack"><a class="viewcode-back" href="../../../../bacnet.console.parser.html#bacnet.console.parser.simple.read_property_ack">[docs]</a><span class="k">def</span> <span class="nf">read_property_ack</span><span class="p">(</span><span class="n">apdu</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function parses read property acknowledgements.</span>
+
+<span class="sd">    :param apdu: ReadPropertyACK</span>
+<span class="sd">    :returns: parsed data, output</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># get parsed data</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">__read_ack</span><span class="p">(</span><span class="n">apdu</span><span class="p">)</span>
+
+    <span class="c"># return parsed data, output</span>
+    <span class="k">return</span> <span class="n">result</span>
+
+</div>
+<div class="viewcode-block" id="read_property_multiple_ack"><a class="viewcode-back" href="../../../../bacnet.console.parser.html#bacnet.console.parser.simple.read_property_multiple_ack">[docs]</a><span class="k">def</span> <span class="nf">read_property_multiple_ack</span><span class="p">(</span><span class="n">apdu</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function parses read property multiple acknowledgements.</span>
+
+<span class="sd">    :param apdu: ReadPropertyMultipleACK</span>
+<span class="sd">    :returns: parsed data, output</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># get parsed data</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">__read_ack</span><span class="p">(</span><span class="n">apdu</span><span class="p">)</span>
+
+    <span class="c"># return parsed data, output</span>
+    <span class="k">return</span> <span class="n">result</span>
+
+</div>
+<div class="viewcode-block" id="whois_request"><a class="viewcode-back" href="../../../../bacnet.console.parser.html#bacnet.console.parser.simple.whois_request">[docs]</a><span class="k">def</span> <span class="nf">whois_request</span><span class="p">(</span><span class="n">apdu</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function parses who is requests.</span>
+
+<span class="sd">    :param apdu: WhoIsRequest</span>
+<span class="sd">    :returns: parsed data, output</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># initialize result</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s">&#39;limits&#39;</span><span class="p">:</span> <span class="p">(),</span>
+    <span class="p">}</span>
+
+    <span class="c"># check if limits were defined</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">apdu</span><span class="p">,</span> <span class="s">&#39;deviceInstanceRangeLowLimit&#39;</span><span class="p">)</span> <span class="ow">and</span> \
+            <span class="n">apdu</span><span class="o">.</span><span class="n">deviceInstanceRangeLowLimit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> \
+            <span class="n">apdu</span><span class="o">.</span><span class="n">deviceInstanceRangeHighLimit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="c"># set limits</span>
+        <span class="n">result</span><span class="p">[</span><span class="s">&#39;limits&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">apdu</span><span class="o">.</span><span class="n">deviceInstanceRangeLowLimit</span><span class="p">,</span> <span class="n">apdu</span><span class="o">.</span><span class="n">deviceInstanceRangeHighLimit</span><span class="p">)</span>
+
+    <span class="c"># initialize output</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="s">&#39;who is around?&#39;</span>
+
+    <span class="c"># check if limits were defined</span>
+    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="s">&#39;limits&#39;</span><span class="p">]):</span>
+        <span class="c"># add values to output</span>
+        <span class="n">output</span> <span class="o">+=</span> <span class="s">&#39; (range: </span><span class="si">%i</span><span class="s"> - </span><span class="si">%i</span><span class="s">)&#39;</span> <span class="o">%</span> <span class="n">result</span><span class="p">[</span><span class="s">&#39;limits&#39;</span><span class="p">]</span>
+
+    <span class="c"># return parsed data, output</span>
+    <span class="k">return</span> <span class="n">result</span><span class="p">,</span> <span class="n">output</span>
+
+</div>
+<div class="viewcode-block" id="iam_request"><a class="viewcode-back" href="../../../../bacnet.console.parser.html#bacnet.console.parser.simple.iam_request">[docs]</a><span class="k">def</span> <span class="nf">iam_request</span><span class="p">(</span><span class="n">apdu</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function parses i am requests.</span>
+
+<span class="sd">    :param apdu: IAmRequest</span>
+<span class="sd">    :returns: parsed data, output</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># read device identifier</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s">&#39;id&#39;</span><span class="p">:</span> <span class="n">apdu</span><span class="o">.</span><span class="n">iAmDeviceIdentifier</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="c"># initialize output</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="s">&#39;i am &quot;</span><span class="si">%s</span><span class="s"> </span><span class="si">%i</span><span class="s">&quot;!&#39;</span> <span class="o">%</span> <span class="n">result</span><span class="p">[</span><span class="s">&#39;id&#39;</span><span class="p">]</span>
+
+    <span class="c"># return parsed data, output</span>
+    <span class="k">return</span> <span class="n">result</span><span class="p">,</span> <span class="n">output</span>
+
+</div>
+<div class="viewcode-block" id="whohas_request"><a class="viewcode-back" href="../../../../bacnet.console.parser.html#bacnet.console.parser.simple.whohas_request">[docs]</a><span class="k">def</span> <span class="nf">whohas_request</span><span class="p">(</span><span class="n">apdu</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function parses who has requests.</span>
+
+<span class="sd">    :param apdu: WhoHasRequest</span>
+<span class="sd">    :returns: parsed data, output</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># initialize result</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s">&#39;limits&#39;</span><span class="p">:</span> <span class="p">(),</span>
+        <span class="s">&#39;has&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="c"># check if limits were defined</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">apdu</span><span class="p">,</span> <span class="s">&#39;deviceInstanceRangeLowLimit&#39;</span><span class="p">)</span> <span class="ow">and</span> \
+            <span class="n">apdu</span><span class="o">.</span><span class="n">deviceInstanceRangeLowLimit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> \
+            <span class="n">apdu</span><span class="o">.</span><span class="n">deviceInstanceRangeHighLimit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="c"># set limits</span>
+        <span class="n">result</span><span class="p">[</span><span class="s">&#39;limits&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">apdu</span><span class="o">.</span><span class="n">deviceInstanceRangeLowLimit</span><span class="p">,</span> <span class="n">apdu</span><span class="o">.</span><span class="n">deviceInstanceRangeHighLimit</span><span class="p">)</span>
+
+    <span class="c"># check if object identifier was supplied</span>
+    <span class="k">if</span> <span class="n">apdu</span><span class="o">.</span><span class="n">object</span><span class="o">.</span><span class="n">objectIdentifier</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="c"># set has object properties</span>
+        <span class="n">result</span><span class="p">[</span><span class="s">&#39;has&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;identifier&#39;</span>
+        <span class="n">result</span><span class="p">[</span><span class="s">&#39;identifier&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">apdu</span><span class="o">.</span><span class="n">object</span><span class="o">.</span><span class="n">objectIdentifier</span>
+
+    <span class="c"># check if object name was supplied</span>
+    <span class="k">elif</span> <span class="n">apdu</span><span class="o">.</span><span class="n">object</span><span class="o">.</span><span class="n">objectName</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="c"># set has object properties</span>
+        <span class="n">result</span><span class="p">[</span><span class="s">&#39;has&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;name&#39;</span>
+        <span class="n">result</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">apdu</span><span class="o">.</span><span class="n">object</span><span class="o">.</span><span class="n">objectName</span>
+
+
+    <span class="c"># check if who has requested property was defined</span>
+    <span class="k">if</span> <span class="n">result</span><span class="p">[</span><span class="s">&#39;has&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="c"># initialize output</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="s">&#39;who has ... malformed&#39;</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c"># initialize output</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="s">&#39;who has object </span><span class="si">%s</span><span class="s"> &quot;</span><span class="si">%s</span><span class="s">&quot;?&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="s">&#39;has&#39;</span><span class="p">],</span> <span class="n">result</span><span class="p">[</span><span class="n">result</span><span class="p">[</span><span class="s">&#39;has&#39;</span><span class="p">]])</span>
+
+        <span class="c"># check if limits were defined</span>
+        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="s">&#39;limits&#39;</span><span class="p">]):</span>
+            <span class="c"># add values to output</span>
+            <span class="n">output</span> <span class="o">+=</span> <span class="s">&#39; (range: </span><span class="si">%i</span><span class="s"> - </span><span class="si">%i</span><span class="s">)&#39;</span> <span class="o">%</span> <span class="n">result</span><span class="p">[</span><span class="s">&#39;limits&#39;</span><span class="p">]</span>
+
+    <span class="c"># return parsed data, output</span>
+    <span class="k">return</span> <span class="n">result</span><span class="p">,</span> <span class="n">output</span>
+
+</div>
+<div class="viewcode-block" id="ihave_request"><a class="viewcode-back" href="../../../../bacnet.console.parser.html#bacnet.console.parser.simple.ihave_request">[docs]</a><span class="k">def</span> <span class="nf">ihave_request</span><span class="p">(</span><span class="n">apdu</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function parses i have requests.</span>
+
+<span class="sd">    :param apdu: IHaveRequest</span>
+<span class="sd">    :returns: parsed data, output</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># read object identifier and name</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s">&#39;device&#39;</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">apdu</span><span class="o">.</span><span class="n">deviceIdentifier</span><span class="p">,</span> <span class="s">&#39;value&#39;</span><span class="p">,</span> <span class="n">apdu</span><span class="o">.</span><span class="n">deviceIdentifier</span><span class="p">),</span>
+        <span class="s">&#39;id&#39;</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">apdu</span><span class="o">.</span><span class="n">objectIdentifier</span><span class="p">,</span> <span class="s">&#39;value&#39;</span><span class="p">,</span> <span class="n">apdu</span><span class="o">.</span><span class="n">deviceIdentifier</span><span class="p">),</span>
+        <span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">apdu</span><span class="o">.</span><span class="n">objectName</span><span class="p">,</span> <span class="s">&#39;value&#39;</span><span class="p">,</span> <span class="n">apdu</span><span class="o">.</span><span class="n">objectName</span><span class="p">),</span>
+    <span class="p">}</span>
+
+    <span class="c"># initialize output</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="s">&#39;i have &quot;</span><span class="si">%s</span><span class="s">&quot; as </span><span class="si">%s</span><span class="s">!&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">],</span> <span class="n">result</span><span class="p">[</span><span class="s">&#39;id&#39;</span><span class="p">])</span>
+
+    <span class="c"># return parsed data, output</span>
+    <span class="k">return</span> <span class="n">result</span><span class="p">,</span> <span class="n">output</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Tobias Grosch.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.3</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

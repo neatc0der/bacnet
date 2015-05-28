@@ -1,0 +1,30 @@
+bacnet.webgui.webgui.settings package
+=====================================
+
+Submodules
+----------
+
+bacnet.webgui.webgui.settings.apps module
+-----------------------------------------
+
+.. automodule:: bacnet.webgui.webgui.settings.apps
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+bacnet.webgui.webgui.settings.private module
+--------------------------------------------
+
+.. automodule:: bacnet.webgui.webgui.settings.private
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: bacnet.webgui.webgui.settings
+    :members:
+    :undoc-members:
+    :show-inheritance:

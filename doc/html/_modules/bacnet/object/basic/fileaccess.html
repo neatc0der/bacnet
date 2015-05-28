@@ -1,0 +1,432 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>bacnet.object.basic.fileaccess &mdash; Masterarbeit Grosch 0.4c0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.4c0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="Masterarbeit Grosch 0.4c0 documentation" href="../../../../index.html" />
+    <link rel="up" title="bacnet.object" href="../../object.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">Masterarbeit Grosch 0.4c0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="../../object.html" accesskey="U">bacnet.object</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for bacnet.object.basic.fileaccess</h1><div class="highlight"><pre>
+<span class="c"># pylint: disable=invalid-name, unused-variable, no-name-in-module</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">File Access Object Module</span>
+<span class="sd">-------------------------</span>
+
+<span class="sd">This module contains File Access Objects.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+
+<span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="kn">import</span> <span class="n">Lock</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">from</span> <span class="nn">.general</span> <span class="kn">import</span> <span class="n">register_object_type</span><span class="p">,</span> <span class="n">FileObject</span>
+
+<span class="kn">from</span> <span class="nn">bacnet.debugging</span> <span class="kn">import</span> <span class="n">bacnet_debug</span><span class="p">,</span> <span class="n">ModuleLogger</span>
+
+<span class="kn">from</span> <span class="nn">bacnet.settings</span> <span class="kn">import</span> <span class="n">DATA_PATH</span>
+
+
+<span class="c"># enable logging</span>
+<span class="n">ModuleLogger</span><span class="p">()</span>
+
+
+<span class="nd">@bacnet_debug</span>
+<span class="nd">@register_object_type</span>
+<div class="viewcode-block" id="RecordAccessFileObject"><a class="viewcode-back" href="../../../../bacnet.object.basic.html#bacnet.object.basic.fileaccess.RecordAccessFileObject">[docs]</a><span class="k">class</span> <span class="nc">RecordAccessFileObject</span><span class="p">(</span><span class="n">FileObject</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class provides read/write access to file records.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function initializes the instance.</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;__init__ </span><span class="si">%r</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="c"># call predecessor</span>
+        <span class="n">FileObject</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fileAccessMethod</span><span class="o">=</span><span class="s">&#39;recordAccess&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="c"># fill record with example data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_record_data</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">def</span> <span class="nf">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function provides builtin length request.</span>
+
+<span class="sd">        :return: length of record</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;__len__&#39;</span><span class="p">)</span>
+
+        <span class="c"># return length</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record_data</span><span class="p">)</span>
+
+<div class="viewcode-block" id="RecordAccessFileObject.ReadFile"><a class="viewcode-back" href="../../../../bacnet.object.basic.html#bacnet.object.basic.fileaccess.RecordAccessFileObject.ReadFile">[docs]</a>    <span class="k">def</span> <span class="nf">ReadFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">count</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function provides read access.</span>
+
+<span class="sd">        :param start: start record</span>
+<span class="sd">        :param count: record count</span>
+<span class="sd">        :return: record data</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;ReadFile </span><span class="si">%r</span><span class="s"> </span><span class="si">%r</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">count</span><span class="p">)</span>
+
+        <span class="c"># check for end of file</span>
+        <span class="n">eof</span> <span class="o">=</span> <span class="n">start</span> <span class="o">+</span> <span class="n">count</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record_data</span><span class="p">)</span>
+
+        <span class="c"># return end of file and record data</span>
+        <span class="k">return</span> <span class="n">eof</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_record_data</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">start</span> <span class="o">+</span> <span class="n">count</span><span class="p">]</span>
+</div>
+<div class="viewcode-block" id="RecordAccessFileObject.WriteFile"><a class="viewcode-back" href="../../../../bacnet.object.basic.html#bacnet.object.basic.fileaccess.RecordAccessFileObject.WriteFile">[docs]</a>    <span class="k">def</span> <span class="nf">WriteFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">count</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function provides write access.</span>
+
+<span class="sd">        :param start: start record</span>
+<span class="sd">        :param count: record count</span>
+<span class="sd">        :param data: record data</span>
+<span class="sd">        :return: start record</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;WriteFile </span><span class="si">%r</span><span class="s"> </span><span class="si">%r</span><span class="s"> </span><span class="si">%r</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">count</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+
+        <span class="c"># check if start record describes appending</span>
+        <span class="k">if</span> <span class="n">start</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c"># set start to end of current record data</span>
+            <span class="n">start</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record_data</span><span class="p">)</span>
+
+            <span class="c"># append new record data</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_record_data</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+        <span class="c"># check if start describes additional extending</span>
+        <span class="k">elif</span> <span class="n">start</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record_data</span><span class="p">):</span>
+            <span class="c"># extend record data with empty data</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_record_data</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="s">&#39;&#39;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">start</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record_data</span><span class="p">))])</span>
+
+            <span class="c"># set start to end of extended record data</span>
+            <span class="n">start</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record_data</span><span class="p">)</span>
+
+            <span class="c"># append new record data</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_record_data</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+        <span class="c"># start describes slicing of current record data</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c"># check if new data overlaps</span>
+            <span class="k">if</span> <span class="n">start</span> <span class="o">+</span> <span class="n">count</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record_data</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_record_data</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+                    <span class="p">[</span><span class="s">&#39;&#39;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">start</span> <span class="o">+</span> <span class="n">count</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_record_data</span><span class="p">))]</span>
+                <span class="p">)</span>
+
+            <span class="c"># write new record data into current record data</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_record_data</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">start</span><span class="o">+</span><span class="n">count</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span>
+
+        <span class="c"># return new start record</span>
+        <span class="k">return</span> <span class="n">start</span>
+
+</div></div>
+<span class="nd">@bacnet_debug</span>
+<span class="nd">@register_object_type</span>
+<div class="viewcode-block" id="StreamAccessFileObject"><a class="viewcode-back" href="../../../../bacnet.object.basic.html#bacnet.object.basic.fileaccess.StreamAccessFileObject">[docs]</a><span class="k">class</span> <span class="nc">StreamAccessFileObject</span><span class="p">(</span><span class="n">FileObject</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class provides read/write access to file streams.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function initializes the instance.</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;__init__ </span><span class="si">%r</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="c"># call predecessor</span>
+        <span class="n">FileObject</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fileAccessMethod</span><span class="o">=</span><span class="s">&#39;streamAccess&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="n">file_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ReadProperty</span><span class="p">(</span><span class="s">&#39;objectName&#39;</span><span class="p">)</span>
+        <span class="n">file_name</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="s">&#39;value&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">file_name</span><span class="p">))</span>
+
+        <span class="n">file_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ReadProperty</span><span class="p">(</span><span class="s">&#39;fileType&#39;</span><span class="p">)</span>
+        <span class="n">file_type</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">file_type</span><span class="p">,</span> <span class="s">&#39;value&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">file_type</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">file_type</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s">&#39;text/x-python&#39;</span><span class="p">:</span>
+            <span class="n">file_name</span> <span class="o">+=</span> <span class="s">&#39;.py&#39;</span>
+
+        <span class="c"># set file name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">DATA_PATH</span><span class="p">,</span> <span class="n">file_name</span><span class="p">)</span>
+
+        <span class="c"># check if file exists</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_file_name</span><span class="p">):</span>
+            <span class="c"># touch file</span>
+            <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_file_name</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+        <span class="c"># unlock file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_file_lock</span> <span class="o">=</span> <span class="n">Lock</span><span class="p">()</span>
+
+<div class="viewcode-block" id="StreamAccessFileObject.get_filename"><a class="viewcode-back" href="../../../../bacnet.object.basic.html#bacnet.object.basic.fileaccess.StreamAccessFileObject.get_filename">[docs]</a>    <span class="k">def</span> <span class="nf">get_filename</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function returns the absolute path and file name.</span>
+
+<span class="sd">        :return: file name</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># return file name</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_file_name</span>
+</div>
+<div class="viewcode-block" id="StreamAccessFileObject.lock_file"><a class="viewcode-back" href="../../../../bacnet.object.basic.html#bacnet.object.basic.fileaccess.StreamAccessFileObject.lock_file">[docs]</a>    <span class="k">def</span> <span class="nf">lock_file</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function locks the file.</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># lock file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_file_lock</span><span class="o">.</span><span class="n">acquire</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="StreamAccessFileObject.unlock_file"><a class="viewcode-back" href="../../../../bacnet.object.basic.html#bacnet.object.basic.fileaccess.StreamAccessFileObject.unlock_file">[docs]</a>    <span class="k">def</span> <span class="nf">unlock_file</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function unlocks the file.</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># unlock file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_file_lock</span><span class="o">.</span><span class="n">release</span><span class="p">()</span>
+</div>
+    <span class="k">def</span> <span class="nf">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function provides builtin length request.</span>
+
+<span class="sd">        :return: length of stream</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;__len__&#39;</span><span class="p">)</span>
+
+        <span class="c"># return length</span>
+        <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getsize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_file_name</span><span class="p">)</span>
+
+<div class="viewcode-block" id="StreamAccessFileObject.ReadFile"><a class="viewcode-back" href="../../../../bacnet.object.basic.html#bacnet.object.basic.fileaccess.StreamAccessFileObject.ReadFile">[docs]</a>    <span class="k">def</span> <span class="nf">ReadFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">count</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function provides read access.</span>
+
+<span class="sd">        :param start: start position</span>
+<span class="sd">        :param count: letter count</span>
+<span class="sd">        :return: record data</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;ReadFile </span><span class="si">%r</span><span class="s"> </span><span class="si">%r</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">count</span><span class="p">)</span>
+
+        <span class="c"># check for end of file</span>
+        <span class="n">eof</span> <span class="o">=</span> <span class="n">start</span> <span class="o">+</span> <span class="n">count</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="c"># lock file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lock_file</span><span class="p">()</span>
+
+        <span class="c"># open file</span>
+        <span class="n">file_pointer</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_file_name</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">)</span>
+
+        <span class="c"># set start position</span>
+        <span class="n">file_pointer</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">start</span><span class="p">)</span>
+
+        <span class="c"># check count</span>
+        <span class="k">if</span> <span class="n">count</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">eof</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="c"># read characters</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">file_pointer</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+
+        <span class="k">elif</span> <span class="n">count</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">start</span> <span class="o">+</span> <span class="n">count</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="c"># read characters</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="n">file_pointer</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">+</span> <span class="n">count</span><span class="p">)</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c"># unable to read characters</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c"># read characters</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">file_pointer</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">count</span><span class="p">)</span>
+
+        <span class="c"># close file</span>
+        <span class="n">file_pointer</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+        <span class="c"># unlock file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">unlock_file</span><span class="p">()</span>
+
+        <span class="c"># return end of file and stream data</span>
+        <span class="k">return</span> <span class="n">eof</span><span class="p">,</span> <span class="n">result</span>
+</div>
+<div class="viewcode-block" id="StreamAccessFileObject.WriteFile"><a class="viewcode-back" href="../../../../bacnet.object.basic.html#bacnet.object.basic.fileaccess.StreamAccessFileObject.WriteFile">[docs]</a>    <span class="k">def</span> <span class="nf">WriteFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="c"># pylint: disable=bad-open-mode</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function provides write access.</span>
+
+<span class="sd">        :param start: start position</span>
+<span class="sd">        :param data: data</span>
+<span class="sd">        :return: start position</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;WriteFile </span><span class="si">%r</span><span class="s"> </span><span class="si">%r</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+
+        <span class="c"># lock file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lock_file</span><span class="p">()</span>
+
+        <span class="c"># check if start position describes appending</span>
+        <span class="k">if</span> <span class="n">start</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c"># set start to end of current stream data</span>
+            <span class="n">start</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+            <span class="c"># lock file</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lock_file</span><span class="p">()</span>
+
+            <span class="c"># open file</span>
+            <span class="n">file_pointer</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_file_name</span><span class="p">,</span> <span class="s">&#39;a&#39;</span><span class="p">)</span>
+
+            <span class="c"># write data</span>
+            <span class="n">file_pointer</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+            <span class="c"># close file</span>
+            <span class="n">file_pointer</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+        <span class="c"># check if start describes additional extending</span>
+        <span class="k">elif</span> <span class="n">start</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="c"># open file</span>
+            <span class="n">file_pointer</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_file_name</span><span class="p">,</span> <span class="s">&#39;a&#39;</span><span class="p">)</span>
+
+            <span class="c"># write empty data</span>
+            <span class="n">file_pointer</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\0</span><span class="s">&#39;</span> <span class="o">*</span> <span class="p">(</span><span class="n">start</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)))</span>
+
+            <span class="c"># write data</span>
+            <span class="n">file_pointer</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+            <span class="c"># close file</span>
+            <span class="n">file_pointer</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+        <span class="c"># start describes overriding of current stream data</span>
+        <span class="k">elif</span> <span class="n">start</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c"># open file</span>
+            <span class="n">file_pointer</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_file_name</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+
+            <span class="c"># write data</span>
+            <span class="n">file_pointer</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+            <span class="c"># close file</span>
+            <span class="n">file_pointer</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+        <span class="c"># start describes slicing of current stream data</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c"># open file</span>
+            <span class="n">file_pointer</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_file_name</span><span class="p">,</span> <span class="s">&#39;r+w&#39;</span><span class="p">)</span>
+
+            <span class="c"># set start position</span>
+            <span class="n">file_pointer</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">start</span><span class="p">)</span>
+
+            <span class="c"># read last chunk</span>
+            <span class="n">chunk</span> <span class="o">=</span> <span class="n">file_pointer</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+
+            <span class="c"># set start position again</span>
+            <span class="n">file_pointer</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">start</span><span class="p">)</span>
+
+            <span class="c"># write data</span>
+            <span class="n">file_pointer</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+            <span class="c"># write last chunk</span>
+            <span class="n">file_pointer</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span>
+
+            <span class="c"># close file</span>
+            <span class="n">file_pointer</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+        <span class="c"># unlock file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">unlock_file</span><span class="p">()</span>
+
+        <span class="c"># return new start record</span>
+        <span class="k">return</span> <span class="n">start</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Tobias Grosch.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.3</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

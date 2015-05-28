@@ -1,0 +1,1026 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>bacnet.app.handler &mdash; Masterarbeit Grosch 0.4c0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.4c0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="Masterarbeit Grosch 0.4c0 documentation" href="../../../index.html" />
+    <link rel="up" title="bacnet.app" href="../app.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Masterarbeit Grosch 0.4c0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="../app.html" accesskey="U">bacnet.app</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for bacnet.app.handler</h1><div class="highlight"><pre>
+<span class="c"># pylint: disable=invalid-name, star-args, too-many-locals, too-many-lines, broad-except</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Application Handler Module</span>
+<span class="sd">--------------------------</span>
+
+<span class="sd">This module provides handler for communication callbacks.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+
+<span class="kn">from</span> <span class="nn">threading</span> <span class="kn">import</span> <span class="n">Event</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+<span class="kn">from</span> <span class="nn">bacpypes.errors</span> <span class="kn">import</span> <span class="n">ExecutionError</span>
+
+<span class="kn">from</span> <span class="nn">bacpypes.basetypes</span> <span class="kn">import</span> <span class="n">DeviceAddress</span><span class="p">,</span> <span class="n">Recipient</span><span class="p">,</span> <span class="n">RecipientProcess</span>
+
+<span class="kn">from</span> <span class="nn">bacpypes.app</span> <span class="kn">import</span> <span class="n">Application</span> <span class="k">as</span> <span class="n">BACpypesApplication</span>
+
+<span class="kn">from</span> <span class="nn">bacpypes.pdu</span> <span class="kn">import</span> <span class="n">Address</span>
+<span class="kn">from</span> <span class="nn">bacpypes.apdu</span> <span class="kn">import</span> <span class="n">ConfirmedCOVNotificationRequest</span><span class="p">,</span> <span class="n">UnconfirmedCOVNotificationRequest</span><span class="p">,</span> \
+    <span class="n">WhoIsRequest</span><span class="p">,</span> <span class="n">RejectReason</span><span class="p">,</span> <span class="n">ConfirmedRequestPDU</span><span class="p">,</span> <span class="n">Error</span><span class="p">,</span> <span class="n">RejectPDU</span>
+
+<span class="kn">from</span> <span class="nn">bacnet.debugging</span> <span class="kn">import</span> <span class="n">bacnet_debug</span><span class="p">,</span> <span class="n">ModuleLogger</span>
+
+<span class="kn">from</span> <span class="nn">bacnet.app.handler.simple</span> <span class="kn">import</span> <span class="n">property_to_result</span>
+
+<span class="kn">from</span> <span class="nn">bacnet.console.parser</span> <span class="kn">import</span> <span class="n">response_parser</span>
+
+<span class="kn">from</span> <span class="nn">bacnet.object.primitivedata</span> <span class="kn">import</span> <span class="n">COVSubscription</span><span class="p">,</span> <span class="n">ObjectPropertyReference</span><span class="p">,</span> <span class="n">Remaining</span>
+
+<span class="kn">from</span> <span class="nn">.simple</span> <span class="kn">import</span> <span class="n">do_IAmRequest</span><span class="p">,</span> <span class="n">do_WhoIsRequest</span><span class="p">,</span> <span class="n">do_IHaveRequest</span><span class="p">,</span> <span class="n">do_WhoHasRequest</span><span class="p">,</span> \
+    <span class="n">do_ReadPropertyMultipleRequest</span><span class="p">,</span> <span class="n">do_WritePropertyMultipleRequest</span><span class="p">,</span> <span class="n">do_ReadPropertyRequest</span><span class="p">,</span> \
+    <span class="n">do_WritePropertyRequest</span>
+<span class="kn">from</span> <span class="nn">.fileaccess</span> <span class="kn">import</span> <span class="n">do_AtomicReadFileRequest</span><span class="p">,</span> <span class="n">do_AtomicWriteFileRequest</span>
+<span class="kn">from</span> <span class="nn">.objects</span> <span class="kn">import</span> <span class="n">do_CreateObjectRequest</span><span class="p">,</span> <span class="n">do_DeleteObjectRequest</span>
+<span class="kn">from</span> <span class="nn">.events</span> <span class="kn">import</span> <span class="n">do_ConfirmedCOVNotificationRequest</span><span class="p">,</span> <span class="n">do_UnconfirmedCOVNotificationRequest</span><span class="p">,</span> \
+    <span class="n">do_SubscribeCOVRequest</span><span class="p">,</span> <span class="n">do_SubscribeCOVPropertyRequest</span>
+<span class="kn">from</span> <span class="nn">.error</span> <span class="kn">import</span> <span class="n">do_AbortPDU</span><span class="p">,</span> <span class="n">do_RejectPDU</span><span class="p">,</span> <span class="n">do_Error</span>
+
+
+<span class="c"># enable logging</span>
+<span class="n">ModuleLogger</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="restart_on_failure"><a class="viewcode-back" href="../../../bacnet.app.handler.html#bacnet.app.basic.restart_on_failure">[docs]</a><span class="k">def</span> <span class="nf">restart_on_failure</span><span class="p">(</span><span class="n">func</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">retries</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">fail_time</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="c"># pylint: disable=unused-argument</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function is a decorator for thread functions to restart after failure</span>
+<span class="sd">    :param func: function reference</span>
+<span class="sd">    :param retries: restart count within fail time</span>
+<span class="sd">    :param fail_time: time between failures to count retries</span>
+<span class="sd">    :return: updated function</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function is a decorator wrapper.</span>
+
+<span class="sd">        :param obj: function</span>
+<span class="sd">        :return: updated function</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">def</span> <span class="nf">inner</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            This function is the actual wrapper of the function call.</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+
+            <span class="c"># initialize counter</span>
+            <span class="n">tries</span> <span class="o">=</span> <span class="mi">0</span>
+
+            <span class="c"># restart until limit is reached</span>
+            <span class="k">while</span> <span class="n">tries</span> <span class="o">&lt;=</span> <span class="n">retries</span><span class="p">:</span>
+                <span class="c"># get current time</span>
+                <span class="n">last_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+                <span class="c"># start function</span>
+                <span class="n">finished</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+                <span class="c"># check if function finished</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">finished</span> <span class="ow">in</span> <span class="p">(</span><span class="bp">False</span><span class="p">,</span> <span class="bp">None</span><span class="p">):</span>
+                    <span class="k">return</span> <span class="n">finished</span>
+
+                <span class="c"># check if time in between was below the limit to count</span>
+                <span class="k">if</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">last_time</span> <span class="ow">or</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">last_time</span> <span class="o">&lt;</span> <span class="n">fail_time</span><span class="p">:</span>
+                    <span class="c"># count try</span>
+                    <span class="n">tries</span> <span class="o">+=</span> <span class="mi">1</span>
+
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c"># reset tries to 1</span>
+                    <span class="n">tries</span> <span class="o">=</span> <span class="mi">1</span>
+
+            <span class="k">return</span> <span class="bp">False</span>
+
+        <span class="c"># return function</span>
+        <span class="k">return</span> <span class="n">inner</span>
+
+    <span class="c"># return wrapper</span>
+    <span class="k">if</span> <span class="n">func</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">wrapper</span>
+
+    <span class="k">return</span> <span class="n">wrapper</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="lock_subscriptions"><a class="viewcode-back" href="../../../bacnet.app.handler.html#bacnet.app.basic.lock_subscriptions">[docs]</a><span class="k">def</span> <span class="nf">lock_subscriptions</span><span class="p">(</span><span class="n">func</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">block</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">retries</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">sleep</span><span class="o">=</span><span class="mf">0.05</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function is a decorator for functions to lock subscriptions during execution.</span>
+
+<span class="sd">    :param func: function reference</span>
+<span class="sd">    :param block: wait until lock is acquired</span>
+<span class="sd">    :param retries: retry count if not block</span>
+<span class="sd">    :param sleep: sleep time in secs if not block</span>
+<span class="sd">    :return: updated function</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function is a decorator wrapper.</span>
+
+<span class="sd">        :param obj: function</span>
+<span class="sd">        :return: updated function</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">def</span> <span class="nf">inner</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            This function is the actual wrapper of the function call.</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+
+            <span class="n">tries</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">if</span> <span class="s">&#39;tries&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+                <span class="k">del</span> <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;tries&#39;</span><span class="p">]</span>
+
+            <span class="c"># check if too many retries</span>
+            <span class="k">if</span> <span class="n">tries</span> <span class="o">&gt;</span> <span class="n">retries</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">None</span>
+
+            <span class="c"># get active cov subscription property</span>
+            <span class="n">active_cov_subscriptions_property</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">localDevice</span><span class="o">.</span><span class="n">get_property</span><span class="p">(</span>
+                <span class="s">&#39;activeCovSubscriptions&#39;</span>
+            <span class="p">)</span>
+
+            <span class="c"># acquire lock</span>
+            <span class="k">if</span> <span class="n">active_cov_subscriptions_property</span><span class="o">.</span><span class="n">lock</span><span class="o">.</span><span class="n">acquire</span><span class="p">(</span><span class="n">block</span><span class="p">):</span>
+
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="c"># get active subscriptions</span>
+                    <span class="n">active_subscriptions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">localDevice</span><span class="o">.</span><span class="n">ReadProperty</span><span class="p">(</span>
+                        <span class="s">&#39;activeCovSubscriptions&#39;</span><span class="p">,</span>
+                        <span class="n">dictionary</span><span class="o">=</span><span class="bp">True</span>
+                    <span class="p">)</span>
+
+                    <span class="c"># cast sequence of subscriptions to list</span>
+                    <span class="k">if</span> <span class="n">active_subscriptions</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                        <span class="n">active_subscriptions</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">active_subscriptions</span> <span class="o">=</span> <span class="n">active_subscriptions</span>
+
+                    <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;active_subscriptions&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">active_subscriptions</span>
+
+                    <span class="c"># call function</span>
+                    <span class="n">result</span> <span class="o">=</span> <span class="n">obj</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+                <span class="k">finally</span><span class="p">:</span>
+                    <span class="c"># release lock</span>
+                    <span class="n">active_cov_subscriptions_property</span><span class="o">.</span><span class="n">lock</span><span class="o">.</span><span class="n">release</span><span class="p">()</span>
+
+                <span class="c"># return result</span>
+                <span class="k">return</span> <span class="n">result</span>
+
+            <span class="c"># sleep</span>
+            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">sleep</span><span class="p">)</span>
+
+            <span class="c"># retry</span>
+            <span class="k">return</span> <span class="n">inner</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">tries</span><span class="o">=</span><span class="n">tries</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="c"># return function</span>
+        <span class="k">return</span> <span class="n">inner</span>
+
+    <span class="k">if</span> <span class="n">func</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">wrapper</span>
+
+    <span class="k">return</span> <span class="n">wrapper</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+
+</div>
+<span class="nd">@bacnet_debug</span><span class="p">(</span><span class="n">formatter</span><span class="o">=</span><span class="s">&#39;</span><span class="si">%(levelname)s</span><span class="s">:app: </span><span class="si">%(message)s</span><span class="s">&#39;</span><span class="p">)</span>
+<div class="viewcode-block" id="HandlerApplication"><a class="viewcode-back" href="../../../bacnet.app.handler.html#bacnet.app.basic.HandlerApplication">[docs]</a><span class="k">class</span> <span class="nc">HandlerApplication</span><span class="p">(</span><span class="n">BACpypesApplication</span><span class="p">):</span>
+    <span class="c"># pylint: disable=abstract-method, too-many-instance-attributes, too-many-arguments</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class provides handler functionality for basic requests.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function constructs the application object.</span>
+
+<span class="sd">        :return: BasicApplication instance</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># call constructor of predecessor class</span>
+        <span class="n">BACpypesApplication</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="c"># reset protected properties</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">protected_properties</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="c"># device itself</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">objectName</span><span class="o">.</span><span class="n">keys</span><span class="p">()[</span><span class="mi">0</span><span class="p">],</span>
+
+            <span class="c"># python program</span>
+            <span class="s">&#39;configuration&#39;</span><span class="p">,</span>
+
+            <span class="c"># program control</span>
+            <span class="s">&#39;control&#39;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c"># initialize device dictionary</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">known_devices</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c"># initialize remote subscriptions</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">remote_subscriptions</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c"># set event</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_devices_now</span> <span class="o">=</span> <span class="n">Event</span><span class="p">()</span>
+
+<div class="viewcode-block" id="HandlerApplication.get_object_by_id"><a class="viewcode-back" href="../../../bacnet.app.handler.html#bacnet.app.basic.HandlerApplication.get_object_by_id">[docs]</a>    <span class="k">def</span> <span class="nf">get_object_by_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function returns object by id.</span>
+
+<span class="sd">        :param obj_id: object id</span>
+<span class="sd">        :return: object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># return object</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">objectIdentifier</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">obj_id</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="HandlerApplication.get_object_by_name"><a class="viewcode-back" href="../../../bacnet.app.handler.html#bacnet.app.basic.HandlerApplication.get_object_by_name">[docs]</a>    <span class="k">def</span> <span class="nf">get_object_by_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj_name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function returns object by name.</span>
+
+<span class="sd">        :param obj_name: object name</span>
+<span class="sd">        :return: object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># return object</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">objectName</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">obj_name</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="HandlerApplication.get_object_id"><a class="viewcode-back" href="../../../bacnet.app.handler.html#bacnet.app.basic.HandlerApplication.get_object_id">[docs]</a>    <span class="k">def</span> <span class="nf">get_object_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj_type</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function provides a unique object id.</span>
+
+<span class="sd">        :param obj_type: object type</span>
+<span class="sd">        :return: object id</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># read object ids</span>
+        <span class="n">obj_ids</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span>
+            <span class="n">obj_id</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">obj_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">objectIdentifier</span><span class="o">.</span><span class="n">iterkeys</span><span class="p">()</span> <span class="k">if</span> <span class="n">obj_id</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">obj_type</span>
+        <span class="p">))</span>
+
+        <span class="c"># initialize object id</span>
+        <span class="n">obj_id</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="c"># loop through object ids to found an unused one</span>
+        <span class="k">for</span> <span class="n">used_id</span> <span class="ow">in</span> <span class="n">obj_ids</span><span class="p">:</span>
+
+            <span class="c"># set object id</span>
+            <span class="n">obj_id</span> <span class="o">=</span> <span class="n">used_id</span> <span class="o">+</span> <span class="mi">1</span>
+
+            <span class="c"># check if object id is in use</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">obj_id</span> <span class="ow">in</span> <span class="n">obj_ids</span><span class="p">:</span>
+                <span class="k">break</span>
+
+        <span class="c"># store sorted object ids</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">objectIdentifier</span><span class="p">[(</span><span class="n">obj_type</span><span class="p">,</span> <span class="n">obj_id</span><span class="p">)]</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="c"># return object id</span>
+        <span class="k">return</span> <span class="n">obj_id</span>
+</div>
+    <span class="nd">@lock_subscriptions</span><span class="p">(</span><span class="n">block</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+<div class="viewcode-block" id="HandlerApplication.check_subscription_updates"><a class="viewcode-back" href="../../../bacnet.app.handler.html#bacnet.app.basic.HandlerApplication.check_subscription_updates">[docs]</a>    <span class="k">def</span> <span class="nf">check_subscription_updates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">apdu</span><span class="p">,</span> <span class="n">active_subscriptions</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function updates subscriptions with device id if needed.</span>
+
+<span class="sd">        :param apdu: incoming i am request</span>
+<span class="sd">        :param active_subscriptions: dictionary of active cov subscriptions</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># read address</span>
+        <span class="n">address</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">apdu</span><span class="o">.</span><span class="n">pduSource</span><span class="p">)</span>
+
+        <span class="c"># get device identifier</span>
+        <span class="n">update_device_id</span> <span class="o">=</span> <span class="n">apdu</span><span class="o">.</span><span class="n">iAmDeviceIdentifier</span>
+
+        <span class="c"># loop through subscription lists</span>
+        <span class="k">for</span> <span class="n">device_id</span> <span class="ow">in</span> <span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="n">update_device_id</span><span class="p">):</span>
+
+            <span class="c"># get subscriptions</span>
+            <span class="n">subscriptions</span> <span class="o">=</span> <span class="n">active_subscriptions</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">device_id</span><span class="p">,</span> <span class="p">[])</span>
+
+            <span class="c"># check if address is in update list</span>
+            <span class="k">if</span> <span class="n">address</span> <span class="ow">in</span> <span class="n">subscriptions</span><span class="p">:</span>
+                <span class="c"># loop through subscriptions</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">subscriptions</span><span class="p">)):</span>
+                    <span class="c"># get subscription</span>
+                    <span class="n">subscription</span> <span class="o">=</span> <span class="n">subscriptions</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+                    <span class="c"># check if address is equal</span>
+                    <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">subscription</span><span class="o">.</span><span class="n">recipient</span><span class="o">.</span><span class="n">recipient</span><span class="o">.</span><span class="n">address</span><span class="o">.</span><span class="n">macAddress</span><span class="p">)</span> <span class="o">==</span> <span class="n">address</span><span class="p">:</span>
+                        <span class="c"># update device identifier</span>
+                        <span class="n">subscription</span><span class="o">.</span><span class="n">recipient</span><span class="o">.</span><span class="n">recipient</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="n">device_id</span>
+
+                        <span class="c"># store subscription</span>
+                        <span class="n">subscriptions</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">subscription</span>
+
+                <span class="c"># store subscriptions</span>
+                <span class="n">active_subscriptions</span><span class="p">[</span><span class="n">device_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">subscriptions</span>
+
+        <span class="c"># store new active subscriptions</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">localDevice</span><span class="o">.</span><span class="n">WriteProperty</span><span class="p">(</span>
+            <span class="s">&#39;activeCovSubscriptions&#39;</span><span class="p">,</span>
+            <span class="n">active_subscriptions</span><span class="p">,</span>
+            <span class="n">direct</span><span class="o">=</span><span class="bp">True</span>
+        <span class="p">)</span>
+</div>
+<div class="viewcode-block" id="HandlerApplication.get_device"><a class="viewcode-back" href="../../../bacnet.app.handler.html#bacnet.app.basic.HandlerApplication.get_device">[docs]</a>    <span class="k">def</span> <span class="nf">get_device</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">address</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function returns device identifier if known.</span>
+
+<span class="sd">        :param address: device address</span>
+<span class="sd">        :return: device identifier</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># check if address is known</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="s">&#39;id&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">known_devices</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">address</span><span class="p">,</span> <span class="p">{}):</span>
+            <span class="c"># create request</span>
+            <span class="n">request</span> <span class="o">=</span> <span class="n">WhoIsRequest</span><span class="p">()</span>
+
+            <span class="c"># set destination to address</span>
+            <span class="n">request</span><span class="o">.</span><span class="n">pduDestination</span> <span class="o">=</span> <span class="n">Address</span><span class="p">(</span><span class="n">address</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;   - request: </span><span class="si">%s</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">request</span><span class="p">)</span>
+
+            <span class="c"># queue request</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">requests</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+
+            <span class="c"># exit</span>
+            <span class="k">return</span>
+
+        <span class="c"># get device</span>
+        <span class="n">device</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">known_devices</span><span class="p">[</span><span class="n">address</span><span class="p">]</span>
+
+        <span class="c"># return device</span>
+        <span class="k">return</span> <span class="n">device</span><span class="p">[</span><span class="s">&#39;id&#39;</span><span class="p">]</span>
+</div>
+<div class="viewcode-block" id="HandlerApplication.send_cov_notification"><a class="viewcode-back" href="../../../bacnet.app.handler.html#bacnet.app.basic.HandlerApplication.send_cov_notification">[docs]</a>    <span class="k">def</span> <span class="nf">send_cov_notification</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">subscription</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function transmits cov notifications for subscriptions</span>
+
+<span class="sd">        :param subscription: subscription</span>
+<span class="sd">        :param values: sequence of property values</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c"># initialize request type</span>
+            <span class="n">request_type</span> <span class="o">=</span> <span class="n">UnconfirmedCOVNotificationRequest</span>
+
+            <span class="c"># check if request must be confirmed</span>
+            <span class="k">if</span> <span class="n">subscription</span><span class="o">.</span><span class="n">issueConfirmedNotifications</span><span class="p">:</span>
+                <span class="c"># reset request type</span>
+                <span class="n">request_type</span> <span class="o">=</span> <span class="n">ConfirmedCOVNotificationRequest</span>
+
+            <span class="c"># get device identifier from address</span>
+            <span class="n">device_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">localDevice</span><span class="o">.</span><span class="n">ReadProperty</span><span class="p">(</span><span class="s">&#39;objectIdentifier&#39;</span><span class="p">)</span>
+
+            <span class="c"># create request</span>
+            <span class="n">request</span> <span class="o">=</span> <span class="n">request_type</span><span class="p">(</span>
+                <span class="n">subscriberProcessIdentifier</span><span class="o">=</span><span class="n">subscription</span><span class="o">.</span><span class="n">recipient</span><span class="o">.</span><span class="n">processIdentifier</span><span class="p">,</span>
+                <span class="n">initiatingDeviceIdentifier</span><span class="o">=</span><span class="n">device_id</span><span class="p">,</span>
+                <span class="n">monitoredObjectIdentifier</span><span class="o">=</span><span class="n">subscription</span><span class="o">.</span><span class="n">monitoredPropertyReference</span><span class="o">.</span><span class="n">objectIdentifier</span><span class="o">.</span>\
+                                          <span class="n">get_tuple</span><span class="p">(),</span>
+                <span class="n">timeRemaining</span><span class="o">=</span><span class="n">subscription</span><span class="o">.</span><span class="n">timeRemaining</span><span class="o">.</span><span class="n">remaining_time</span><span class="p">,</span>
+                <span class="n">listOfValues</span><span class="o">=</span><span class="n">values</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="c"># set destination</span>
+            <span class="n">request</span><span class="o">.</span><span class="n">pduDestination</span> <span class="o">=</span> <span class="n">Address</span><span class="p">(</span><span class="n">subscription</span><span class="o">.</span><span class="n">recipient</span><span class="o">.</span><span class="n">recipient</span><span class="o">.</span><span class="n">address</span><span class="o">.</span><span class="n">macAddress</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;   - request: </span><span class="si">%s</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">request</span><span class="p">)</span>
+
+            <span class="c"># queue request</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">requests</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_exception</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
+</div>
+    <span class="nd">@lock_subscriptions</span>
+<div class="viewcode-block" id="HandlerApplication.delete_cov_subscriptions"><a class="viewcode-back" href="../../../bacnet.app.handler.html#bacnet.app.basic.HandlerApplication.delete_cov_subscriptions">[docs]</a>    <span class="k">def</span> <span class="nf">delete_cov_subscriptions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">subscriptions</span><span class="p">,</span>
+                                 <span class="n">inform_object</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">active_subscriptions</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function removes a list of subscriptions from the cov subscription list.</span>
+
+<span class="sd">        :param subscriptions: subscription list</span>
+<span class="sd">        :param inform_object: inform object</span>
+<span class="sd">        :param active_subscriptions: dictionary of active cov subscriptions</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># loop through subscriptions</span>
+        <span class="k">for</span> <span class="n">subscription</span> <span class="ow">in</span> <span class="n">subscriptions</span><span class="p">:</span>
+            <span class="c"># check if object must be informed</span>
+            <span class="k">if</span> <span class="n">inform_object</span><span class="p">:</span>
+                <span class="c"># read object identifier</span>
+                <span class="n">obj_id</span> <span class="o">=</span> <span class="n">subscription</span><span class="o">.</span><span class="n">monitoredPropertyReference</span><span class="o">.</span><span class="n">objectIdentifier</span>
+
+                <span class="c"># get object by identifier</span>
+                <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_object_by_id</span><span class="p">(</span><span class="n">obj_id</span><span class="p">)</span>
+
+                <span class="c"># delete subscription</span>
+                <span class="n">obj</span><span class="o">.</span><span class="n">delete_cov_subscription</span><span class="p">(</span><span class="n">subscription</span><span class="p">,</span> <span class="n">inform_app</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+            <span class="c"># read device identifier</span>
+            <span class="n">device_id</span> <span class="o">=</span> <span class="n">subscription</span><span class="o">.</span><span class="n">recipient</span><span class="o">.</span><span class="n">recipient</span><span class="o">.</span><span class="n">device</span>
+
+            <span class="c"># get device subscriptions</span>
+            <span class="n">device_subscriptions</span> <span class="o">=</span> <span class="n">active_subscriptions</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">device_id</span><span class="p">,</span> <span class="p">[])</span>
+
+            <span class="c"># delete subscription from list</span>
+            <span class="k">if</span> <span class="n">subscription</span> <span class="ow">in</span> <span class="n">device_subscriptions</span><span class="p">:</span>
+                <span class="n">device_subscriptions</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">subscription</span><span class="p">)</span>
+                <span class="n">active_subscriptions</span><span class="p">[</span><span class="n">device_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">device_subscriptions</span>
+
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">device_subscriptions</span><span class="p">):</span>
+                    <span class="k">del</span> <span class="n">active_subscriptions</span><span class="p">[</span><span class="n">device_id</span><span class="p">]</span>
+
+        <span class="c"># store new active subscriptions</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">localDevice</span><span class="o">.</span><span class="n">WriteProperty</span><span class="p">(</span><span class="s">&#39;activeCovSubscriptions&#39;</span><span class="p">,</span> <span class="n">active_subscriptions</span><span class="p">,</span> <span class="n">direct</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</div>
+    <span class="nd">@lock_subscriptions</span>
+<div class="viewcode-block" id="HandlerApplication.delete_cov_subscription"><a class="viewcode-back" href="../../../bacnet.app.handler.html#bacnet.app.basic.HandlerApplication.delete_cov_subscription">[docs]</a>    <span class="k">def</span> <span class="nf">delete_cov_subscription</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">apdu</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span>
+                                <span class="n">prop</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">prop_index</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">active_subscriptions</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function deletes subscription from cov subscription list.</span>
+
+<span class="sd">        :param apdu: incoming message</span>
+<span class="sd">        :param obj: object</span>
+<span class="sd">        :param prop: property</span>
+<span class="sd">        :param active_subscriptions: dictionary of active cov subscriptions</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># read subscriber</span>
+        <span class="n">subscriber</span> <span class="o">=</span> <span class="n">apdu</span><span class="o">.</span><span class="n">subscriberProcessIdentifier</span>
+
+        <span class="c"># read object identifier</span>
+        <span class="n">obj_id</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">ReadProperty</span><span class="p">(</span><span class="s">&#39;objectIdentifier&#39;</span><span class="p">)</span>
+
+        <span class="c"># initialize loop variable</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c"># get device identifier from address</span>
+        <span class="n">device_ids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_device</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">apdu</span><span class="o">.</span><span class="n">pduSource</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">device_ids</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">device_ids</span> <span class="o">=</span> <span class="n">active_subscriptions</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">device_ids</span> <span class="o">=</span> <span class="p">(</span><span class="n">device_ids</span><span class="p">,)</span>
+
+        <span class="c"># loop through device ids</span>
+        <span class="k">for</span> <span class="n">device_id</span> <span class="ow">in</span> <span class="n">device_ids</span><span class="p">:</span>
+            <span class="c"># get device subscriptions</span>
+            <span class="n">device_subscriptions</span> <span class="o">=</span> <span class="n">active_subscriptions</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">device_id</span><span class="p">,</span> <span class="p">[])</span>
+
+            <span class="c"># loop through subscriptions</span>
+            <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">device_subscriptions</span><span class="p">):</span>
+                <span class="c"># get subscription</span>
+                <span class="n">subscription</span> <span class="o">=</span> <span class="n">device_subscriptions</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+                <span class="c"># read recipient</span>
+                <span class="n">recipient</span> <span class="o">=</span> <span class="n">subscription</span><span class="o">.</span><span class="n">recipient</span><span class="o">.</span><span class="n">recipient</span>
+
+                <span class="c"># check if recipient matches</span>
+                <span class="n">recipient_match</span> <span class="o">=</span> <span class="n">subscription</span><span class="o">.</span><span class="n">recipient</span><span class="o">.</span><span class="n">device</span> <span class="o">==</span> <span class="n">subscriber</span> <span class="ow">and</span> \
+                                  <span class="nb">str</span><span class="p">(</span><span class="n">recipient</span><span class="o">.</span><span class="n">address</span><span class="o">.</span><span class="n">macAddress</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="n">apdu</span><span class="o">.</span><span class="n">pduSource</span><span class="p">)</span>
+                                  <span class="c"># recipient.address.networkNumber == apdu.pduSource.addrNet</span>
+
+                <span class="c"># check if subscription is matching</span>
+                <span class="k">if</span> <span class="n">recipient_match</span><span class="p">:</span>
+
+                    <span class="c"># read property reference</span>
+                    <span class="n">prop_ref</span> <span class="o">=</span> <span class="n">subscription</span><span class="o">.</span><span class="n">monitoredPropertyReference</span>
+
+                    <span class="c"># check if object matches</span>
+                    <span class="n">obj_match</span> <span class="o">=</span> <span class="n">prop_ref</span><span class="o">.</span><span class="n">objectIdentifier</span> <span class="o">==</span> <span class="n">obj_id</span>
+
+                    <span class="c"># check if property matches</span>
+                    <span class="n">prop_match</span> <span class="o">=</span> <span class="n">prop_ref</span><span class="o">.</span><span class="n">propertyIdentifier</span> <span class="o">==</span> <span class="n">prop</span><span class="o">.</span><span class="n">identifier</span> <span class="ow">and</span> \
+                                 <span class="n">prop_ref</span><span class="o">.</span><span class="n">propertyArrayIndex</span> <span class="o">==</span> <span class="n">prop_index</span>
+
+                    <span class="c"># check if object is matching</span>
+                    <span class="k">if</span> <span class="n">obj_match</span> <span class="ow">and</span> <span class="n">prop_match</span><span class="p">:</span>
+
+                        <span class="c"># remove subscription from object</span>
+                        <span class="n">obj</span><span class="o">.</span><span class="n">delete_cov_subscription</span><span class="p">(</span><span class="n">subscription</span><span class="p">)</span>
+
+                        <span class="c"># remove index from active subscriptions</span>
+                        <span class="k">del</span> <span class="n">device_subscriptions</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+                        <span class="c"># store device subscriptions in active subscriptions</span>
+                        <span class="n">active_subscriptions</span><span class="p">[</span><span class="n">device_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">device_subscriptions</span>
+
+                        <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">device_subscriptions</span><span class="p">):</span>
+                            <span class="k">del</span> <span class="n">active_subscriptions</span><span class="p">[</span><span class="n">device_id</span><span class="p">]</span>
+
+                        <span class="k">continue</span>
+
+                <span class="c"># go to next subscription</span>
+                <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="c"># store new active subscriptions</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">localDevice</span><span class="o">.</span><span class="n">WriteProperty</span><span class="p">(</span><span class="s">&#39;activeCovSubscriptions&#39;</span><span class="p">,</span> <span class="n">active_subscriptions</span><span class="p">,</span> <span class="n">direct</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</div>
+    <span class="nd">@lock_subscriptions</span>
+<div class="viewcode-block" id="HandlerApplication.renew_cov_subscription"><a class="viewcode-back" href="../../../bacnet.app.handler.html#bacnet.app.basic.HandlerApplication.renew_cov_subscription">[docs]</a>    <span class="k">def</span> <span class="nf">renew_cov_subscription</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">subscription</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">active_subscriptions</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function checks if subscription can be renewed and returns boolean of this action.</span>
+
+<span class="sd">        :param subscription: subscription</span>
+<span class="sd">        :param obj: object</span>
+<span class="sd">        :param active_subscriptions: dictionary of active cov subscriptions</span>
+<span class="sd">        :return: subscription renewed</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># initialize result</span>
+        <span class="n">renewed</span> <span class="o">=</span> <span class="bp">False</span>
+
+        <span class="c"># read device identifier</span>
+        <span class="n">device_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">subscription</span><span class="o">.</span><span class="n">recipient</span><span class="o">.</span><span class="n">recipient</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+
+        <span class="c"># read device subscriptions</span>
+        <span class="n">device_subscriptions</span> <span class="o">=</span> <span class="n">active_subscriptions</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">device_id</span><span class="p">),</span> <span class="p">[])</span>
+
+        <span class="c"># loop through all device subscriptions</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">device_subscriptions</span><span class="p">)):</span>
+            <span class="c"># get entry</span>
+            <span class="n">entry</span> <span class="o">=</span> <span class="n">device_subscriptions</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+            <span class="c"># check if device and process id match</span>
+            <span class="k">if</span> <span class="n">entry</span><span class="o">.</span><span class="n">recipient</span><span class="o">.</span><span class="n">recipient</span><span class="o">.</span><span class="n">device</span> <span class="o">==</span> <span class="n">subscription</span><span class="o">.</span><span class="n">recipient</span><span class="o">.</span><span class="n">recipient</span><span class="o">.</span><span class="n">device</span> <span class="ow">and</span> \
+                <span class="n">entry</span><span class="o">.</span><span class="n">recipient</span><span class="o">.</span><span class="n">processIdentifier</span> <span class="o">==</span> <span class="n">subscription</span><span class="o">.</span><span class="n">recipient</span><span class="o">.</span><span class="n">processIdentifier</span><span class="p">:</span>
+                <span class="c"># check if objects and properties match</span>
+
+                <span class="k">if</span> <span class="n">entry</span><span class="o">.</span><span class="n">monitoredPropertyReference</span><span class="o">.</span><span class="n">objectIdentifier</span> <span class="o">==</span> \
+                        <span class="n">subscription</span><span class="o">.</span><span class="n">monitoredPropertyReference</span><span class="o">.</span><span class="n">objectIdentifier</span> <span class="ow">and</span> \
+                    <span class="n">entry</span><span class="o">.</span><span class="n">monitoredPropertyReference</span><span class="o">.</span><span class="n">propertyIdentifier</span> <span class="o">==</span> \
+                        <span class="n">subscription</span><span class="o">.</span><span class="n">monitoredPropertyReference</span><span class="o">.</span><span class="n">propertyIdentifier</span> <span class="ow">and</span> \
+                    <span class="n">entry</span><span class="o">.</span><span class="n">monitoredPropertyReference</span><span class="o">.</span><span class="n">propertyArrayIndex</span> <span class="o">==</span> \
+                        <span class="n">subscription</span><span class="o">.</span><span class="n">monitoredPropertyReference</span><span class="o">.</span><span class="n">propertyArrayIndex</span><span class="p">:</span>
+
+                    <span class="c"># store new subscription</span>
+                    <span class="n">device_subscriptions</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">subscription</span>
+                    <span class="n">active_subscriptions</span><span class="p">[</span><span class="n">device_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">device_subscriptions</span>
+
+                    <span class="c"># renew subscription in object</span>
+                    <span class="n">obj</span><span class="o">.</span><span class="n">renew_cov_subscription</span><span class="p">(</span><span class="n">subscription</span><span class="p">)</span>
+
+                    <span class="c"># store new active subscriptions</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">localDevice</span><span class="o">.</span><span class="n">WriteProperty</span><span class="p">(</span>
+                        <span class="s">&#39;activeCovSubscriptions&#39;</span><span class="p">,</span>
+                        <span class="n">active_subscriptions</span><span class="p">,</span>
+                        <span class="n">direct</span><span class="o">=</span><span class="bp">True</span>
+                    <span class="p">)</span>
+
+                    <span class="c"># set result</span>
+                    <span class="n">renewed</span> <span class="o">=</span> <span class="bp">True</span>
+
+                    <span class="c"># break loop</span>
+                    <span class="k">break</span>
+
+        <span class="c"># check if subscription was renewed</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">renewed</span><span class="p">:</span>
+            <span class="c"># append new subscription</span>
+            <span class="n">device_subscriptions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">subscription</span><span class="p">)</span>
+            <span class="n">active_subscriptions</span><span class="p">[</span><span class="n">device_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">device_subscriptions</span>
+
+            <span class="c"># add subscription to object</span>
+            <span class="n">obj</span><span class="o">.</span><span class="n">add_cov_subscription</span><span class="p">(</span><span class="n">subscription</span><span class="p">)</span>
+
+            <span class="c"># store new active subscriptions</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">localDevice</span><span class="o">.</span><span class="n">WriteProperty</span><span class="p">(</span>
+                <span class="s">&#39;activeCovSubscriptions&#39;</span><span class="p">,</span>
+                <span class="n">active_subscriptions</span><span class="p">,</span>
+                <span class="n">direct</span><span class="o">=</span><span class="bp">True</span>
+            <span class="p">)</span>
+
+        <span class="c"># return result</span>
+        <span class="k">return</span> <span class="n">renewed</span>
+</div>
+<div class="viewcode-block" id="HandlerApplication.add_cov_subscription"><a class="viewcode-back" href="../../../bacnet.app.handler.html#bacnet.app.basic.HandlerApplication.add_cov_subscription">[docs]</a>    <span class="k">def</span> <span class="nf">add_cov_subscription</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">apdu</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">prop</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function adds subscription to cov subscription list.</span>
+
+<span class="sd">        :param apdu: incoming message</span>
+<span class="sd">        :param obj: object</span>
+<span class="sd">        :param prop: property</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># initialize cov increment and property array index</span>
+        <span class="n">cov_inc</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">prop_index</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="c"># check if object supports cov notification</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">obj</span><span class="o">.</span><span class="n">cov_supported</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="n">ExecutionError</span><span class="p">(</span>
+                <span class="n">errorClass</span><span class="o">=</span><span class="s">&#39;object&#39;</span><span class="p">,</span>
+                <span class="n">errorCode</span><span class="o">=</span><span class="s">&#39;optionalFunctionalityNotSupported&#39;</span>
+            <span class="p">)</span>
+
+        <span class="c"># check if property was defined</span>
+        <span class="k">if</span> <span class="n">prop</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="c"># check if property supports cov notification</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">obj</span><span class="o">.</span><span class="n">cov_supported</span><span class="p">(</span><span class="n">prop</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="n">ExecutionError</span><span class="p">(</span>
+                    <span class="n">errorClass</span><span class="o">=</span><span class="s">&#39;property&#39;</span><span class="p">,</span>
+                    <span class="n">errorCode</span><span class="o">=</span><span class="s">&#39;optionalFunctionalityNotSupported&#39;</span>
+                <span class="p">)</span>
+
+            <span class="c"># read cov increment</span>
+            <span class="n">cov_inc</span> <span class="o">=</span> <span class="n">apdu</span><span class="o">.</span><span class="n">covIncrement</span>
+
+            <span class="c"># read property array index</span>
+            <span class="n">prop_index</span> <span class="o">=</span> <span class="n">apdu</span><span class="o">.</span><span class="n">monitoredPropertyIdentifier</span><span class="o">.</span><span class="n">propertyArrayIndex</span>
+
+        <span class="c"># read life time</span>
+        <span class="n">lifetime</span> <span class="o">=</span> <span class="n">apdu</span><span class="o">.</span><span class="n">lifetime</span>
+
+        <span class="c"># check if life time out of range</span>
+        <span class="k">if</span> <span class="bp">False</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ExecutionError</span><span class="p">(</span><span class="n">errorClass</span><span class="o">=</span><span class="s">&#39;services&#39;</span><span class="p">,</span> <span class="n">errorCode</span><span class="o">=</span><span class="s">&#39;valueOutOfRange&#39;</span><span class="p">)</span>
+
+        <span class="c"># check if activeCovSubscription is full</span>
+        <span class="k">if</span> <span class="bp">False</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ExecutionError</span><span class="p">(</span><span class="n">errorClass</span><span class="o">=</span><span class="s">&#39;resources&#39;</span><span class="p">,</span> <span class="n">errorCode</span><span class="o">=</span><span class="s">&#39;noSpaceToAddListElement&#39;</span><span class="p">)</span>
+
+        <span class="c"># read if requests should be confirmed</span>
+        <span class="n">confirmed</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">apdu</span><span class="o">.</span><span class="n">issueConfirmedNotifications</span><span class="p">)</span>
+
+        <span class="c"># check if subscription was canceled</span>
+        <span class="k">if</span> <span class="n">confirmed</span> <span class="ow">and</span> <span class="n">lifetime</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="c"># delete subscription</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">delete_cov_subscription</span><span class="p">(</span><span class="n">apdu</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">prop</span><span class="o">=</span><span class="n">prop</span><span class="p">,</span> <span class="n">prop_index</span><span class="o">=</span><span class="n">prop_index</span><span class="p">)</span>
+
+        <span class="c"># read subscriber</span>
+        <span class="n">subscriber</span> <span class="o">=</span> <span class="n">apdu</span><span class="o">.</span><span class="n">subscriberProcessIdentifier</span>
+
+        <span class="c"># read address</span>
+        <span class="n">address</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">apdu</span><span class="o">.</span><span class="n">pduSource</span><span class="p">)</span>
+
+        <span class="c"># get device identifier from address</span>
+        <span class="n">device_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_device</span><span class="p">(</span><span class="n">address</span><span class="p">)</span>
+
+        <span class="c"># create subscription</span>
+        <span class="n">subscription</span> <span class="o">=</span> <span class="n">COVSubscription</span><span class="p">(</span>
+            <span class="n">recipient</span><span class="o">=</span><span class="n">RecipientProcess</span><span class="p">(</span>
+                <span class="n">recipient</span><span class="o">=</span><span class="n">Recipient</span><span class="p">(</span>
+                    <span class="n">device</span><span class="o">=</span><span class="n">device_id</span><span class="p">,</span>
+                    <span class="n">address</span><span class="o">=</span><span class="n">DeviceAddress</span><span class="p">(</span>
+                        <span class="c"># TODO: distinguish between local and remote, 0 == local</span>
+                        <span class="n">networkNumber</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                        <span class="n">macAddress</span><span class="o">=</span><span class="n">address</span><span class="p">,</span>
+                    <span class="p">),</span>
+                <span class="p">),</span>
+                <span class="n">processIdentifier</span><span class="o">=</span><span class="n">subscriber</span><span class="p">,</span>
+            <span class="p">),</span>
+            <span class="n">monitoredPropertyReference</span><span class="o">=</span><span class="n">ObjectPropertyReference</span><span class="p">(</span>
+                <span class="n">objectIdentifier</span><span class="o">=</span><span class="n">obj</span><span class="o">.</span><span class="n">ReadProperty</span><span class="p">(</span><span class="s">&#39;objectIdentifier&#39;</span><span class="p">),</span>
+                <span class="n">propertyIdentifier</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                <span class="n">propertyArrayIndex</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+            <span class="p">),</span>
+            <span class="n">issueConfirmedNotifications</span><span class="o">=</span><span class="n">confirmed</span><span class="p">,</span>
+            <span class="n">timeRemaining</span><span class="o">=</span><span class="n">Remaining</span><span class="p">(</span><span class="n">lifetime</span><span class="p">),</span>
+            <span class="n">covIncrement</span><span class="o">=</span><span class="n">cov_inc</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c"># check if property is defined</span>
+        <span class="k">if</span> <span class="n">prop</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="c"># set property identifier and array index</span>
+            <span class="n">subscription</span><span class="o">.</span><span class="n">monitoredPropertyReference</span><span class="o">.</span><span class="n">propertyIdentifier</span> <span class="o">=</span> <span class="n">prop</span><span class="o">.</span><span class="n">identifier</span>
+            <span class="n">subscription</span><span class="o">.</span><span class="n">monitoredPropertyReference</span><span class="o">.</span><span class="n">propertyArrayIndex</span> <span class="o">=</span> <span class="n">prop_index</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">renew_cov_subscription</span><span class="p">(</span><span class="n">subscription</span><span class="p">,</span> <span class="n">obj</span><span class="p">)</span>
+</div>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">__get_remote_subscription_index</span><span class="p">(</span><span class="n">subscriptions</span><span class="p">,</span> <span class="n">subscription</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function looks for the provided subscription</span>
+
+<span class="sd">        :param subscriptions: list of subscriptions</span>
+<span class="sd">        :param subscription: subscription(s)</span>
+<span class="sd">        :return: subscription index(es)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">subscription</span><span class="p">,</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">list</span><span class="p">)):</span>
+            <span class="n">subscription</span> <span class="o">=</span> <span class="p">(</span><span class="n">subscription</span><span class="p">,)</span>
+
+        <span class="n">result</span> <span class="o">=</span> <span class="p">[</span><span class="bp">None</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">subscription</span><span class="p">)</span>
+
+        <span class="c"># loop through all existing subscriptions</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">subscriptions</span><span class="p">)):</span>
+            <span class="c"># get subscription</span>
+            <span class="n">entry</span> <span class="o">=</span> <span class="n">subscriptions</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+            <span class="c"># loop through single subscriptions</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">subscription</span><span class="p">)):</span>
+                <span class="c"># get single subscription</span>
+                <span class="n">single_subscription</span> <span class="o">=</span> <span class="n">subscription</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+
+                <span class="n">subscription_exists</span> <span class="o">=</span> <span class="bp">True</span>
+
+                <span class="c"># loop through subscription keys</span>
+                <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">single_subscription</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+                    <span class="c"># ignore remote address and remaining lifetime - might change during runtime</span>
+                    <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;address&#39;</span><span class="p">,</span> <span class="s">&#39;remaining&#39;</span><span class="p">,</span> <span class="s">&#39;renew&#39;</span><span class="p">]:</span>
+                        <span class="k">continue</span>
+
+                    <span class="c"># check if subscription exists</span>
+                    <span class="k">if</span> <span class="n">entry</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">!=</span> <span class="n">value</span><span class="p">:</span>
+                        <span class="n">subscription_exists</span> <span class="o">=</span> <span class="bp">False</span>
+
+                        <span class="c"># break loop</span>
+                        <span class="k">break</span>
+
+                <span class="c"># check if subscription was found</span>
+                <span class="k">if</span> <span class="n">subscription_exists</span><span class="p">:</span>
+                    <span class="c"># return index</span>
+                    <span class="n">result</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">i</span>
+
+                    <span class="c"># break loop</span>
+                    <span class="k">break</span>
+
+            <span class="c"># check if all single subscriptions were found</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+                <span class="c"># break loop</span>
+                <span class="k">break</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="c"># return result</span>
+        <span class="k">return</span> <span class="n">result</span>
+
+<div class="viewcode-block" id="HandlerApplication.handle_remote_subscription"><a class="viewcode-back" href="../../../bacnet.app.handler.html#bacnet.app.basic.HandlerApplication.handle_remote_subscription">[docs]</a>    <span class="k">def</span> <span class="nf">handle_remote_subscription</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">apdu</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function stores a new remote subscription.</span>
+
+<span class="sd">        :param apdu: outgoing request</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># get device id</span>
+        <span class="n">device_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_device</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">apdu</span><span class="o">.</span><span class="n">pduDestination</span><span class="p">))</span>
+
+        <span class="c"># get parsed data</span>
+        <span class="n">parsed_data</span> <span class="o">=</span> <span class="n">response_parser</span><span class="p">(</span><span class="n">apdu</span><span class="p">)</span>
+
+        <span class="c"># read lifetime</span>
+        <span class="n">lifetime</span> <span class="o">=</span> <span class="n">parsed_data</span><span class="p">[</span><span class="s">&#39;content&#39;</span><span class="p">][</span><span class="s">&#39;object&#39;</span><span class="p">]</span>
+
+        <span class="c"># create new subscription</span>
+        <span class="n">new_subscription</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s">&#39;address&#39;</span><span class="p">:</span> <span class="n">parsed_data</span><span class="p">[</span><span class="s">&#39;destination&#39;</span><span class="p">],</span>
+            <span class="s">&#39;property&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+            <span class="s">&#39;index&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="n">new_subscription</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">parsed_data</span><span class="p">[</span><span class="s">&#39;content&#39;</span><span class="p">])</span>
+
+        <span class="n">remove_subscription</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">lifetime</span> <span class="o">&gt;</span> <span class="mi">0</span>
+
+        <span class="c"># get subscriptions</span>
+        <span class="n">subscriptions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">remote_subscriptions</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">device_id</span><span class="p">,</span> <span class="p">[])</span>
+
+        <span class="n">subscription_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__get_remote_subscription_index</span><span class="p">(</span><span class="n">subscriptions</span><span class="p">,</span> <span class="n">new_subscription</span><span class="p">)</span>
+
+        <span class="c"># check if subscription was found</span>
+        <span class="k">if</span> <span class="n">subscription_index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="c"># check if subscription is supposed to be removed</span>
+            <span class="k">if</span> <span class="n">remove_subscription</span><span class="p">:</span>
+                <span class="c"># remove subscription</span>
+                <span class="k">del</span> <span class="n">subscriptions</span><span class="p">[</span><span class="n">subscription_index</span><span class="p">]</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c"># update subscription</span>
+                <span class="n">subscriptions</span><span class="p">[</span><span class="n">subscription_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_subscription</span>
+
+        <span class="c"># check if subscription exists</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="n">subscription_index</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">remove_subscription</span><span class="p">:</span>
+            <span class="n">subscriptions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_subscription</span><span class="p">)</span>
+
+        <span class="c"># store subscriptions</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">remote_subscriptions</span><span class="p">[</span><span class="n">device_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">subscriptions</span>
+</div>
+<div class="viewcode-block" id="HandlerApplication.receive_remote_notification"><a class="viewcode-back" href="../../../bacnet.app.handler.html#bacnet.app.basic.HandlerApplication.receive_remote_notification">[docs]</a>    <span class="k">def</span> <span class="nf">receive_remote_notification</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">apdu</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function checks if the cov notification was initiated correctly.</span>
+
+<span class="sd">        :param apdu: incoming message</span>
+<span class="sd">        :return: remote subscription exists</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># TODO: handle received cov notification</span>
+        <span class="k">pass</span>
+</div>
+<div class="viewcode-block" id="HandlerApplication.check_remote_subscription_updates"><a class="viewcode-back" href="../../../bacnet.app.handler.html#bacnet.app.basic.HandlerApplication.check_remote_subscription_updates">[docs]</a>    <span class="k">def</span> <span class="nf">check_remote_subscription_updates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">apdu</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function checks if the cov notification was initiated correctly.</span>
+
+<span class="sd">        :param apdu: incoming message</span>
+<span class="sd">        :return: remote subscription exists</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># get subscriptions</span>
+        <span class="n">subscriptions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">remote_subscriptions</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="p">[])</span>
+
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c"># loop through subscriptions</span>
+        <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">subscriptions</span><span class="p">):</span>
+            <span class="c"># get subscription</span>
+            <span class="n">subscription</span> <span class="o">=</span> <span class="n">subscriptions</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+            <span class="c"># check if address matches</span>
+            <span class="k">if</span> <span class="n">subscription</span><span class="p">[</span><span class="s">&#39;address&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="n">apdu</span><span class="o">.</span><span class="n">pduSource</span><span class="p">):</span>
+                <span class="c"># get actual device identifier</span>
+                <span class="n">device_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_device</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">apdu</span><span class="o">.</span><span class="n">pduSource</span><span class="p">))</span>
+
+                <span class="c"># check if device identifier was found</span>
+                <span class="k">if</span> <span class="n">device_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="c"># get list of remote subscriptions</span>
+                    <span class="n">remote_subscriptions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">remote_subscriptions</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">device_id</span><span class="p">,</span> <span class="p">[])</span>
+
+                    <span class="c"># append subscription to appropriate device identifier</span>
+                    <span class="n">remote_subscriptions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">subscription</span><span class="p">)</span>
+
+                    <span class="c"># store new remote subscriptions</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">remote_subscriptions</span><span class="p">[</span><span class="n">device_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">remote_subscriptions</span>
+
+                    <span class="c"># remove subscription from unknown device identifier list</span>
+                    <span class="k">del</span> <span class="n">subscriptions</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+                    <span class="c"># go to next subscription</span>
+                    <span class="k">continue</span>
+
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="c"># store subscriptions</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">remote_subscriptions</span><span class="p">[</span><span class="bp">None</span><span class="p">]</span> <span class="o">=</span> <span class="n">subscriptions</span>
+</div>
+<div class="viewcode-block" id="HandlerApplication.do_indication"><a class="viewcode-back" href="../../../bacnet.app.handler.html#bacnet.app.basic.HandlerApplication.do_indication">[docs]</a>    <span class="k">def</span> <span class="nf">do_indication</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">apdu</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function initiates appropriate function call for a received request.</span>
+
+<span class="sd">        :param apdu: incoming message</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;indication </span><span class="si">%r</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">apdu</span><span class="p">)</span>
+
+        <span class="c"># get helper function by name</span>
+        <span class="n">helper_name</span> <span class="o">=</span> <span class="s">&quot;do_</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">apdu</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span>
+        <span class="n">helper_func</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">helper_name</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;   - helper_func: </span><span class="si">%r</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">helper_func</span><span class="p">)</span>
+
+        <span class="c"># update last seen</span>
+        <span class="n">device</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">known_devices</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">apdu</span><span class="o">.</span><span class="n">pduSource</span><span class="p">),</span> <span class="p">{})</span>
+        <span class="n">device</span><span class="p">[</span><span class="s">&#39;last_seen&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">known_devices</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">apdu</span><span class="o">.</span><span class="n">pduSource</span><span class="p">)]</span> <span class="o">=</span> <span class="n">device</span>
+        <span class="k">del</span> <span class="n">device</span>
+
+        <span class="c"># reject messages for unrecognized services</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">helper_func</span><span class="p">:</span>
+            <span class="n">rejected</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">apdu</span><span class="p">,</span> <span class="n">ConfirmedRequestPDU</span><span class="p">)</span>
+
+            <span class="c"># send rejection in case confirmation needed</span>
+            <span class="k">if</span> <span class="n">rejected</span><span class="p">:</span>
+                <span class="n">resp</span> <span class="o">=</span> <span class="n">RejectPDU</span><span class="p">(</span>
+                    <span class="n">apdu</span><span class="o">.</span><span class="n">apduInvokeID</span><span class="p">,</span>
+                    <span class="n">RejectReason</span><span class="o">.</span><span class="n">UNRECOGNIZEDSERVICE</span><span class="p">,</span>
+                    <span class="n">context</span><span class="o">=</span><span class="n">apdu</span>
+                <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">requests</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">resp</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c"># call helper function</span>
+            <span class="n">resp</span> <span class="o">=</span> <span class="n">helper_func</span><span class="p">(</span><span class="n">apdu</span><span class="p">)</span>
+
+            <span class="c"># queue response</span>
+            <span class="k">if</span> <span class="n">resp</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;   - resp: </span><span class="si">%r</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">resp</span><span class="p">)</span>
+
+                <span class="c"># queue response</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">requests</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">resp</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="n">ExecutionError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;   - execution error: </span><span class="si">%r</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">error</span><span class="p">)</span>
+
+            <span class="c"># return the error to the sender</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">apdu</span><span class="p">,</span> <span class="n">ConfirmedRequestPDU</span><span class="p">):</span>
+                <span class="n">resp</span> <span class="o">=</span> <span class="n">Error</span><span class="p">(</span><span class="n">errorClass</span><span class="o">=</span><span class="n">error</span><span class="o">.</span><span class="n">errorClass</span><span class="p">,</span> <span class="n">errorCode</span><span class="o">=</span><span class="n">error</span><span class="o">.</span><span class="n">errorCode</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">apdu</span><span class="p">)</span>
+
+                <span class="c"># queue error</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">requests</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">resp</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_exception</span><span class="p">(</span><span class="s">&#39;exception: </span><span class="si">%r</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">error</span><span class="p">)</span>
+
+            <span class="c"># return the error to the sender</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">apdu</span><span class="p">,</span> <span class="n">ConfirmedRequestPDU</span><span class="p">):</span>
+                <span class="n">resp</span> <span class="o">=</span> <span class="n">Error</span><span class="p">(</span><span class="n">errorClass</span><span class="o">=</span><span class="s">&#39;device&#39;</span><span class="p">,</span> <span class="n">errorCode</span><span class="o">=</span><span class="s">&#39;operationalProblem&#39;</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">apdu</span><span class="p">)</span>
+
+                <span class="c"># queue error</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">requests</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">resp</span><span class="p">)</span>
+
+
+<span class="c"># loop through all global objects</span></div></div>
+<span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">reference</span> <span class="ow">in</span> <span class="nb">globals</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="c"># check if object is a request</span>
+    <span class="k">if</span> <span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;do_&#39;</span><span class="p">):</span>
+        <span class="c"># assign method to class</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="n">HandlerApplication</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">reference</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Tobias Grosch.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.3</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,260 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>bacnet.sandbox &mdash; Masterarbeit Grosch 0.4c0 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.4c0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="Masterarbeit Grosch 0.4c0 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Masterarbeit Grosch 0.4c0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for bacnet.sandbox</h1><div class="highlight"><pre>
+<span class="c"># pylint: disable=broad-except</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Sandbox Module</span>
+<span class="sd">--------------</span>
+
+<span class="sd">This module contains handlers for the pypy sandbox environment.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">platform</span>
+
+<span class="kn">from</span> <span class="nn">bacnet.debugging</span> <span class="kn">import</span> <span class="n">bacnet_debug</span><span class="p">,</span> <span class="n">ModuleLogger</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">.process</span> <span class="kn">import</span> <span class="n">PyPySandboxProcess</span>
+
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="n">PyPySandboxProcess</span> <span class="o">=</span> <span class="bp">None</span>
+
+<span class="c"># enable logging</span>
+<span class="n">ModuleLogger</span><span class="p">()</span>
+
+
+<span class="c"># set environment variables</span>
+<span class="n">STARTDIR</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
+<span class="n">SANDBOX</span> <span class="o">=</span> <span class="s">&#39;bacnet/sandbox/pypy/pypy/sandbox&#39;</span>
+<span class="n">SANDBOX_TMP</span> <span class="o">=</span> <span class="s">&#39;tmp&#39;</span>
+<span class="n">SANDBOX_COMPILED</span> <span class="o">=</span> <span class="s">&#39;../goal/</span><span class="si">%s</span><span class="s">/pypy-c&#39;</span>
+
+
+<div class="viewcode-block" id="get_platform_name"><a class="viewcode-back" href="../../bacnet.sandbox.html#bacnet.sandbox.get_platform_name">[docs]</a><span class="k">def</span> <span class="nf">get_platform_name</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function returns the platform name.</span>
+
+<span class="sd">    :return: platform name</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># get system</span>
+    <span class="n">system</span> <span class="o">=</span> <span class="n">platform</span><span class="o">.</span><span class="n">system</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+
+    <span class="c"># get architecture</span>
+    <span class="n">machine</span> <span class="o">=</span> <span class="n">platform</span><span class="o">.</span><span class="n">machine</span><span class="p">()</span>
+
+    <span class="c"># check if machine is arm with hard float</span>
+    <span class="k">if</span> <span class="n">machine</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;armv7&#39;</span><span class="p">):</span>
+        <span class="c"># reset machine description</span>
+        <span class="n">machine</span> <span class="o">=</span> <span class="s">&#39;armhf&#39;</span>
+
+    <span class="c"># check if machine is arm with soft float</span>
+    <span class="k">elif</span> <span class="n">machine</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;arm&#39;</span><span class="p">):</span>
+        <span class="c"># reset machine description</span>
+        <span class="n">machine</span> <span class="o">=</span> <span class="s">&#39;armel&#39;</span>
+
+    <span class="c"># return platform name</span>
+    <span class="k">return</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">-</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">system</span><span class="p">,</span> <span class="n">machine</span><span class="p">)</span>
+
+
+<span class="c"># set platform name</span></div>
+<span class="n">PLATFORM_NAME</span> <span class="o">=</span> <span class="n">get_platform_name</span><span class="p">()</span>
+
+
+<span class="nd">@bacnet_debug</span>
+<div class="viewcode-block" id="sandbox_support"><a class="viewcode-back" href="../../bacnet.sandbox.html#bacnet.sandbox.sandbox_support">[docs]</a><span class="k">def</span> <span class="nf">sandbox_support</span><span class="p">(</span><span class="n">platform_name</span><span class="o">=</span><span class="n">PLATFORM_NAME</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function checks if compiled sandbox version of pypy exists for this system.</span>
+
+<span class="sd">    :return: sandbox is supported on this system</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># get path to executable</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;sandbox&#39;</span><span class="p">):</span>
+        <span class="n">executable</span> <span class="o">=</span> <span class="n">SANDBOX_COMPILED</span> <span class="o">%</span> <span class="n">platform_name</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">executable</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">SANDBOX</span><span class="p">,</span> <span class="n">SANDBOX_COMPILED</span><span class="p">))</span> <span class="o">%</span> <span class="n">platform_name</span>
+
+    <span class="n">sandbox_support</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;checking for sandbox executable: </span><span class="si">%s</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">executable</span><span class="p">)</span>
+
+    <span class="c"># return if sandbox is supported</span>
+    <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">executable</span><span class="p">)</span>
+
+</div>
+<span class="nd">@bacnet_debug</span>
+<div class="viewcode-block" id="get_sandbox_process"><a class="viewcode-back" href="../../bacnet.sandbox.html#bacnet.sandbox.get_sandbox_process">[docs]</a><span class="k">def</span> <span class="nf">get_sandbox_process</span><span class="p">(</span><span class="n">executable</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function returns a sandbox process object.</span>
+
+<span class="sd">    :param executable: relative path to untrusted executable</span>
+<span class="sd">    :return: sandbox process</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="bp">self</span> <span class="o">=</span> <span class="n">get_sandbox_process</span>
+
+    <span class="c"># print platform info</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;platform: </span><span class="si">%s</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">PLATFORM_NAME</span><span class="p">)</span>
+
+    <span class="c"># get path to sandbox</span>
+    <span class="n">sandbox_executable</span> <span class="o">=</span> <span class="n">SANDBOX_COMPILED</span> <span class="o">%</span> <span class="n">PLATFORM_NAME</span>
+
+    <span class="c"># check if sandbox version is supported</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">sandbox_support</span><span class="p">():</span>
+        <span class="c"># print error</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_error</span><span class="p">(</span><span class="s">&#39;sandboxing unsupported: changing to pypy without sandboxing (DANGEROUS!)&#39;</span><span class="p">)</span>
+
+        <span class="c"># get path to pypy</span>
+        <span class="n">sandbox_executable</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">popen</span><span class="p">(</span><span class="s">&#39;which pypy&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\r\n</span><span class="s">&#39;</span><span class="p">)</span>
+
+        <span class="c"># check if pypy was found</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">sandbox_executable</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_error</span><span class="p">(</span><span class="s">&#39;pypy not found&#39;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+
+    <span class="c"># initialize sandbox process</span>
+    <span class="n">sandbox_process</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c"># change to sandbox directory</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">SANDBOX</span><span class="p">)</span>
+
+        <span class="c"># create sandbox process</span>
+        <span class="n">sandbox_process</span> <span class="o">=</span> <span class="n">PyPySandboxProcess</span><span class="p">(</span>
+            <span class="n">sandbox_executable</span><span class="p">,</span>
+            <span class="p">[</span>
+                <span class="c"># &#39;--heapsize&#39;,</span>
+                <span class="c"># str(50 * 1024 * 1024),</span>
+                <span class="n">executable</span><span class="p">,</span>
+            <span class="p">],</span>
+            <span class="n">tmpdir</span><span class="o">=</span><span class="n">SANDBOX_TMP</span><span class="p">,</span>
+            <span class="n">debug</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="c"># return to execution directory</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">STARTDIR</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;sandbox process: </span><span class="si">%s</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">sandbox_process</span><span class="p">)</span>
+
+    <span class="c"># return sandbox process</span>
+    <span class="k">return</span> <span class="n">sandbox_process</span>
+
+</div>
+<span class="nd">@bacnet_debug</span>
+<div class="viewcode-block" id="sandbox_interact"><a class="viewcode-back" href="../../bacnet.sandbox.html#bacnet.sandbox.sandbox_interact">[docs]</a><span class="k">def</span> <span class="nf">sandbox_interact</span><span class="p">(</span><span class="n">sandbox_process</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function interacts with the sandbox process.</span>
+
+<span class="sd">    :param sandbox_process: sandbox process object</span>
+<span class="sd">    :return: None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="bp">self</span> <span class="o">=</span> <span class="n">sandbox_interact</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;process interaction started&#39;</span><span class="p">)</span>
+
+    <span class="c"># check is sandbox process was defined</span>
+    <span class="k">if</span> <span class="n">sandbox_process</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c"># start interaction</span>
+            <span class="n">sandbox_process</span><span class="o">.</span><span class="n">interact</span><span class="p">()</span>
+
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="c"># kill process</span>
+            <span class="n">sandbox_process</span><span class="o">.</span><span class="n">kill</span><span class="p">()</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;process stopped&#39;</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Tobias Grosch.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.3</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

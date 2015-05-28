@@ -1,0 +1,38 @@
+bacnet.console package
+======================
+
+Subpackages
+-----------
+
+.. toctree::
+
+    bacnet.console.creator
+    bacnet.console.parser
+
+Submodules
+----------
+
+bacnet.console.basic module
+---------------------------
+
+.. automodule:: bacnet.console.basic
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+bacnet.console.define module
+----------------------------
+
+.. automodule:: bacnet.console.define
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: bacnet.console
+    :members:
+    :undoc-members:
+    :show-inheritance:

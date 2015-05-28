@@ -1,0 +1,892 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>bacnet.object.properties &mdash; Masterarbeit Grosch 0.4c0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.4c0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="Masterarbeit Grosch 0.4c0 documentation" href="../../../index.html" />
+    <link rel="up" title="bacnet.object" href="../object.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Masterarbeit Grosch 0.4c0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="../object.html" accesskey="U">bacnet.object</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for bacnet.object.properties</h1><div class="highlight"><pre>
+<span class="c"># pylint: disable=invalid-name, too-many-branches, too-many-arguments, too-few-public-methods</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Object Properties Module</span>
+<span class="sd">------------------------</span>
+
+<span class="sd">This module contains specific properties for the usage within objects.</span>
+<span class="sd">Especially it provides updated property COV functionality for bacpypes objects.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">Iterable</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">from</span> <span class="nn">threading</span> <span class="kn">import</span> <span class="n">Lock</span>
+<span class="kn">import</span> <span class="nn">types</span>
+
+<span class="kn">from</span> <span class="nn">bacpypes.errors</span> <span class="kn">import</span> <span class="n">ConfigurationError</span><span class="p">,</span> <span class="n">ExecutionError</span>
+
+<span class="kn">from</span> <span class="nn">bacpypes.primitivedata</span> <span class="kn">import</span> <span class="n">Atomic</span><span class="p">,</span> <span class="n">CharacterString</span><span class="p">,</span> <span class="n">Real</span><span class="p">,</span> <span class="n">Unsigned</span><span class="p">,</span> <span class="n">Time</span><span class="p">,</span> <span class="n">Date</span>
+<span class="kn">from</span> <span class="nn">bacpypes.basetypes</span> <span class="kn">import</span> <span class="n">BinaryPV</span>
+<span class="kn">from</span> <span class="nn">bacpypes.constructeddata</span> <span class="kn">import</span> <span class="n">Array</span>
+
+<span class="kn">from</span> <span class="nn">bacpypes.object</span> <span class="kn">import</span> <span class="n">PropertyIdentifier</span>
+
+<span class="kn">from</span> <span class="nn">bacnet.object.primitivedata</span> <span class="kn">import</span> <span class="n">RingList</span><span class="p">,</span> <span class="n">SequenceOfCOVSubscription</span>
+
+<span class="kn">from</span> <span class="nn">bacnet.debugging</span> <span class="kn">import</span> <span class="n">bacnet_debug</span><span class="p">,</span> <span class="n">ModuleLogger</span>
+
+
+<span class="c"># enable logging</span>
+<span class="n">ModuleLogger</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="s">&#39;INFO&#39;</span><span class="p">)</span>
+
+
+<span class="nd">@bacnet_debug</span>
+<div class="viewcode-block" id="HardwareAccessObject"><a class="viewcode-back" href="../../../bacnet.object.html#bacnet.object.properties.HardwareAccessObject">[docs]</a><span class="k">class</span> <span class="nc">HardwareAccessObject</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class is a wrapper for terra hardware objects.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">hardware</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">writable</span> <span class="o">=</span> <span class="bp">False</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hw_object</span><span class="p">,</span> <span class="n">write</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">hysteresis</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">buffer_size</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function is a constructor for the wrapper of a hardware objects.</span>
+
+<span class="sd">        :param hw_object: hardware object</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># set hardware object</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hardware</span> <span class="o">=</span> <span class="n">hw_object</span>
+
+        <span class="c"># set writable property</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">writable</span> <span class="o">=</span> <span class="n">write</span>
+
+        <span class="k">if</span> <span class="n">buffer_size</span><span class="p">:</span>
+            <span class="c"># set buffer</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span> <span class="o">=</span> <span class="n">RingList</span><span class="p">(</span><span class="n">buffer_size</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">hysteresis</span><span class="p">:</span>
+            <span class="c"># set hysteresis usage</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">hysteresis_func</span> <span class="o">=</span> <span class="n">hysteresis</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function returns a unicode representation of the instance.</span>
+
+<span class="sd">        :return: unicode representation</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s">u&#39;&lt;</span><span class="si">%s</span><span class="s">.</span><span class="si">%s</span><span class="s"> of </span><span class="si">%r</span><span class="s">&gt;&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__module__</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">hardware</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function returns a unicode representation of the instance.</span>
+
+<span class="sd">        :return: unicode representation</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__repr__</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__unicode__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function returns a unicode representation of the instance.</span>
+
+<span class="sd">        :return: unicode representation</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__repr__</span><span class="p">()</span>
+
+<div class="viewcode-block" id="HardwareAccessObject.hysteresis"><a class="viewcode-back" href="../../../bacnet.object.html#bacnet.object.properties.HardwareAccessObject.hysteresis">[docs]</a>    <span class="k">def</span> <span class="nf">hysteresis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function applies a user specific hysteresis to the value.</span>
+
+<span class="sd">        :param value: hardware value</span>
+<span class="sd">        :return: updated value</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># call user specific function</span>
+        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;hysteresis_func&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">s</span><span class="p">,</span> <span class="n">v</span><span class="p">:</span> <span class="n">v</span><span class="p">)(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="HardwareAccessObject.get"><a class="viewcode-back" href="../../../bacnet.object.html#bacnet.object.properties.HardwareAccessObject.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function is a wrapper for getting the actual hardware value</span>
+
+<span class="sd">        :param index: array index</span>
+<span class="sd">        :return: value</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># get hardware</span>
+        <span class="n">hardware</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hardware</span>
+
+        <span class="c"># get hardware by index</span>
+        <span class="k">if</span> <span class="n">index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">hardware</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">):</span>
+            <span class="n">hardware</span> <span class="o">=</span> <span class="n">hardware</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+
+        <span class="c"># initialize value</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="c"># check if hardware has get-function</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">hardware</span><span class="p">,</span> <span class="s">&#39;get&#39;</span><span class="p">):</span>
+            <span class="c"># read hardware value</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">hardware</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+
+            <span class="c"># apply hysteresis</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hysteresis</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+        <span class="c"># return value</span>
+        <span class="k">return</span> <span class="n">value</span>
+</div>
+<div class="viewcode-block" id="HardwareAccessObject.set"><a class="viewcode-back" href="../../../bacnet.object.html#bacnet.object.properties.HardwareAccessObject.set">[docs]</a>    <span class="k">def</span> <span class="nf">set</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">data_type</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="c"># pylint: disable=too-many-function-args</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function converts the</span>
+
+<span class="sd">        :param value: value</span>
+<span class="sd">        :param data_type: data type</span>
+<span class="sd">        :param index: array index</span>
+<span class="sd">        :return: value</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># check if hardware is writable</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">writable</span><span class="p">:</span>
+            <span class="c"># exit</span>
+            <span class="k">return</span> <span class="n">value</span>
+
+        <span class="n">return_values</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c"># get hardware</span>
+        <span class="n">hardware</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">hardware</span>
+
+        <span class="c"># get hardware by index</span>
+        <span class="k">if</span> <span class="n">index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">hardware</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">):</span>
+            <span class="n">hardware</span> <span class="o">=</span> <span class="n">hardware</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+
+        <span class="c">#check if hardware is an iterable</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">hardware</span><span class="p">,</span> <span class="p">(</span><span class="n">Array</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">)):</span>
+
+            <span class="c"># loop through hardware objects</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">hardware</span><span class="p">)):</span>
+
+                <span class="c"># check if value is an array</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Array</span><span class="p">):</span>
+                    <span class="c"># call function for each object</span>
+                    <span class="n">return_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">data_type</span><span class="o">.</span><span class="n">subtype</span><span class="p">,</span> <span class="n">i</span><span class="p">))</span>
+
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c"># call function for each object</span>
+                    <span class="n">return_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">data_type</span><span class="o">.</span><span class="n">subtype</span><span class="p">,</span> <span class="n">i</span><span class="p">))</span>
+
+            <span class="c"># return value list</span>
+            <span class="k">return</span> <span class="n">return_values</span>
+
+        <span class="c"># check if data type is binary</span>
+        <span class="k">elif</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">data_type</span><span class="p">,</span> <span class="n">BinaryPV</span><span class="p">):</span>
+
+            <span class="c"># check if hardware should be turned on or off</span>
+            <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s">&#39;value&#39;</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="o">==</span> <span class="s">&#39;active&#39;</span><span class="p">:</span>
+                <span class="n">hardware</span><span class="o">.</span><span class="n">on</span><span class="p">()</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">hardware</span><span class="o">.</span><span class="n">off</span><span class="p">()</span>
+
+        <span class="c"># check if data type is string</span>
+        <span class="k">elif</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">data_type</span><span class="p">,</span> <span class="n">CharacterString</span><span class="p">):</span>
+
+            <span class="c"># check if hardware has write function</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">hardware</span><span class="p">,</span> <span class="s">&#39;write&#39;</span><span class="p">):</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="n">hardware</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s">&#39;value&#39;</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_error</span><span class="p">(</span><span class="s">&#39;unable to write to hardware </span><span class="si">%r</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">hardware</span><span class="p">)</span>
+
+        <span class="c"># check if data type is real</span>
+        <span class="c"># elif isinstance(value, Real):</span>
+        <span class="c">#     pass</span>
+
+        <span class="c"># check if value is array size</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="k">pass</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_error</span><span class="p">(</span>
+                <span class="s">&#39;unable to set value &quot;</span><span class="si">%s</span><span class="s">&quot; (</span><span class="si">%s</span><span class="s">) on hardware </span><span class="si">%r</span><span class="s">&#39;</span> <span class="o">%</span>
+                <span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">),</span> <span class="n">hardware</span><span class="p">)</span>
+            <span class="p">)</span>
+
+            <span class="c"># exit</span>
+            <span class="k">return</span> <span class="n">value</span>
+
+        <span class="c"># return value</span>
+        <span class="k">return</span> <span class="n">value</span>
+
+</div></div>
+<span class="nd">@bacnet_debug</span>
+<div class="viewcode-block" id="Property"><a class="viewcode-back" href="../../../bacnet.object.html#bacnet.object.properties.Property">[docs]</a><span class="k">class</span> <span class="nc">Property</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class is an extension of the bacpypes Property class to support COV notifications.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identifier</span><span class="p">,</span> <span class="n">datatype</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function initializes the property.</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;__init__ </span><span class="si">%s</span><span class="s">, </span><span class="si">%s</span><span class="s">, </span><span class="si">%s</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">identifier</span><span class="p">,</span> <span class="n">datatype</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="c"># read identifier and data type</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">identifier</span> <span class="o">=</span> <span class="n">identifier</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">datatype</span> <span class="o">=</span> <span class="n">datatype</span>
+
+        <span class="c"># read default, optional and mutable</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">default</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;default&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">optional</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;optional&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mutable</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;mutable&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span>
+
+        <span class="c"># get cov support</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cov_support</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;cov_support&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span>
+
+        <span class="c"># get hardware</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hardware</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;hardware&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function returns a unicode representation of the instance.</span>
+
+<span class="sd">        :return: unicode representation</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s">u&#39;&lt;</span><span class="si">%s</span><span class="s">.</span><span class="si">%s</span><span class="s"> </span><span class="si">%r</span><span class="s">&gt;&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__module__</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">identifier</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function returns a unicode representation of the instance.</span>
+
+<span class="sd">        :return: unicode representation</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__repr__</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__unicode__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function returns a unicode representation of the instance.</span>
+
+<span class="sd">        :return: unicode representation</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__repr__</span><span class="p">()</span>
+
+<div class="viewcode-block" id="Property.WriteProperty"><a class="viewcode-back" href="../../../bacnet.object.html#bacnet.object.properties.Property.WriteProperty">[docs]</a>    <span class="k">def</span> <span class="nf">WriteProperty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">arrayIndex</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">priority</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">direct</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function handles writing.</span>
+
+<span class="sd">        :param obj: property</span>
+<span class="sd">        :param value: property value</span>
+<span class="sd">        :param arrayIndex: index</span>
+<span class="sd">        :param priority: priority</span>
+<span class="sd">        :param direct: direct</span>
+<span class="sd">        :return: property value</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span>
+            <span class="s">&#39;WriteProperty(</span><span class="si">%s</span><span class="s">) </span><span class="si">%s</span><span class="s"> </span><span class="si">%r</span><span class="s"> arrayIndex=</span><span class="si">%r</span><span class="s"> priority=</span><span class="si">%r</span><span class="s"> direct=</span><span class="si">%r</span><span class="s">&#39;</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">identifier</span><span class="p">,</span>
+            <span class="n">obj</span><span class="p">,</span>
+            <span class="n">value</span><span class="p">,</span>
+            <span class="n">arrayIndex</span><span class="p">,</span>
+            <span class="n">priority</span><span class="p">,</span>
+            <span class="n">direct</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">direct</span><span class="p">:</span>
+            <span class="c"># check if property must be provided</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">optional</span> <span class="ow">and</span> <span class="n">value</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%s</span><span class="s"> value required&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">identifier</span><span class="p">)</span>
+
+            <span class="c"># check if writing is allowed</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">mutable</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ExecutionError</span><span class="p">(</span><span class="n">errorClass</span><span class="o">=</span><span class="s">&#39;property&#39;</span><span class="p">,</span> <span class="n">errorCode</span><span class="o">=</span><span class="s">&#39;writeAccessDenied&#39;</span><span class="p">)</span>
+
+        <span class="c"># initialize value</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">issubclass</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">datatype</span><span class="p">,</span> <span class="n">CharacterString</span><span class="p">):</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+            <span class="k">if</span> <span class="nb">issubclass</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">datatype</span><span class="p">,</span> <span class="p">(</span><span class="n">Real</span><span class="p">,</span> <span class="n">Unsigned</span><span class="p">)):</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c"># check if data type is correct</span>
+        <span class="k">if</span> <span class="nb">issubclass</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">datatype</span><span class="p">,</span> <span class="n">Atomic</span><span class="p">):</span>
+            <span class="c"># inform hardware</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">identifier</span> <span class="o">==</span> <span class="s">&#39;presentValue&#39;</span> <span class="ow">and</span> <span class="n">obj</span><span class="o">.</span><span class="n">_hardware</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">_hardware</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">datatype</span><span class="p">)</span>
+
+            <span class="c"># cast to correct data type if needed</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">datatype</span><span class="p">)</span> <span class="ow">and</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">datatype</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;   - property is atomic, assumed correct type&#39;</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">datatype</span><span class="p">):</span>
+            <span class="c"># inform hardware</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">identifier</span> <span class="o">==</span> <span class="s">&#39;presentValue&#39;</span> <span class="ow">and</span> <span class="n">obj</span><span class="o">.</span><span class="n">_hardware</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">_hardware</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">datatype</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;   - correct type&#39;</span><span class="p">)</span>
+
+        <span class="c"># check if property index is set</span>
+        <span class="k">elif</span> <span class="n">arrayIndex</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="c"># check if data type is array</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">datatype</span><span class="p">,</span> <span class="n">Array</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="n">ExecutionError</span><span class="p">(</span><span class="n">errorClass</span><span class="o">=</span><span class="s">&#39;property&#39;</span><span class="p">,</span> <span class="n">errorCode</span><span class="o">=</span><span class="s">&#39;propertyIsNotAnArray&#39;</span><span class="p">)</span>
+
+            <span class="c"># read values</span>
+            <span class="n">values</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get_value</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">identifier</span><span class="p">)</span>
+
+            <span class="c"># check if values exist</span>
+            <span class="k">if</span> <span class="n">values</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%s</span><span class="s"> uninitialized array&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">identifier</span><span class="p">)</span>
+
+            <span class="c"># check if array index is valid</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">arrayIndex</span> <span class="o">&lt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="n">ExecutionError</span><span class="p">(</span><span class="n">errorClass</span><span class="o">=</span><span class="s">&#39;property&#39;</span><span class="p">,</span> <span class="n">errorCode</span><span class="o">=</span><span class="s">&#39;invalidArrayIndex&#39;</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;   - forwarding to array&#39;</span><span class="p">)</span>
+
+            <span class="c"># inform hardware</span>
+            <span class="k">if</span> <span class="n">arrayIndex</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">identifier</span> <span class="o">==</span> <span class="s">&#39;presentValue&#39;</span> <span class="ow">and</span> <span class="n">obj</span><span class="o">.</span><span class="n">_hardware</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">_hardware</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">datatype</span><span class="p">)</span>
+
+            <span class="c"># set value</span>
+            <span class="n">values</span><span class="p">[</span><span class="n">arrayIndex</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+            <span class="c"># return value</span>
+            <span class="k">return</span> <span class="n">value</span>
+
+        <span class="c"># check if value is set</span>
+        <span class="k">elif</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+
+            <span class="c"># cast value</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">datatype</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+            <span class="c"># inform hardware</span>
+            <span class="k">if</span> <span class="n">obj</span><span class="o">.</span><span class="n">_hardware</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">_hardware</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">datatype</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;   - coerced the value: </span><span class="si">%r</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+        <span class="c"># set value</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">identifier</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+        <span class="c"># return value</span>
+        <span class="k">return</span> <span class="n">value</span>
+</div>
+<div class="viewcode-block" id="Property.ReadProperty"><a class="viewcode-back" href="../../../bacnet.object.html#bacnet.object.properties.Property.ReadProperty">[docs]</a>    <span class="k">def</span> <span class="nf">ReadProperty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">arrayIndex</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function handles reading.</span>
+
+<span class="sd">        :param obj: property</span>
+<span class="sd">        :param arrayIndex: index</span>
+<span class="sd">        :return: property value</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span>
+            <span class="s">&#39;ReadProperty(</span><span class="si">%s</span><span class="s">) </span><span class="si">%s</span><span class="s"> arrayIndex=</span><span class="si">%r</span><span class="s">&#39;</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">identifier</span><span class="p">,</span>
+            <span class="n">obj</span><span class="p">,</span>
+            <span class="n">arrayIndex</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c"># read value</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get_value</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">identifier</span><span class="p">)</span>
+
+        <span class="c"># check if property index is set</span>
+        <span class="k">if</span> <span class="n">arrayIndex</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="c"># check if data type is array</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">datatype</span><span class="p">,</span> <span class="n">Array</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="n">ExecutionError</span><span class="p">(</span><span class="n">errorClass</span><span class="o">=</span><span class="s">&#39;property&#39;</span><span class="p">,</span> <span class="n">errorCode</span><span class="o">=</span><span class="s">&#39;propertyIsNotAnArray&#39;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">obj</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">identifier</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">datatype</span><span class="p">())</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get_value</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">identifier</span><span class="p">)</span>
+
+            <span class="c"># check if array index is valid</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">arrayIndex</span> <span class="o">&lt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="n">ExecutionError</span><span class="p">(</span><span class="n">errorClass</span><span class="o">=</span><span class="s">&#39;property&#39;</span><span class="p">,</span> <span class="n">errorCode</span><span class="o">=</span><span class="s">&#39;invalidArrayIndex&#39;</span><span class="p">)</span>
+
+            <span class="c"># check if value is valid</span>
+            <span class="k">if</span> <span class="n">value</span><span class="p">:</span>
+                <span class="c"># set value</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="n">arrayIndex</span><span class="p">]</span>
+
+        <span class="c"># return value</span>
+        <span class="k">return</span> <span class="n">value</span>
+
+</div></div>
+<div class="viewcode-block" id="StandardProperty"><a class="viewcode-back" href="../../../bacnet.object.html#bacnet.object.properties.StandardProperty">[docs]</a><span class="k">class</span> <span class="nc">StandardProperty</span><span class="p">(</span><span class="n">Property</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class is an extension of the bacpypes StandardProperty class to support COV notifications.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function initializes the property.</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># check if subclass is valid</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="p">(</span><span class="n">OptionalProperty</span><span class="p">,</span> <span class="n">ReadableProperty</span><span class="p">,</span> <span class="n">WritableProperty</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="n">ConfigurationError</span><span class="p">(</span>
+                <span class="s">&#39;</span><span class="si">%s</span><span class="s"> must derive from OptionalProperty, ReadableProperty, or WritableProperty&#39;</span> <span class="o">%</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span>
+            <span class="p">)</span>
+
+        <span class="c"># read identifier</span>
+        <span class="n">identifier</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="c"># check if identifier is valid</span>
+        <span class="k">if</span> <span class="n">identifier</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">PropertyIdentifier</span><span class="o">.</span><span class="n">enumerations</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ConfigurationError</span><span class="p">(</span><span class="s">&#39;unknown standard property identifier: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">identifier</span><span class="p">)</span>
+
+        <span class="c"># call predecessor</span>
+        <span class="n">Property</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="OptionalProperty"><a class="viewcode-back" href="../../../bacnet.object.html#bacnet.object.properties.OptionalProperty">[docs]</a><span class="k">class</span> <span class="nc">OptionalProperty</span><span class="p">(</span><span class="n">StandardProperty</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class is an extension of the bacpypes OptionalProperty class to support COV notifications.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identifier</span><span class="p">,</span> <span class="n">datatype</span><span class="p">,</span>
+                 <span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">mutable</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">cov_support</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function initializes the property.</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># call predecessor</span>
+        <span class="n">StandardProperty</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">identifier</span><span class="p">,</span>
+            <span class="n">datatype</span><span class="p">,</span>
+            <span class="n">default</span><span class="o">=</span><span class="n">default</span><span class="p">,</span>
+            <span class="n">optional</span><span class="o">=</span><span class="n">optional</span><span class="p">,</span>
+            <span class="n">mutable</span><span class="o">=</span><span class="n">mutable</span><span class="p">,</span>
+            <span class="n">cov_support</span><span class="o">=</span><span class="n">cov_support</span><span class="p">,</span>
+        <span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="ReadableProperty"><a class="viewcode-back" href="../../../bacnet.object.html#bacnet.object.properties.ReadableProperty">[docs]</a><span class="k">class</span> <span class="nc">ReadableProperty</span><span class="p">(</span><span class="n">StandardProperty</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class is an extension of the bacpypes ReadableProperty class to support COV notifications.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identifier</span><span class="p">,</span> <span class="n">datatype</span><span class="p">,</span>
+                 <span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">mutable</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">cov_support</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function initializes the property.</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># call predecessor</span>
+        <span class="n">StandardProperty</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">identifier</span><span class="p">,</span>
+            <span class="n">datatype</span><span class="p">,</span>
+            <span class="n">default</span><span class="o">=</span><span class="n">default</span><span class="p">,</span>
+            <span class="n">optional</span><span class="o">=</span><span class="n">optional</span><span class="p">,</span>
+            <span class="n">mutable</span><span class="o">=</span><span class="n">mutable</span><span class="p">,</span>
+            <span class="n">cov_support</span><span class="o">=</span><span class="n">cov_support</span><span class="p">,</span>
+        <span class="p">)</span>
+
+</div>
+<span class="nd">@bacnet_debug</span>
+<div class="viewcode-block" id="WritableProperty"><a class="viewcode-back" href="../../../bacnet.object.html#bacnet.object.properties.WritableProperty">[docs]</a><span class="k">class</span> <span class="nc">WritableProperty</span><span class="p">(</span><span class="n">StandardProperty</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class is an extension of the bacpypes WritableProperty class to support COV notifications.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identifier</span><span class="p">,</span> <span class="n">datatype</span><span class="p">,</span>
+                 <span class="n">default</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">optional</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">mutable</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">cov_support</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function initializes the property.</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># call predecessor</span>
+        <span class="n">StandardProperty</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">identifier</span><span class="p">,</span>
+            <span class="n">datatype</span><span class="p">,</span>
+            <span class="n">default</span><span class="o">=</span><span class="n">default</span><span class="p">,</span>
+            <span class="n">optional</span><span class="o">=</span><span class="n">optional</span><span class="p">,</span>
+            <span class="n">mutable</span><span class="o">=</span><span class="n">mutable</span><span class="p">,</span>
+            <span class="n">cov_support</span><span class="o">=</span><span class="n">cov_support</span><span class="p">,</span>
+        <span class="p">)</span>
+
+</div>
+<span class="nd">@bacnet_debug</span>
+<div class="viewcode-block" id="ObjectIdentifierProperty"><a class="viewcode-back" href="../../../bacnet.object.html#bacnet.object.properties.ObjectIdentifierProperty">[docs]</a><span class="k">class</span> <span class="nc">ObjectIdentifierProperty</span><span class="p">(</span><span class="n">ReadableProperty</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class is an extension of the ReadableProperty class for object identifiers.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="ObjectIdentifierProperty.WriteProperty"><a class="viewcode-back" href="../../../bacnet.object.html#bacnet.object.properties.ObjectIdentifierProperty.WriteProperty">[docs]</a>    <span class="k">def</span> <span class="nf">WriteProperty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">arrayIndex</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">priority</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">direct</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function handles writing.</span>
+
+<span class="sd">        :param obj: property</span>
+<span class="sd">        :param value: property value</span>
+<span class="sd">        :param arrayIndex: index</span>
+<span class="sd">        :param priority: priority</span>
+<span class="sd">        :param direct: direct</span>
+<span class="sd">        :return: property value</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span>
+            <span class="s">&#39;WriteProperty </span><span class="si">%r</span><span class="s"> </span><span class="si">%r</span><span class="s"> arrayIndex=</span><span class="si">%r</span><span class="s"> priority=</span><span class="si">%r</span><span class="s">&#39;</span><span class="p">,</span>
+            <span class="n">obj</span><span class="p">,</span>
+            <span class="n">value</span><span class="p">,</span>
+            <span class="n">arrayIndex</span><span class="p">,</span>
+            <span class="n">priority</span>
+        <span class="p">)</span>
+
+        <span class="c"># check if value was provided</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="c"># check if value is valid</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">IntType</span><span class="p">,</span> <span class="n">types</span><span class="o">.</span><span class="n">LongType</span><span class="p">)):</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">objectType</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+        <span class="c"># check if object type within value is correct</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">types</span><span class="o">.</span><span class="n">TupleType</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">obj</span><span class="o">.</span><span class="n">objectType</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%s</span><span class="s"> required&#39;</span> <span class="o">%</span> <span class="n">obj</span><span class="o">.</span><span class="n">objectType</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&#39;object identifier invalid&#39;</span><span class="p">)</span>
+
+        <span class="c"># perform actual write procedure</span>
+        <span class="k">return</span> <span class="n">ReadableProperty</span><span class="o">.</span><span class="n">WriteProperty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">arrayIndex</span><span class="p">,</span> <span class="n">priority</span><span class="p">,</span> <span class="n">direct</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="CurrentDateProperty"><a class="viewcode-back" href="../../../bacnet.object.html#bacnet.object.properties.CurrentDateProperty">[docs]</a><span class="k">class</span> <span class="nc">CurrentDateProperty</span><span class="p">(</span><span class="n">OptionalProperty</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class is an extension of the OptionalProperty class for current date.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identifier</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function initializes the property.</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">OptionalProperty</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identifier</span><span class="p">,</span> <span class="n">Date</span><span class="p">)</span>
+
+<div class="viewcode-block" id="CurrentDateProperty.ReadProperty"><a class="viewcode-back" href="../../../bacnet.object.html#bacnet.object.properties.CurrentDateProperty.ReadProperty">[docs]</a>    <span class="k">def</span> <span class="nf">ReadProperty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">arrayIndex</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function handles reading.</span>
+
+<span class="sd">        :param obj: property</span>
+<span class="sd">        :param arrayIndex: index</span>
+<span class="sd">        :return: property value</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># access an array</span>
+        <span class="k">if</span> <span class="n">arrayIndex</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%s</span><span class="s"> is not an array&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">identifier</span><span class="p">)</span>
+
+        <span class="c"># get utc now</span>
+        <span class="n">utcnow</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">()</span>
+
+        <span class="c"># get current date</span>
+        <span class="n">now</span> <span class="o">=</span> <span class="n">Date</span><span class="p">(</span>
+            <span class="n">year</span><span class="o">=</span><span class="n">utcnow</span><span class="o">.</span><span class="n">year</span> <span class="o">-</span> <span class="mi">1900</span><span class="p">,</span>
+            <span class="n">month</span><span class="o">=</span><span class="n">utcnow</span><span class="o">.</span><span class="n">month</span><span class="p">,</span>
+            <span class="n">day</span><span class="o">=</span><span class="n">utcnow</span><span class="o">.</span><span class="n">day</span><span class="p">,</span>
+            <span class="n">dayOfWeek</span><span class="o">=</span><span class="n">utcnow</span><span class="o">.</span><span class="n">weekday</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="p">)</span>
+
+        <span class="c"># return value</span>
+        <span class="k">return</span> <span class="n">now</span><span class="o">.</span><span class="n">value</span>
+</div>
+<div class="viewcode-block" id="CurrentDateProperty.WriteProperty"><a class="viewcode-back" href="../../../bacnet.object.html#bacnet.object.properties.CurrentDateProperty.WriteProperty">[docs]</a>    <span class="k">def</span> <span class="nf">WriteProperty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">arrayIndex</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">priority</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">direct</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function handles writing.</span>
+
+<span class="sd">        :param obj: property</span>
+<span class="sd">        :param value: property value</span>
+<span class="sd">        :param arrayIndex: index</span>
+<span class="sd">        :param priority: priority</span>
+<span class="sd">        :param direct: direct</span>
+<span class="sd">        :return: property value</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">raise</span> <span class="n">ExecutionError</span><span class="p">(</span><span class="n">errorClass</span><span class="o">=</span><span class="s">&#39;property&#39;</span><span class="p">,</span> <span class="n">errorCode</span><span class="o">=</span><span class="s">&#39;writeAccessDenied&#39;</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="CurrentTimeProperty"><a class="viewcode-back" href="../../../bacnet.object.html#bacnet.object.properties.CurrentTimeProperty">[docs]</a><span class="k">class</span> <span class="nc">CurrentTimeProperty</span><span class="p">(</span><span class="n">OptionalProperty</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class is an extension of the OptionalProperty class for current time.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identifier</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function initializes the property.</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">OptionalProperty</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identifier</span><span class="p">,</span> <span class="n">Time</span><span class="p">)</span>
+
+<div class="viewcode-block" id="CurrentTimeProperty.ReadProperty"><a class="viewcode-back" href="../../../bacnet.object.html#bacnet.object.properties.CurrentTimeProperty.ReadProperty">[docs]</a>    <span class="k">def</span> <span class="nf">ReadProperty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">arrayIndex</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function handles reading.</span>
+
+<span class="sd">        :param obj: property</span>
+<span class="sd">        :param arrayIndex: index</span>
+<span class="sd">        :return: property value</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># check if array index was provided</span>
+        <span class="k">if</span> <span class="n">arrayIndex</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%s</span><span class="s"> is not an array&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">identifier</span><span class="p">)</span>
+
+        <span class="c"># get utc now</span>
+        <span class="n">utcnow</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">()</span>
+
+        <span class="c"># get current time</span>
+        <span class="n">now</span> <span class="o">=</span> <span class="n">Time</span><span class="p">(</span>
+            <span class="n">hour</span><span class="o">=</span><span class="n">utcnow</span><span class="o">.</span><span class="n">hour</span><span class="p">,</span>
+            <span class="n">minute</span><span class="o">=</span><span class="n">utcnow</span><span class="o">.</span><span class="n">minute</span><span class="p">,</span>
+            <span class="n">second</span><span class="o">=</span><span class="n">utcnow</span><span class="o">.</span><span class="n">second</span><span class="p">,</span>
+            <span class="n">hundredth</span><span class="o">=</span><span class="n">utcnow</span><span class="o">.</span><span class="n">microsecond</span> <span class="o">/</span>  <span class="mi">10000</span>
+        <span class="p">)</span>
+
+        <span class="c"># return value</span>
+        <span class="k">return</span> <span class="n">now</span><span class="o">.</span><span class="n">value</span>
+</div>
+<div class="viewcode-block" id="CurrentTimeProperty.WriteProperty"><a class="viewcode-back" href="../../../bacnet.object.html#bacnet.object.properties.CurrentTimeProperty.WriteProperty">[docs]</a>    <span class="k">def</span> <span class="nf">WriteProperty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">arrayIndex</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">priority</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">direct</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function handles writing.</span>
+
+<span class="sd">        :param obj: property</span>
+<span class="sd">        :param value: property value</span>
+<span class="sd">        :param arrayIndex: index</span>
+<span class="sd">        :param priority: priority</span>
+<span class="sd">        :param direct: direct</span>
+<span class="sd">        :return: property value</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">raise</span> <span class="n">ExecutionError</span><span class="p">(</span><span class="n">errorClass</span><span class="o">=</span><span class="s">&#39;property&#39;</span><span class="p">,</span> <span class="n">errorCode</span><span class="o">=</span><span class="s">&#39;writeAccessDenied&#39;</span><span class="p">)</span>
+
+</div></div>
+<span class="nd">@bacnet_debug</span>
+<div class="viewcode-block" id="ActiveCovSubscriptionsProperty"><a class="viewcode-back" href="../../../bacnet.object.html#bacnet.object.properties.ActiveCovSubscriptionsProperty">[docs]</a><span class="k">class</span> <span class="nc">ActiveCovSubscriptionsProperty</span><span class="p">(</span><span class="n">ReadableProperty</span><span class="p">):</span>
+    <span class="c"># pylint: disable=arguments-differ</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class is an extension of the ReadableProperty class for active cov subscriptions.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function initializes the property.</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># add lock to property</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lock</span> <span class="o">=</span> <span class="n">Lock</span><span class="p">()</span>
+
+        <span class="c"># call predecessor</span>
+        <span class="n">ReadableProperty</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ActiveCovSubscriptionsProperty.ReadProperty"><a class="viewcode-back" href="../../../bacnet.object.html#bacnet.object.properties.ActiveCovSubscriptionsProperty.ReadProperty">[docs]</a>    <span class="k">def</span> <span class="nf">ReadProperty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">arrayIndex</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">dictionary</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function handles reading.</span>
+
+<span class="sd">        :param obj: property</span>
+<span class="sd">        :param arrayIndex: index</span>
+<span class="sd">        :return: property value</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># get result</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">ReadableProperty</span><span class="o">.</span><span class="n">ReadProperty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">arrayIndex</span><span class="p">)</span>
+
+        <span class="c"># check if return value should be a dictionary</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">dictionary</span><span class="p">:</span>
+
+            <span class="n">removables</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="c"># get new instance</span>
+            <span class="n">new_result</span> <span class="o">=</span> <span class="n">SequenceOfCOVSubscription</span><span class="p">()</span>
+
+            <span class="c"># loop through all subscriptions</span>
+            <span class="k">for</span> <span class="n">subscriptions</span> <span class="ow">in</span> <span class="n">result</span><span class="o">.</span><span class="n">itervalues</span><span class="p">():</span>
+                <span class="k">for</span> <span class="n">subscription</span> <span class="ow">in</span> <span class="n">subscriptions</span><span class="p">:</span>
+                    <span class="c"># check if remaining life time is 0</span>
+                    <span class="k">if</span> <span class="n">subscription</span><span class="o">.</span><span class="n">timeRemaining</span><span class="o">.</span><span class="n">remaining_time</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="c"># add subscription to remove list</span>
+                        <span class="n">removables</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">subscription</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="c"># add subscription to read result</span>
+                        <span class="n">new_result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">subscription</span><span class="p">)</span>
+
+            <span class="c"># check if removables were found</span>
+            <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">removables</span><span class="p">):</span>
+                <span class="c"># remove results</span>
+                <span class="n">obj</span><span class="o">.</span><span class="n">_application</span><span class="o">.</span><span class="n">delete_cov_subscriptions</span><span class="p">(</span><span class="n">removables</span><span class="p">)</span>
+
+            <span class="n">result</span> <span class="o">=</span> <span class="n">new_result</span>
+
+        <span class="c"># return result</span>
+        <span class="k">return</span> <span class="n">result</span>
+</div>
+<div class="viewcode-block" id="ActiveCovSubscriptionsProperty.WriteProperty"><a class="viewcode-back" href="../../../bacnet.object.html#bacnet.object.properties.ActiveCovSubscriptionsProperty.WriteProperty">[docs]</a>    <span class="k">def</span> <span class="nf">WriteProperty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">arrayIndex</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">priority</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">direct</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function handles writing.</span>
+
+<span class="sd">        :param obj: property</span>
+<span class="sd">        :param value: property value</span>
+<span class="sd">        :param arrayIndex: index</span>
+<span class="sd">        :param priority: priority</span>
+<span class="sd">        :param direct: direct</span>
+<span class="sd">        :return: property value</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span>
+            <span class="s">&#39;WriteProperty(</span><span class="si">%s</span><span class="s">) </span><span class="si">%s</span><span class="s"> </span><span class="si">%r</span><span class="s"> arrayIndex=</span><span class="si">%r</span><span class="s"> priority=</span><span class="si">%r</span><span class="s"> direct=</span><span class="si">%r</span><span class="s">&#39;</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">identifier</span><span class="p">,</span>
+            <span class="n">obj</span><span class="p">,</span>
+            <span class="n">value</span><span class="p">,</span>
+            <span class="n">arrayIndex</span><span class="p">,</span>
+            <span class="n">priority</span><span class="p">,</span>
+            <span class="n">direct</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c"># initialize value</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">issubclass</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">datatype</span><span class="p">,</span> <span class="n">CharacterString</span><span class="p">):</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+            <span class="k">if</span> <span class="nb">issubclass</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">datatype</span><span class="p">,</span> <span class="p">(</span><span class="n">Real</span><span class="p">,</span> <span class="n">Unsigned</span><span class="p">)):</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">direct</span><span class="p">:</span>
+            <span class="c"># check if property must be provided</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">optional</span> <span class="ow">and</span> <span class="n">value</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%s</span><span class="s"> value required&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">identifier</span><span class="p">)</span>
+
+            <span class="c"># check if writing is allowed</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">mutable</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ExecutionError</span><span class="p">(</span><span class="n">errorClass</span><span class="o">=</span><span class="s">&#39;property&#39;</span><span class="p">,</span> <span class="n">errorCode</span><span class="o">=</span><span class="s">&#39;writeAccessDenied&#39;</span><span class="p">)</span>
+
+        <span class="c"># check if property was locked before writing</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lock</span><span class="o">.</span><span class="n">acquire</span><span class="p">(</span><span class="bp">False</span><span class="p">):</span>
+            <span class="c"># release lock</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lock</span><span class="o">.</span><span class="n">release</span><span class="p">()</span>
+
+            <span class="k">if</span> <span class="n">value</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_warning</span><span class="p">(</span><span class="s">&#39;not locked before writing directly&#39;</span><span class="p">)</span>
+
+        <span class="c"># check if value is dictionary</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_warning</span><span class="p">(</span><span class="s">&#39;value is not a dictionary&#39;</span><span class="p">)</span>
+
+        <span class="c"># set value</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">set_value</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">identifier</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+        <span class="c"># return value</span>
+        <span class="k">return</span> <span class="n">value</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Tobias Grosch.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.3</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

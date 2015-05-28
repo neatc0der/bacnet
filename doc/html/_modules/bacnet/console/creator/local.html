@@ -1,0 +1,502 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>bacnet.console.creator.local &mdash; Masterarbeit Grosch 0.4c0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.4c0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="Masterarbeit Grosch 0.4c0 documentation" href="../../../../index.html" />
+    <link rel="up" title="bacnet.console.creator" href="../creator.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">Masterarbeit Grosch 0.4c0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="../../console.html" >bacnet.console</a> &raquo;</li>
+          <li class="nav-item nav-item-3"><a href="../creator.html" accesskey="U">bacnet.console.creator</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for bacnet.console.creator.local</h1><div class="highlight"><pre>
+<span class="c"># pylint: disable=</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Local Handler Module</span>
+<span class="sd">--------------------</span>
+
+<span class="sd">This module provides local access requests. - DEPRECATED !</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="kn">from</span> <span class="nn">bacpypes.constructeddata</span> <span class="kn">import</span> <span class="n">Array</span>
+
+
+<span class="c"># code dump</span>
+<span class="c"># ---------</span>
+<span class="c">#</span>
+<span class="c"># def do_set(self, args):</span>
+<span class="c">#     &quot;&quot;&quot;</span>
+<span class="c">#     This function sets the property value of a local property.</span>
+<span class="c">#</span>
+<span class="c">#     Usage: set ( &lt;name&gt; | &lt;type&gt; &lt;instance&gt; ) &lt;property&gt; &lt;value&gt; [ &lt;index&gt; ]</span>
+<span class="c">#</span>
+<span class="c">#     :param args: string of parameters</span>
+<span class="c">#     :return: None</span>
+<span class="c">#     &quot;&quot;&quot;</span>
+<span class="c">#</span>
+<span class="c">#     self._debug(&#39;do_set %r&#39;, args)</span>
+<span class="c">#</span>
+<span class="c">#     # read object name</span>
+<span class="c">#     obj_name = args[0]</span>
+<span class="c">#</span>
+<span class="c">#     i = 1</span>
+<span class="c">#</span>
+<span class="c">#     # check if object id was set</span>
+<span class="c">#     if i &lt; len(args) and args[i].isdigit():</span>
+<span class="c">#         # read object id</span>
+<span class="c">#         obj_id = (obj_name, int(args[i]))</span>
+<span class="c">#         i += 1</span>
+<span class="c">#</span>
+<span class="c">#         # get object by id</span>
+<span class="c">#         obj = self.application.get_object_by_id(obj_id)</span>
+<span class="c">#</span>
+<span class="c">#     else:</span>
+<span class="c">#         # get object by name</span>
+<span class="c">#         obj = self.application.get_object_by_name(obj_name)</span>
+<span class="c">#</span>
+<span class="c">#     # call helper function</span>
+<span class="c">#     local_set(args, i, obj)</span>
+<span class="c">#</span>
+<span class="c"># def do_list(self, args):</span>
+<span class="c">#     &quot;&quot;&quot;</span>
+<span class="c">#     This function lists all objects within the application, all properties within an object, or</span>
+<span class="c">#     the property value of a property.</span>
+<span class="c">#</span>
+<span class="c">#     Usage: list [ ( &lt;name&gt; | &lt;type&gt; &lt;instance&gt; ) [ &lt;property&gt; [ &lt;index&gt; ] ] ]</span>
+<span class="c">#</span>
+<span class="c">#     :param args: string of parameters</span>
+<span class="c">#     :return: None</span>
+<span class="c">#     &quot;&quot;&quot;</span>
+<span class="c">#</span>
+<span class="c">#     self._debug(&#39;do_list %r&#39;, args)</span>
+<span class="c">#</span>
+<span class="c">#     obj = None</span>
+<span class="c">#     objs = None</span>
+<span class="c">#</span>
+<span class="c">#     i = 0</span>
+<span class="c">#</span>
+<span class="c">#     # read all objects</span>
+<span class="c">#     if len(args) == 0:</span>
+<span class="c">#         objs = self.application.objectName.values()</span>
+<span class="c">#</span>
+<span class="c">#     else:</span>
+<span class="c">#         # read object name</span>
+<span class="c">#         obj_name = args[0]</span>
+<span class="c">#</span>
+<span class="c">#         i += 1</span>
+<span class="c">#</span>
+<span class="c">#         # check if object id was set</span>
+<span class="c">#         if i &lt; len(args) and args[i].isdigit():</span>
+<span class="c">#             # read object id</span>
+<span class="c">#             obj_id = (obj_name, int(args[i]))</span>
+<span class="c">#             i += 1</span>
+<span class="c">#</span>
+<span class="c">#             # get object by id</span>
+<span class="c">#             obj = self.application.get_object_by_id(obj_id)</span>
+<span class="c">#</span>
+<span class="c">#         else:</span>
+<span class="c">#             # get object by name</span>
+<span class="c">#             obj = self.application.get_object_by_name(obj_name)</span>
+<span class="c">#</span>
+<span class="c">#     local_list(args, i, obj, objs)</span>
+
+
+<span class="k">def</span> <span class="nf">__list_property_value</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">prop_id</span><span class="p">,</span> <span class="n">prop_index</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function handles listing of property values.</span>
+
+<span class="sd">    :param args: list of parameters</span>
+<span class="sd">    :param i: parameter position</span>
+<span class="sd">    :param obj: object</span>
+<span class="sd">    :return: None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># check if property id is set to &#39;all&#39;</span>
+    <span class="k">if</span> <span class="n">prop_id</span> <span class="o">==</span> <span class="s">&#39;all&#39;</span><span class="p">:</span>
+        <span class="c"># check if property index is set</span>
+        <span class="k">if</span> <span class="n">prop_index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;property index invalid for &quot;all&quot;&#39;</span><span class="p">)</span>
+
+        <span class="c"># collect all property ids of the object</span>
+        <span class="n">prop_ids</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
+            <span class="n">p_id</span> <span class="k">for</span> <span class="n">p_id</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="n">propertyList</span>
+            <span class="k">if</span> <span class="n">p_id</span> <span class="o">!=</span> <span class="s">&#39;propertyList&#39;</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">p_id</span><span class="p">,</span> <span class="nb">basestring</span><span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="n">values</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">(</span>
+                <span class="s">&#39;Identifier&#39;</span><span class="p">,</span>
+                <span class="s">&#39;Type&#39;</span><span class="p">,</span>
+                <span class="s">&#39;Value&#39;</span>
+            <span class="p">),</span>
+        <span class="p">]</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">prop_ids</span> <span class="o">=</span> <span class="p">(</span><span class="n">prop_id</span><span class="p">,)</span>
+
+        <span class="n">values</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">(</span>
+                <span class="s">&#39;Type&#39;</span><span class="p">,</span>
+                <span class="s">&#39;Value&#39;</span>
+            <span class="p">),</span>
+        <span class="p">]</span>
+
+    <span class="c"># loop through</span>
+    <span class="k">for</span> <span class="n">prop_id</span> <span class="ow">in</span> <span class="n">prop_ids</span><span class="p">:</span>
+        <span class="c"># read property value</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">ReadProperty</span><span class="p">(</span><span class="n">prop_id</span><span class="p">,</span> <span class="n">prop_index</span><span class="p">)</span>
+
+        <span class="c"># get data type</span>
+        <span class="n">data_type</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get_datatype</span><span class="p">(</span><span class="n">prop_id</span><span class="p">)</span>
+
+        <span class="c"># check if property index was set</span>
+        <span class="k">if</span> <span class="n">prop_index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+
+            <span class="c"># check if property data type is array</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">data_type</span><span class="p">,</span> <span class="n">Array</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;property data type is not an array&#39;</span><span class="p">)</span>
+
+            <span class="c"># get subtype of array</span>
+            <span class="n">data_type</span> <span class="o">=</span> <span class="n">data_type</span><span class="o">.</span><span class="n">subtype</span>
+
+        <span class="k">elif</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">data_type</span><span class="p">,</span> <span class="n">Array</span><span class="p">):</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="p">()</span>
+
+            <span class="c"># loop through values</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">ReadProperty</span><span class="p">(</span><span class="n">prop_id</span><span class="p">,</span> <span class="mi">0</span><span class="p">)):</span>
+
+                <span class="c"># read new value</span>
+                <span class="n">new_value</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">ReadProperty</span><span class="p">(</span><span class="n">prop_id</span><span class="p">,</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">new_value</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">new_value</span><span class="p">,</span> <span class="s">&#39;value&#39;</span><span class="p">,</span> <span class="n">new_value</span><span class="p">)</span>
+
+                <span class="c"># reset new value</span>
+                <span class="n">value</span> <span class="o">+=</span> <span class="p">(</span><span class="n">new_value</span><span class="p">,)</span>
+
+        <span class="c"># create value line</span>
+        <span class="n">value_line</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">data_type</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span>
+            <span class="n">value</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c"># add identifier if required</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">prop_ids</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">value_line</span> <span class="o">=</span> <span class="p">(</span><span class="n">prop_id</span><span class="p">,)</span> <span class="o">+</span> <span class="n">value_line</span>
+
+        <span class="c"># append line</span>
+        <span class="n">values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value_line</span><span class="p">)</span>
+
+    <span class="c"># print value</span>
+    <span class="n">print_values</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="print_values"><a class="viewcode-back" href="../../../../bacnet.console.creator.html#bacnet.console.creator.local.print_values">[docs]</a><span class="k">def</span> <span class="nf">print_values</span><span class="p">(</span><span class="n">values</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function prints all arguments.</span>
+
+<span class="sd">    :param values: list of argument tuples</span>
+<span class="sd">    :return: None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__get_max_values</span><span class="p">(</span><span class="n">values</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function collects maximum lengths for all arguments.</span>
+
+<span class="sd">        :param values: list of argument tuples</span>
+<span class="sd">        :return: maximum lengths</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># initialize max values</span>
+        <span class="n">max_values</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="p">(</span><span class="mi">0</span><span class="p">,)</span>
+
+        <span class="c"># loop through values</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">)):</span>
+            <span class="n">new_max_values</span> <span class="o">=</span> <span class="p">()</span>
+
+            <span class="c"># loop through arguments</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="n">i</span><span class="p">])):</span>
+                <span class="n">new_max_values</span> <span class="o">+=</span> <span class="p">(</span>
+                    <span class="nb">len</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]))</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]))</span> <span class="o">&gt;</span> <span class="n">max_values</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+                    <span class="k">else</span> <span class="n">max_values</span><span class="p">[</span><span class="n">j</span><span class="p">],</span>
+                <span class="p">)</span>
+
+            <span class="n">max_values</span> <span class="o">=</span> <span class="n">new_max_values</span>
+
+        <span class="c"># return max values</span>
+        <span class="k">return</span> <span class="n">max_values</span>
+
+    <span class="c"># get maximum lengths</span>
+    <span class="n">max_values</span> <span class="o">=</span> <span class="n">__get_max_values</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+
+    <span class="c"># loop through values</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">)):</span>
+        <span class="c"># loop through arguments</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="n">i</span><span class="p">])):</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+                <span class="s">&#39;</span><span class="si">%s%s</span><span class="s">&#39;</span> <span class="o">%</span>
+                <span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">])</span><span class="o">.</span><span class="n">ljust</span><span class="p">(</span><span class="n">max_values</span><span class="p">[</span><span class="n">j</span><span class="p">]),</span>
+                    <span class="s">&#39; &#39;</span> <span class="k">if</span> <span class="n">j</span><span class="o">+</span><span class="mi">1</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">else</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="c"># add line under header</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%s</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">((</span><span class="nb">sum</span><span class="p">(</span><span class="n">max_values</span><span class="p">)</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="s">&#39;-&#39;</span><span class="p">))</span>
+
+    <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+
+</div>
+<div class="viewcode-block" id="local_set"><a class="viewcode-back" href="../../../../bacnet.console.creator.html#bacnet.console.creator.local.local_set">[docs]</a><span class="k">def</span> <span class="nf">local_set</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function sets the property value of a local property.</span>
+
+<span class="sd">    :param args: list of parameters</span>
+<span class="sd">    :param obj: object</span>
+<span class="sd">    :return: None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># check if arguments were provided</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;too few arguments&#39;</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">5</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;too many arguments&#39;</span><span class="p">)</span>
+
+    <span class="c"># check if object id is valid</span>
+    <span class="k">if</span> <span class="n">obj</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;object not found&#39;</span><span class="p">)</span>
+
+    <span class="c"># read property id</span>
+    <span class="n">prop_id</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+    <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;value not found&#39;</span><span class="p">)</span>
+
+    <span class="c"># read value</span>
+    <span class="n">value</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+    <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="c"># read property</span>
+    <span class="n">prop</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">_properties</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">prop_id</span><span class="p">)</span>
+
+    <span class="c"># check if property is valid</span>
+    <span class="k">if</span> <span class="n">prop</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;property not found&#39;</span><span class="p">)</span>
+
+    <span class="n">prop_index</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="c"># check if property check was set</span>
+    <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">args</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;array index must be integer&#39;</span><span class="p">)</span>
+
+        <span class="c"># read property index</span>
+        <span class="n">prop_index</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+    <span class="c"># read property value</span>
+    <span class="n">old_value</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">ReadProperty</span><span class="p">(</span><span class="n">prop_id</span><span class="p">,</span> <span class="n">prop_index</span><span class="p">)</span>
+
+    <span class="n">datatype</span> <span class="o">=</span> <span class="n">prop</span><span class="o">.</span><span class="n">datatype</span>
+
+    <span class="c"># check if property index was set</span>
+    <span class="k">if</span> <span class="n">prop_index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+
+        <span class="c"># check if property data type is array</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">datatype</span><span class="p">,</span> <span class="n">Array</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;property data type is not an array&#39;</span><span class="p">)</span>
+
+        <span class="n">datatype</span> <span class="o">=</span> <span class="n">datatype</span><span class="o">.</span><span class="n">subtype</span>
+
+    <span class="c"># check if property value is an array</span>
+    <span class="k">elif</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">datatype</span><span class="p">,</span> <span class="n">Array</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;property index is required for an array&#39;</span><span class="p">)</span>
+
+    <span class="c"># write property value</span>
+    <span class="n">obj</span><span class="o">.</span><span class="n">WriteProperty</span><span class="p">(</span><span class="n">prop_id</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">arrayIndex</span><span class="o">=</span><span class="n">prop_index</span><span class="p">)</span>
+
+    <span class="c"># get value string if available</span>
+    <span class="n">value</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s">&#39;value&#39;</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+    <span class="n">old_value</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">old_value</span><span class="p">,</span> <span class="s">&#39;value&#39;</span><span class="p">,</span> <span class="n">old_value</span><span class="p">)</span>
+
+    <span class="c"># print info</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;(</span><span class="si">%s</span><span class="s">) </span><span class="si">%r</span><span class="s"> -&gt; </span><span class="si">%r</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">datatype</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="n">old_value</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+
+</div>
+<div class="viewcode-block" id="local_list"><a class="viewcode-back" href="../../../../bacnet.console.creator.html#bacnet.console.creator.local.local_list">[docs]</a><span class="k">def</span> <span class="nf">local_list</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">obj</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">objs</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function lists all objects within the application, all properties within an object, or the</span>
+<span class="sd">    property value of a property.</span>
+
+<span class="sd">    :param args: list of parameters</span>
+<span class="sd">    :param obj: object</span>
+<span class="sd">    :return: None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># check if no argument was passed</span>
+    <span class="k">if</span> <span class="n">objs</span><span class="p">:</span>
+        <span class="n">values</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">(</span>
+                <span class="s">&#39;Type&#39;</span><span class="p">,</span>
+                <span class="s">&#39;Name&#39;</span><span class="p">,</span>
+                <span class="s">&#39;Identifier&#39;</span><span class="p">,</span>
+            <span class="p">),</span>
+        <span class="p">]</span>
+
+        <span class="c"># collect all objects</span>
+        <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">objs</span><span class="p">:</span>
+            <span class="n">values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="p">(</span>
+                    <span class="s">&#39;</span><span class="si">%s</span><span class="s">:&#39;</span> <span class="o">%</span> <span class="n">obj</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span>
+                    <span class="s">&#39;</span><span class="si">%s</span><span class="s">,&#39;</span> <span class="o">%</span> <span class="n">obj</span><span class="o">.</span><span class="n">objectName</span><span class="p">,</span>
+                    <span class="n">obj</span><span class="o">.</span><span class="n">objectIdentifier</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="c"># print all objects</span>
+        <span class="n">print_values</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+
+        <span class="c"># exit</span>
+        <span class="k">return</span>
+
+    <span class="c"># arguments are malformed</span>
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;too many arguments&#39;</span><span class="p">)</span>
+
+    <span class="c"># check if object id is valid</span>
+    <span class="k">if</span> <span class="n">obj</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;object not found&#39;</span><span class="p">)</span>
+
+    <span class="c"># check if property was set</span>
+    <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+        <span class="c"># read property id</span>
+        <span class="n">prop_id</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="c"># check if all properties were requested</span>
+        <span class="k">if</span> <span class="n">prop_id</span> <span class="o">!=</span> <span class="s">&#39;all&#39;</span><span class="p">:</span>
+            <span class="c"># read property</span>
+            <span class="n">data_type</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get_datatype</span><span class="p">(</span><span class="n">prop_id</span><span class="p">)</span>
+
+            <span class="c"># check if property is valid</span>
+            <span class="k">if</span> <span class="n">data_type</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;property not found&#39;</span><span class="p">)</span>
+
+        <span class="n">prop_index</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="c"># check if property check was set</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">args</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;array index must be integer&#39;</span><span class="p">)</span>
+
+            <span class="c"># read property index</span>
+            <span class="n">prop_index</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+        <span class="c"># list property value</span>
+        <span class="n">__list_property_value</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">prop_id</span><span class="p">,</span> <span class="n">prop_index</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">values</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">(</span>
+                <span class="s">&#39;Type&#39;</span><span class="p">,</span>
+                <span class="s">&#39;Identifier&#39;</span><span class="p">,</span>
+            <span class="p">),</span>
+        <span class="p">]</span>
+
+        <span class="c"># collect all properties</span>
+        <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="n">properties</span><span class="p">:</span>
+            <span class="n">values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="p">(</span>
+                    <span class="s">&#39;</span><span class="si">%s</span><span class="s">:&#39;</span> <span class="o">%</span> <span class="n">prop</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span>
+                    <span class="n">prop</span><span class="o">.</span><span class="n">identifier</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="c"># print all properties</span>
+        <span class="n">print_values</span><span class="p">(</span><span class="n">values</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Tobias Grosch.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.3</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,353 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>bacnet.system.config package &mdash; Masterarbeit Grosch 0.4c0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.4c0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Masterarbeit Grosch 0.4c0 documentation" href="index.html" />
+    <link rel="up" title="bacnet.system package" href="bacnet.system.html" />
+    <link rel="next" title="bacnet.webgui package" href="bacnet.webgui.html" />
+    <link rel="prev" title="bacnet.system package" href="bacnet.system.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="bacnet.webgui.html" title="bacnet.webgui package"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="bacnet.system.html" title="bacnet.system package"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Masterarbeit Grosch 0.4c0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="bacnet.html" >bacnet package</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="bacnet.system.html" accesskey="U">bacnet.system package</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="bacnet-system-config-package">
+<h1>bacnet.system.config package<a class="headerlink" href="#bacnet-system-config-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-bacnet.system.config.helper">
+<span id="bacnet-system-config-helper-module"></span><h2>bacnet.system.config.helper module<a class="headerlink" href="#module-bacnet.system.config.helper" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="handler-helper-module">
+<h3>Handler Helper Module<a class="headerlink" href="#handler-helper-module" title="Permalink to this headline">¶</a></h3>
+<p>This module provides access to local interface addresses.</p>
+<dl class="function">
+<dt id="bacnet.system.config.helper.get_local_ip">
+<code class="descclassname">bacnet.system.config.helper.</code><code class="descname">get_local_ip</code><span class="sig-paren">(</span><em>interface</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/system/config/helper.html#get_local_ip"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.system.config.helper.get_local_ip" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function retrieves an IP address from the defined interface.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>interface</strong> &#8211; network interface for IP address retrieval</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">ip_address</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="module-bacnet.system.config.parser">
+<span id="bacnet-system-config-parser-module"></span><h2>bacnet.system.config.parser module<a class="headerlink" href="#module-bacnet.system.config.parser" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="config-parser-module">
+<h3>Config Parser Module<a class="headerlink" href="#config-parser-module" title="Permalink to this headline">¶</a></h3>
+<p>This module provides an extended version of the BCApypes argument parser.</p>
+<dl class="class">
+<dt id="bacnet.system.config.parser.FullArgumentParser">
+<em class="property">class </em><code class="descclassname">bacnet.system.config.parser.</code><code class="descname">FullArgumentParser</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/system/config/parser.html#FullArgumentParser"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.system.config.parser.FullArgumentParser" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">argparse.ArgumentParser</span></code></p>
+<p>This class combines BACpypes builtin config and parameter parser with customized parameters.</p>
+<dl class="attribute">
+<dt id="bacnet.system.config.parser.FullArgumentParser.arg_object">
+<code class="descname">arg_object</code><em class="property"> = None</em><a class="headerlink" href="#bacnet.system.config.parser.FullArgumentParser.arg_object" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bacnet.system.config.parser.FullArgumentParser.parse_args">
+<code class="descname">parse_args</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/system/config/parser.html#FullArgumentParser.parse_args"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.system.config.parser.FullArgumentParser.parse_args" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function wraps the parse_args of ConfigArgumentParser to intercept version requests.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">self</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.system.config.parser.FullArgumentParser.update">
+<code class="descname">update</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/system/config/parser.html#FullArgumentParser.update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.system.config.parser.FullArgumentParser.update" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function updates the argument object.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">parsed parameters</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="module-bacnet.system.config">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-bacnet.system.config" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="bacnet-config-module">
+<h3>BACnet Config Module<a class="headerlink" href="#bacnet-config-module" title="Permalink to this headline">¶</a></h3>
+<p>This module provides configuration functionality.</p>
+<dl class="class">
+<dt id="bacnet.system.config.ConfigManager">
+<em class="property">class </em><code class="descclassname">bacnet.system.config.</code><code class="descname">ConfigManager</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/system/config.html#ConfigManager"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.system.config.ConfigManager" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>This class handles the configuration requests by the user.</p>
+<dl class="attribute">
+<dt id="bacnet.system.config.ConfigManager.data">
+<code class="descname">data</code><em class="property"> = {}</em><a class="headerlink" href="#bacnet.system.config.ConfigManager.data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bacnet.system.config.ConfigManager.filename">
+<code class="descname">filename</code><em class="property"> = 'BACnet.ini'</em><a class="headerlink" href="#bacnet.system.config.ConfigManager.filename" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bacnet.system.config.ConfigManager.get">
+<code class="descname">get</code><span class="sig-paren">(</span><em>key</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/system/config.html#ConfigManager.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.system.config.ConfigManager.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function retrieves specified value provided by the user.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>key</strong> &#8211; value to retrieve</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.system.config.ConfigManager.get_input">
+<code class="descname">get_input</code><span class="sig-paren">(</span><em>key</em>, <em>prompt</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/system/config.html#ConfigManager.get_input"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.system.config.ConfigManager.get_input" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function handles user input.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>key</strong> &#8211; default key</li>
+<li><strong>prompt</strong> &#8211; prompt text</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">user response</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.system.config.ConfigManager.start">
+<code class="descname">start</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/system/config.html#ConfigManager.start"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.system.config.ConfigManager.start" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function initiates the user interface.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.system.config.ConfigManager.store">
+<code class="descname">store</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/system/config.html#ConfigManager.store"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.system.config.ConfigManager.store" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function stores the retrieved data.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.system.config.ConfigManager.valid">
+<code class="descname">valid</code><span class="sig-paren">(</span><em>key</em>, <em>response</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/system/config.html#ConfigManager.valid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.system.config.ConfigManager.valid" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function checks, if response is valid</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>key</strong> &#8211; value to retrieve</li>
+<li><strong>response</strong> &#8211; retrieved value</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.system.config.ConfigManager.verify_address">
+<code class="descname">verify_address</code><span class="sig-paren">(</span><em>key='address'</em>, <em>response=''</em>, <em>interface=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/system/config.html#ConfigManager.verify_address"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.system.config.ConfigManager.verify_address" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function retrieves an ip address provided by the user.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>response</strong> &#8211; user input</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">verified response</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.system.config.ConfigManager.verify_bbmd">
+<code class="descname">verify_bbmd</code><span class="sig-paren">(</span><em>response</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/system/config.html#ConfigManager.verify_bbmd"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.system.config.ConfigManager.verify_bbmd" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function verifies an ip address provided by the user.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>response</strong> &#8211; user input</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">verified response</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">bacnet.system.config package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-bacnet.system.config.helper">bacnet.system.config.helper module</a><ul>
+<li><a class="reference internal" href="#handler-helper-module">Handler Helper Module</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-bacnet.system.config.parser">bacnet.system.config.parser module</a><ul>
+<li><a class="reference internal" href="#config-parser-module">Config Parser Module</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-bacnet.system.config">Module contents</a><ul>
+<li><a class="reference internal" href="#bacnet-config-module">BACnet Config Module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="bacnet.system.html"
+                        title="previous chapter">bacnet.system package</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="bacnet.webgui.html"
+                        title="next chapter">bacnet.webgui package</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/bacnet.system.config.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Tobias Grosch.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.3</a>
+      
+      |
+      <a href="_sources/bacnet.system.config.txt"
+          rel="nofollow">Page source</a></li>
+    </div>
+
+    
+
+    
+  </body>
+</html>

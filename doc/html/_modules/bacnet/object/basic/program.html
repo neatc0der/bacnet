@@ -1,0 +1,503 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>bacnet.object.basic.program &mdash; Masterarbeit Grosch 0.4c0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.4c0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="Masterarbeit Grosch 0.4c0 documentation" href="../../../../index.html" />
+    <link rel="up" title="bacnet.object" href="../../object.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">Masterarbeit Grosch 0.4c0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="../../object.html" accesskey="U">bacnet.object</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for bacnet.object.basic.program</h1><div class="highlight"><pre>
+<span class="c"># pylint: disable=invalid-name, unused-variable, broad-except, too-many-branches, too-many-arguments</span>
+<span class="c"># pylint: disable=no-name-in-module, too-many-statements</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Object Basic Module</span>
+<span class="sd">--------------------</span>
+
+<span class="sd">This module contains basic definitions of BACpypes Object.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+
+<span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="kn">import</span> <span class="n">Queue</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">tempfile</span> <span class="kn">import</span> <span class="n">NamedTemporaryFile</span>
+<span class="kn">from</span> <span class="nn">threading</span> <span class="kn">import</span> <span class="n">Thread</span>
+
+<span class="kn">from</span> <span class="nn">bacpypes.errors</span> <span class="kn">import</span> <span class="n">ExecutionError</span>
+
+<span class="kn">from</span> <span class="nn">bacnet.debugging</span> <span class="kn">import</span> <span class="n">bacnet_debug</span><span class="p">,</span> <span class="n">ModuleLogger</span>
+
+<span class="kn">from</span> <span class="nn">bacnet.settings</span> <span class="kn">import</span> <span class="n">DATA_PATH</span><span class="p">,</span> <span class="n">SANDBOX_TMP</span><span class="p">,</span> <span class="n">INTERFACE_SCRIPT</span>
+
+<span class="kn">from</span> <span class="nn">bacnet.sandbox</span> <span class="kn">import</span> <span class="n">get_sandbox_process</span><span class="p">,</span> <span class="n">sandbox_interact</span>
+
+<span class="kn">from</span> <span class="nn">.general</span> <span class="kn">import</span> <span class="n">register_object_type</span><span class="p">,</span> <span class="n">ProgramObject</span>
+
+
+<span class="c"># enable logging</span>
+<span class="n">ModuleLogger</span><span class="p">()</span>
+
+
+<span class="nd">@bacnet_debug</span>
+<span class="nd">@register_object_type</span>
+<div class="viewcode-block" id="ExecProgramObject"><a class="viewcode-back" href="../../../../bacnet.object.basic.html#bacnet.object.basic.program.ExecProgramObject">[docs]</a><span class="k">class</span> <span class="nc">ExecProgramObject</span><span class="p">(</span><span class="n">ProgramObject</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class provides additional functionality for python programs.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function initializes the object.</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;__init__ </span><span class="si">%r</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_exec_file</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="n">ProgramObject</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_state_queue</span> <span class="o">=</span> <span class="n">Queue</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_program</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="n">file_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ReadProperty</span><span class="p">(</span><span class="s">&#39;instanceOf&#39;</span><span class="p">)</span>
+        <span class="n">file_name</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="s">&#39;value&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">file_name</span><span class="p">))</span>
+        <span class="n">file_name</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">DATA_PATH</span><span class="p">,</span> <span class="n">file_name</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_source_file</span> <span class="o">=</span> <span class="n">file_name</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_watchdog_thread</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_halt_thread</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">WriteProperty</span><span class="p">(</span><span class="s">&#39;programChange&#39;</span><span class="p">,</span> <span class="s">&#39;ready&#39;</span><span class="p">,</span> <span class="n">direct</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">WriteProperty</span><span class="p">(</span><span class="s">&#39;programState&#39;</span><span class="p">,</span> <span class="s">&#39;idle&#39;</span><span class="p">,</span> <span class="n">direct</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ExecProgramObject.set_application"><a class="viewcode-back" href="../../../../bacnet.object.basic.html#bacnet.object.basic.program.ExecProgramObject.set_application">[docs]</a>    <span class="k">def</span> <span class="nf">set_application</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">application</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function defines the application associated to this object.</span>
+
+<span class="sd">        :param application: application object</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># call predecessor</span>
+        <span class="n">ProgramObject</span><span class="o">.</span><span class="n">set_application</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">application</span><span class="p">)</span>
+
+        <span class="c"># check if application object exists</span>
+        <span class="k">if</span> <span class="n">application</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="c"># read object name</span>
+            <span class="n">obj_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ReadProperty</span><span class="p">(</span><span class="s">&#39;instanceOf&#39;</span><span class="p">)</span>
+            <span class="n">obj_name</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">obj_name</span><span class="p">,</span> <span class="s">&#39;value&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">obj_name</span><span class="p">))</span>
+
+            <span class="c"># get file object by name</span>
+            <span class="n">file_obj</span> <span class="o">=</span> <span class="n">application</span><span class="o">.</span><span class="n">get_object_by_name</span><span class="p">(</span><span class="n">obj_name</span><span class="p">)</span>
+
+            <span class="c"># check if file object exists</span>
+            <span class="k">if</span> <span class="n">file_obj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="c"># get file name</span>
+                <span class="n">file_name</span> <span class="o">=</span> <span class="n">file_obj</span><span class="o">.</span><span class="n">get_filename</span><span class="p">()</span>
+
+                <span class="c"># set file name</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_source_file</span> <span class="o">=</span> <span class="n">file_name</span>
+</div>
+    <span class="k">def</span> <span class="nf">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function handles object deletion.</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;delete&#39;</span><span class="p">)</span>
+
+        <span class="c"># check if execution file is defined</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exec_file</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="c"># get current state</span>
+            <span class="n">current_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ReadProperty</span><span class="p">(</span><span class="s">&#39;programState&#39;</span><span class="p">)</span>
+            <span class="n">current_state</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">current_state</span><span class="p">,</span> <span class="s">&#39;value&#39;</span><span class="p">,</span> <span class="n">current_state</span><span class="p">)</span>
+
+            <span class="c"># check if program is running</span>
+            <span class="k">if</span> <span class="n">current_state</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;loading&#39;</span><span class="p">,</span> <span class="s">&#39;running&#39;</span><span class="p">,</span> <span class="s">&#39;waiting&#39;</span><span class="p">):</span>
+                <span class="c"># halt program</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">haltProgram</span><span class="p">()</span>
+
+            <span class="c"># check if program is loaded</span>
+            <span class="k">if</span> <span class="n">current_state</span> <span class="o">!=</span> <span class="s">&#39;idle&#39;</span><span class="p">:</span>
+                <span class="c"># unload</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">unloadProgram</span><span class="p">()</span>
+
+<div class="viewcode-block" id="ExecProgramObject.safe_delete"><a class="viewcode-back" href="../../../../bacnet.object.basic.html#bacnet.object.basic.program.ExecProgramObject.safe_delete">[docs]</a>    <span class="k">def</span> <span class="nf">safe_delete</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function handles safe deletion</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__del__</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="ExecProgramObject.loadProgram"><a class="viewcode-back" href="../../../../bacnet.object.basic.html#bacnet.object.basic.program.ExecProgramObject.loadProgram">[docs]</a>    <span class="k">def</span> <span class="nf">loadProgram</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function loads the program.</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;loadProgram&#39;</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+
+            <span class="c"># set state to loading</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">WriteProperty</span><span class="p">(</span><span class="s">&#39;programState&#39;</span><span class="p">,</span> <span class="s">&#39;loading&#39;</span><span class="p">,</span> <span class="n">direct</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+            <span class="c"># get temp file</span>
+            <span class="n">temp_file</span> <span class="o">=</span> <span class="n">NamedTemporaryFile</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s">&#39;w&#39;</span><span class="p">,</span> <span class="n">delete</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="nb">dir</span><span class="o">=</span><span class="n">SANDBOX_TMP</span><span class="p">)</span>
+
+            <span class="c"># store file name</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_exec_file</span> <span class="o">=</span> <span class="n">temp_file</span><span class="o">.</span><span class="n">name</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;created temp file: </span><span class="si">%s</span><span class="s">&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exec_file</span><span class="p">)</span>
+
+            <span class="c"># read interface and write to temp file</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">INTERFACE_SCRIPT</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">interface_file</span><span class="p">:</span>
+                <span class="n">temp_file</span><span class="o">.</span><span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">interface_file</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+
+            <span class="c"># read source file and write to temp file</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_source_file</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">source_file</span><span class="p">:</span>
+                <span class="n">temp_file</span><span class="o">.</span><span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">source_file</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+
+            <span class="c"># close temp file</span>
+            <span class="n">temp_file</span><span class="o">.</span><span class="n">file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_exception</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
+
+            <span class="c"># set state to halted</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">WriteProperty</span><span class="p">(</span><span class="s">&#39;programState&#39;</span><span class="p">,</span> <span class="s">&#39;idle&#39;</span><span class="p">,</span> <span class="n">direct</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+            <span class="c"># set reason to loadFailed</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">WriteProperty</span><span class="p">(</span><span class="s">&#39;reasonForHalt&#39;</span><span class="p">,</span> <span class="s">&#39;loadFailed&#39;</span><span class="p">,</span> <span class="n">direct</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+            <span class="k">return</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">runProgram</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="ExecProgramObject.runProgram"><a class="viewcode-back" href="../../../../bacnet.object.basic.html#bacnet.object.basic.program.ExecProgramObject.runProgram">[docs]</a>    <span class="k">def</span> <span class="nf">runProgram</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function runs the program.</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;runProgram&#39;</span><span class="p">)</span>
+
+        <span class="c"># set state to running</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">WriteProperty</span><span class="p">(</span><span class="s">&#39;programState&#39;</span><span class="p">,</span> <span class="s">&#39;running&#39;</span><span class="p">,</span> <span class="n">direct</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+        <span class="c"># get relative path to execution file</span>
+        <span class="n">exec_file</span> <span class="o">=</span> <span class="s">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_exec_file</span><span class="o">.</span><span class="n">rpartition</span><span class="p">(</span><span class="s">&#39;tmp/&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">:])</span>
+
+        <span class="c"># initialize program</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_program</span> <span class="o">=</span> <span class="n">get_sandbox_process</span><span class="p">(</span><span class="n">exec_file</span><span class="p">)</span>
+
+        <span class="c"># set change state to ready</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">WriteProperty</span><span class="p">(</span><span class="s">&#39;programChange&#39;</span><span class="p">,</span> <span class="s">&#39;ready&#39;</span><span class="p">,</span> <span class="n">direct</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c"># start interaction</span>
+            <span class="n">sandbox_interact</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_program</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_exception</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
+
+        <span class="c"># set state to halted</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">WriteProperty</span><span class="p">(</span><span class="s">&#39;programState&#39;</span><span class="p">,</span> <span class="s">&#39;halted&#39;</span><span class="p">,</span> <span class="n">direct</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+        <span class="c"># check if program terminated successfully</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_program</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="c"># set reason to internal</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">WriteProperty</span><span class="p">(</span><span class="s">&#39;reasonForHalt&#39;</span><span class="p">,</span> <span class="s">&#39;internal&#39;</span><span class="p">,</span> <span class="n">direct</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_program</span><span class="o">.</span><span class="n">poll</span><span class="p">()</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c"># set reason to program</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">WriteProperty</span><span class="p">(</span><span class="s">&#39;reasonForHalt&#39;</span><span class="p">,</span> <span class="s">&#39;program&#39;</span><span class="p">,</span> <span class="n">direct</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c"># set reason to normal</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">WriteProperty</span><span class="p">(</span><span class="s">&#39;reasonForHalt&#39;</span><span class="p">,</span> <span class="s">&#39;normal&#39;</span><span class="p">,</span> <span class="n">direct</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+        <span class="c"># clean up</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_program</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;runProgram: finished&#39;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ExecProgramObject.haltProgram"><a class="viewcode-back" href="../../../../bacnet.object.basic.html#bacnet.object.basic.program.ExecProgramObject.haltProgram">[docs]</a>    <span class="k">def</span> <span class="nf">haltProgram</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function halts the program.</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;haltProgram&#39;</span><span class="p">)</span>
+
+        <span class="c"># check if halt thread is still running</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_halt_thread</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_halt_thread</span><span class="o">.</span><span class="n">isAlive</span><span class="p">():</span>
+            <span class="c"># start thread</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_halt_thread</span> <span class="o">=</span> <span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">do_haltProgram</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_halt_thread</span><span class="o">.</span><span class="n">setDaemon</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_halt_thread</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_halt_thread</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
+
+            <span class="c"># set reason to internal</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">WriteProperty</span><span class="p">(</span><span class="s">&#39;reasonForHalt&#39;</span><span class="p">,</span> <span class="s">&#39;internal&#39;</span><span class="p">,</span> <span class="n">direct</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+            <span class="c"># set state to halted</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">WriteProperty</span><span class="p">(</span><span class="s">&#39;programState&#39;</span><span class="p">,</span> <span class="s">&#39;halted&#39;</span><span class="p">,</span> <span class="n">direct</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+            <span class="c"># set change state to ready</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">WriteProperty</span><span class="p">(</span><span class="s">&#39;programChange&#39;</span><span class="p">,</span> <span class="s">&#39;ready&#39;</span><span class="p">,</span> <span class="n">direct</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;halt thread already running&#39;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ExecProgramObject.do_haltProgram"><a class="viewcode-back" href="../../../../bacnet.object.basic.html#bacnet.object.basic.program.ExecProgramObject.do_haltProgram">[docs]</a>    <span class="k">def</span> <span class="nf">do_haltProgram</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This functions watches over the halt process of the executed program.</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;running: halt thread&#39;</span><span class="p">)</span>
+
+        <span class="c"># check if program is still running</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_program</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="c"># terminate program</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_program</span><span class="o">.</span><span class="n">kill</span><span class="p">()</span>
+
+        <span class="c"># check if watchdog is still running</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_watchdog_thread</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_watchdog_thread</span><span class="o">.</span><span class="n">isAlive</span><span class="p">():</span>
+            <span class="c"># wait for thread to stop</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_watchdog_thread</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;finished: halt thread&#39;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ExecProgramObject.unloadProgram"><a class="viewcode-back" href="../../../../bacnet.object.basic.html#bacnet.object.basic.program.ExecProgramObject.unloadProgram">[docs]</a>    <span class="k">def</span> <span class="nf">unloadProgram</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function unloads the program.</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;unloadProgram&#39;</span><span class="p">)</span>
+
+        <span class="c"># set state to unloading</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">WriteProperty</span><span class="p">(</span><span class="s">&#39;programState&#39;</span><span class="p">,</span> <span class="s">&#39;unloading&#39;</span><span class="p">,</span> <span class="n">direct</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+        <span class="c"># remove temp file</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_exec_file</span><span class="p">)</span>
+
+        <span class="c"># clean up</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_exec_file</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="c"># set state to idle</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">WriteProperty</span><span class="p">(</span><span class="s">&#39;programState&#39;</span><span class="p">,</span> <span class="s">&#39;idle&#39;</span><span class="p">,</span> <span class="n">direct</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ExecProgramObject.watchdog"><a class="viewcode-back" href="../../../../bacnet.object.basic.html#bacnet.object.basic.program.ExecProgramObject.watchdog">[docs]</a>    <span class="k">def</span> <span class="nf">watchdog</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">funcs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function watches over the executed program changes.</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;running: watchdog thread&#39;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">func</span> <span class="ow">in</span> <span class="n">funcs</span><span class="p">:</span>
+            <span class="n">func</span><span class="p">()</span>
+
+        <span class="c"># set change state to ready</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">WriteProperty</span><span class="p">(</span><span class="s">&#39;programChange&#39;</span><span class="p">,</span> <span class="s">&#39;ready&#39;</span><span class="p">,</span> <span class="n">direct</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;finished: watchdog thread&#39;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="ExecProgramObject.WriteProperty"><a class="viewcode-back" href="../../../../bacnet.object.basic.html#bacnet.object.basic.program.ExecProgramObject.WriteProperty">[docs]</a>    <span class="k">def</span> <span class="nf">WriteProperty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prop_id</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">arrayIndex</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">priority</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">direct</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function writes to property.</span>
+
+<span class="sd">        :param prop_id: property identifier</span>
+<span class="sd">        :param value: value</span>
+<span class="sd">        :param arrayIndex: index</span>
+<span class="sd">        :param priority: priority</span>
+<span class="sd">        :param direct: direct</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># check if program state should be changed</span>
+        <span class="k">if</span> <span class="n">prop_id</span> <span class="o">==</span> <span class="s">&#39;programChange&#39;</span><span class="p">:</span>
+
+            <span class="c"># read state</span>
+            <span class="n">new_state</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s">&#39;value&#39;</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+            <span class="c"># get current change state</span>
+            <span class="n">current_change</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ReadProperty</span><span class="p">(</span><span class="s">&#39;programChange&#39;</span><span class="p">)</span>
+
+            <span class="c"># get current state</span>
+            <span class="n">current_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ReadProperty</span><span class="p">(</span><span class="s">&#39;programState&#39;</span><span class="p">)</span>
+            <span class="n">current_state</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">current_state</span><span class="p">,</span> <span class="s">&#39;value&#39;</span><span class="p">,</span> <span class="n">current_state</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;WriteProperty: change program state to </span><span class="si">%s</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">new_state</span><span class="p">)</span>
+
+            <span class="c"># initializes functions to be executed</span>
+            <span class="n">funcs</span> <span class="o">=</span> <span class="p">()</span>
+
+            <span class="c"># check if object is ready</span>
+            <span class="k">if</span> <span class="n">current_change</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">current_change</span> <span class="o">!=</span> <span class="s">&#39;ready&#39;</span> <span class="ow">and</span> <span class="n">value</span> <span class="o">!=</span> <span class="s">&#39;ready&#39;</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ExecutionError</span><span class="p">(</span><span class="n">errorClass</span><span class="o">=</span><span class="s">&#39;object&#39;</span><span class="p">,</span> <span class="n">errorCode</span><span class="o">=</span><span class="s">&#39;busy&#39;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">new_state</span> <span class="o">==</span> <span class="s">&#39;load&#39;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">current_state</span> <span class="o">==</span> <span class="s">&#39;idle&#39;</span><span class="p">:</span>
+                    <span class="n">funcs</span> <span class="o">+=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">loadProgram</span><span class="p">,)</span>
+                <span class="k">elif</span> <span class="n">current_state</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;halted&#39;</span><span class="p">,</span> <span class="s">&#39;running&#39;</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">current_state</span> <span class="o">==</span> <span class="s">&#39;halted&#39;</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">haltProgram</span><span class="p">()</span>
+                    <span class="n">funcs</span> <span class="o">+=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">runProgram</span><span class="p">,)</span>
+                <span class="k">elif</span> <span class="n">current_state</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;loading&#39;</span><span class="p">,</span> <span class="s">&#39;unloading&#39;</span><span class="p">,</span> <span class="s">&#39;waiting&#39;</span><span class="p">):</span>
+                    <span class="k">return</span>
+
+            <span class="k">elif</span> <span class="n">new_state</span> <span class="o">==</span> <span class="s">&#39;run&#39;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">current_state</span> <span class="o">==</span> <span class="s">&#39;idle&#39;</span><span class="p">:</span>
+                    <span class="n">funcs</span> <span class="o">+=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">loadProgram</span><span class="p">,)</span>
+                <span class="k">elif</span> <span class="n">current_state</span> <span class="o">==</span> <span class="s">&#39;halted&#39;</span><span class="p">:</span>
+                    <span class="n">funcs</span> <span class="o">+=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">runProgram</span><span class="p">,)</span>
+                <span class="k">elif</span> <span class="n">current_state</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;loading&#39;</span><span class="p">,</span> <span class="s">&#39;running&#39;</span><span class="p">,</span> <span class="s">&#39;unloading&#39;</span><span class="p">,</span> <span class="s">&#39;waiting&#39;</span><span class="p">):</span>
+                    <span class="k">return</span>
+
+            <span class="k">elif</span> <span class="n">new_state</span> <span class="o">==</span> <span class="s">&#39;halt&#39;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">current_state</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;waiting&#39;</span><span class="p">,</span> <span class="s">&#39;running&#39;</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">haltProgram</span><span class="p">()</span>
+                <span class="k">return</span>
+
+            <span class="k">elif</span> <span class="n">new_state</span> <span class="o">==</span> <span class="s">&#39;restart&#39;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">current_state</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;halted&#39;</span><span class="p">,</span> <span class="s">&#39;running&#39;</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">current_state</span> <span class="o">==</span> <span class="s">&#39;running&#39;</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">haltProgram</span><span class="p">()</span>
+                    <span class="n">funcs</span> <span class="o">+=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">runProgram</span><span class="p">,)</span>
+                <span class="k">elif</span> <span class="n">current_state</span> <span class="o">==</span> <span class="s">&#39;idle&#39;</span><span class="p">:</span>
+                    <span class="n">funcs</span> <span class="o">+=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">loadProgram</span><span class="p">,)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">return</span>
+
+            <span class="k">elif</span> <span class="n">new_state</span> <span class="o">==</span> <span class="s">&#39;unload&#39;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">current_state</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;halted&#39;</span><span class="p">,</span> <span class="s">&#39;waiting&#39;</span><span class="p">,</span> <span class="s">&#39;running&#39;</span><span class="p">,</span> <span class="s">&#39;loading&#39;</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">current_state</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;running&#39;</span><span class="p">,</span> <span class="s">&#39;loading&#39;</span><span class="p">):</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">haltProgram</span><span class="p">()</span>
+                    <span class="n">funcs</span> <span class="o">+=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">unloadProgram</span><span class="p">,)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">return</span>
+
+            <span class="k">elif</span> <span class="n">new_state</span> <span class="o">!=</span> <span class="s">&#39;ready&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_error</span><span class="p">(</span><span class="s">&#39;unknown programChange: </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">new_state</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">value</span> <span class="o">!=</span> <span class="s">&#39;ready&#39;</span> <span class="ow">and</span> <span class="n">value</span> <span class="o">!=</span> <span class="n">current_change</span><span class="p">:</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">current_change</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">funcs</span><span class="p">)</span> <span class="ow">or</span> \
+                        <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_watchdog_thread</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_watchdog_thread</span><span class="o">.</span><span class="n">is_alive</span><span class="p">()):</span>
+                    <span class="k">raise</span> <span class="n">ExecutionError</span><span class="p">(</span><span class="n">errorClass</span><span class="o">=</span><span class="s">&#39;object&#39;</span><span class="p">,</span> <span class="n">errorCode</span><span class="o">=</span><span class="s">&#39;internalError&#39;</span><span class="p">)</span>
+
+                <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_watchdog_thread</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_watchdog_thread</span><span class="o">.</span><span class="n">is_alive</span><span class="p">():</span>
+                    <span class="c"># set program change value</span>
+                    <span class="n">ProgramObject</span><span class="o">.</span><span class="n">WriteProperty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prop_id</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">arrayIndex</span><span class="p">,</span> <span class="n">priority</span><span class="p">,</span> <span class="n">direct</span><span class="p">)</span>
+
+                    <span class="c"># start thread</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_watchdog_thread</span> <span class="o">=</span> <span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">watchdog</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="n">funcs</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_watchdog_thread</span><span class="o">.</span><span class="n">setDaemon</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_watchdog_thread</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+            <span class="k">elif</span> <span class="n">value</span> <span class="o">==</span> <span class="s">&#39;ready&#39;</span><span class="p">:</span>
+                <span class="c"># set program change state</span>
+                <span class="n">ProgramObject</span><span class="o">.</span><span class="n">WriteProperty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prop_id</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">arrayIndex</span><span class="p">,</span> <span class="n">priority</span><span class="p">,</span> <span class="n">direct</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">ProgramObject</span><span class="o">.</span><span class="n">WriteProperty</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prop_id</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">arrayIndex</span><span class="p">,</span> <span class="n">priority</span><span class="p">,</span> <span class="n">direct</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Tobias Grosch.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.3</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

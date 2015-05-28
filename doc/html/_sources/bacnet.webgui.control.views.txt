@@ -1,0 +1,30 @@
+bacnet.webgui.control.views package
+===================================
+
+Submodules
+----------
+
+bacnet.webgui.control.views.access module
+-----------------------------------------
+
+.. automodule:: bacnet.webgui.control.views.access
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+bacnet.webgui.control.views.devices module
+------------------------------------------
+
+.. automodule:: bacnet.webgui.control.views.devices
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: bacnet.webgui.control.views
+    :members:
+    :undoc-members:
+    :show-inheritance:

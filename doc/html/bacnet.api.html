@@ -1,0 +1,209 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>bacnet.api package &mdash; Masterarbeit Grosch 0.4c0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.4c0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Masterarbeit Grosch 0.4c0 documentation" href="index.html" />
+    <link rel="up" title="bacnet package" href="bacnet.html" />
+    <link rel="next" title="bacnet.app package" href="bacnet.app.html" />
+    <link rel="prev" title="bacnet package" href="bacnet.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="bacnet.app.html" title="bacnet.app package"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="bacnet.html" title="bacnet package"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Masterarbeit Grosch 0.4c0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="bacnet.html" accesskey="U">bacnet package</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="bacnet-api-package">
+<h1>bacnet.api package<a class="headerlink" href="#bacnet-api-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-bacnet.api">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-bacnet.api" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="bacnet-api-module">
+<h3>BACnet API Module<a class="headerlink" href="#bacnet-api-module" title="Permalink to this headline">¶</a></h3>
+<p>This module provides basic api functionality.</p>
+<dl class="class">
+<dt id="bacnet.api.BACnetAPI">
+<em class="property">class </em><code class="descclassname">bacnet.api.</code><code class="descname">BACnetAPI</code><span class="sig-paren">(</span><em>*args</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/api.html#BACnetAPI"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.api.BACnetAPI" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>This class unifies all API accessible functions.</p>
+<dl class="method">
+<dt id="bacnet.api.BACnetAPI.create">
+<code class="descname">create</code><span class="sig-paren">(</span><em>line</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/api.html#BACnetAPI.create"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.api.BACnetAPI.create" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function creates a request for the specified command.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>line</strong> &#8211; command line</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">request object</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="bacnet.api.BACnetAPI.parse">
+<em class="property">static </em><code class="descname">parse</code><span class="sig-paren">(</span><em>apdu</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/api.html#BACnetAPI.parse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.api.BACnetAPI.parse" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function returns a parsed dictionary from provided message.
+:param apdu: message
+:return: parsed dict</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.api.BACnetAPI.receive">
+<code class="descname">receive</code><span class="sig-paren">(</span><em>block=True</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/api.html#BACnetAPI.receive"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.api.BACnetAPI.receive" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function checks for available incoming requests</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>block</strong> &#8211; block</li>
+<li><strong>timeout</strong> &#8211; timeout</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">incoming response or None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.api.BACnetAPI.send">
+<code class="descname">send</code><span class="sig-paren">(</span><em>request</em>, <em>block=True</em>, <em>timeout=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/api.html#BACnetAPI.send"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.api.BACnetAPI.send" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function transmits the request.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>request</strong> &#8211; outgoing request</li>
+<li><strong>block</strong> &#8211; block</li>
+<li><strong>timeout</strong> &#8211; timeout</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">request was queued</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">bacnet.api package</a><ul>
+<li><a class="reference internal" href="#module-bacnet.api">Module contents</a><ul>
+<li><a class="reference internal" href="#bacnet-api-module">BACnet API Module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="bacnet.html"
+                        title="previous chapter">bacnet package</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="bacnet.app.html"
+                        title="next chapter">bacnet.app package</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/bacnet.api.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Tobias Grosch.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.3</a>
+      
+      |
+      <a href="_sources/bacnet.api.txt"
+          rel="nofollow">Page source</a></li>
+    </div>
+
+    
+
+    
+  </body>
+</html>

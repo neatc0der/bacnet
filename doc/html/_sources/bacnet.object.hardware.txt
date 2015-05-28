@@ -1,0 +1,17 @@
+bacnet.object.hardware package
+==============================
+
+Subpackages
+-----------
+
+.. toctree::
+
+    bacnet.object.hardware.terra
+
+Module contents
+---------------
+
+.. automodule:: bacnet.object.hardware
+    :members:
+    :undoc-members:
+    :show-inheritance:

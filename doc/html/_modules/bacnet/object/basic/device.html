@@ -1,0 +1,168 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>bacnet.object.basic.device &mdash; Masterarbeit Grosch 0.4c0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.4c0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="Masterarbeit Grosch 0.4c0 documentation" href="../../../../index.html" />
+    <link rel="up" title="bacnet.object" href="../../object.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">Masterarbeit Grosch 0.4c0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="../../object.html" accesskey="U">bacnet.object</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for bacnet.object.basic.device</h1><div class="highlight"><pre>
+<span class="c"># pylint: disable=invalid-name, no-name-in-module, unused-import, too-few-public-methods</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Object Basic Module</span>
+<span class="sd">--------------------</span>
+
+<span class="sd">This module contains basic definitions of BACpypes Object.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+
+<span class="kn">from</span> <span class="nn">bacpypes.primitivedata</span> <span class="kn">import</span> <span class="n">ObjectIdentifier</span>
+<span class="kn">from</span> <span class="nn">bacpypes.constructeddata</span> <span class="kn">import</span> <span class="n">ArrayOf</span>
+
+<span class="kn">from</span> <span class="nn">.general</span> <span class="kn">import</span> <span class="n">DeviceObject</span><span class="p">,</span> <span class="n">properties</span><span class="p">,</span> <span class="n">register_object_type</span>
+
+<span class="kn">from</span> <span class="nn">bacnet.debugging</span> <span class="kn">import</span> <span class="n">bacnet_debug</span><span class="p">,</span> <span class="n">ModuleLogger</span>
+
+
+<span class="c"># enable logging</span>
+<span class="n">ModuleLogger</span><span class="p">()</span>
+
+
+<span class="nd">@bacnet_debug</span>
+<span class="nd">@register_object_type</span>
+<div class="viewcode-block" id="LocalDeviceObject"><a class="viewcode-back" href="../../../../bacnet.object.basic.html#bacnet.object.basic.device.LocalDeviceObject">[docs]</a><span class="k">class</span> <span class="nc">LocalDeviceObject</span><span class="p">(</span><span class="n">DeviceObject</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class provides additional functionality for device objects.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">properties</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">properties</span><span class="o">.</span><span class="n">CurrentTimeProperty</span><span class="p">(</span><span class="s">&#39;localTime&#39;</span><span class="p">),</span>
+        <span class="n">properties</span><span class="o">.</span><span class="n">CurrentDateProperty</span><span class="p">(</span><span class="s">&#39;localDate&#39;</span><span class="p">)</span>
+    <span class="p">]</span>
+
+    <span class="n">defaultProperties</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s">&#39;maxApduLengthAccepted&#39;</span><span class="p">:</span> <span class="mi">1024</span><span class="p">,</span>
+        <span class="s">&#39;segmentationSupported&#39;</span><span class="p">:</span> <span class="s">&#39;segmentedBoth&#39;</span><span class="p">,</span>
+        <span class="s">&#39;maxSegmentsAccepted&#39;</span><span class="p">:</span> <span class="mi">16</span><span class="p">,</span>
+        <span class="s">&#39;apduSegmentTimeout&#39;</span><span class="p">:</span> <span class="mi">20000</span><span class="p">,</span>
+        <span class="s">&#39;apduTimeout&#39;</span><span class="p">:</span> <span class="mi">3000</span><span class="p">,</span>
+        <span class="s">&#39;numberOfApduRetries&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+    <span class="p">}</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function initializes the object.</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&quot;__init__ </span><span class="si">%r</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="c"># fill in default property values not in kwargs</span>
+        <span class="k">for</span> <span class="n">attr</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">LocalDeviceObject</span><span class="o">.</span><span class="n">defaultProperties</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">attr</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+                <span class="n">kwargs</span><span class="p">[</span><span class="n">attr</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+        <span class="c"># proceed as usual</span>
+        <span class="n">DeviceObject</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="c"># create a default implementation of an object list for local devices.</span>
+        <span class="c"># If it is specified in the kwargs, that overrides this default.</span>
+        <span class="k">if</span> <span class="s">&#39;objectList&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">objectList</span> <span class="o">=</span> <span class="n">ArrayOf</span><span class="p">(</span><span class="n">ObjectIdentifier</span><span class="p">)([</span><span class="bp">self</span><span class="o">.</span><span class="n">objectIdentifier</span><span class="p">])</span>
+
+            <span class="c"># if the object has a property list and one wasn&#39;t provided</span>
+            <span class="c"># in the kwargs, then it was created by default and the objectList</span>
+            <span class="c"># property should be included</span>
+            <span class="k">if</span> <span class="p">(</span><span class="s">&#39;propertyList&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">propertyList</span><span class="p">:</span>
+                <span class="c"># make sure it&#39;s not already there</span>
+                <span class="k">if</span> <span class="s">&#39;objectList&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">propertyList</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">propertyList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;objectList&#39;</span><span class="p">)</span>
+
+        <span class="c"># initialize cov subscriptions</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">WriteProperty</span><span class="p">(</span><span class="s">&#39;activeCovSubscriptions&#39;</span><span class="p">,</span> <span class="p">{},</span> <span class="n">direct</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Tobias Grosch.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.3</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

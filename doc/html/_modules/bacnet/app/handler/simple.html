@@ -1,0 +1,864 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>bacnet.app.handler.simple &mdash; Masterarbeit Grosch 0.4c0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.4c0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="Masterarbeit Grosch 0.4c0 documentation" href="../../../../index.html" />
+    <link rel="up" title="bacnet.app.handler" href="../handler.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">Masterarbeit Grosch 0.4c0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="../../app.html" >bacnet.app</a> &raquo;</li>
+          <li class="nav-item nav-item-3"><a href="../handler.html" accesskey="U">bacnet.app.handler</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for bacnet.app.handler.simple</h1><div class="highlight"><pre>
+<span class="c"># pylint: disable=invalid-name, too-many-locals, star-args</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Application Handler Module</span>
+<span class="sd">--------------------------</span>
+
+<span class="sd">This module provides basic functions for value casting, property creation and general handlers.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+
+<span class="kn">import</span> <span class="nn">time</span>
+
+<span class="kn">from</span> <span class="nn">bacpypes.constructeddata</span> <span class="kn">import</span> <span class="n">Array</span><span class="p">,</span> <span class="n">Any</span>
+<span class="kn">from</span> <span class="nn">bacpypes.primitivedata</span> <span class="kn">import</span> <span class="n">Unsigned</span><span class="p">,</span> <span class="n">Null</span>
+<span class="kn">from</span> <span class="nn">bacpypes.basetypes</span> <span class="kn">import</span> <span class="n">ErrorType</span>
+
+<span class="kn">from</span> <span class="nn">bacpypes.errors</span> <span class="kn">import</span> <span class="n">ExecutionError</span>
+
+<span class="kn">from</span> <span class="nn">bacpypes.object</span> <span class="kn">import</span> <span class="n">PropertyError</span>
+
+<span class="kn">from</span> <span class="nn">bacpypes.apdu</span> <span class="kn">import</span> <span class="n">ReadAccessResultElement</span><span class="p">,</span> <span class="n">ReadAccessResultElementChoice</span><span class="p">,</span> <span class="n">SimpleAckPDU</span><span class="p">,</span> \
+    <span class="n">ReadPropertyACK</span><span class="p">,</span> <span class="n">ReadPropertyMultipleACK</span><span class="p">,</span> <span class="n">ReadAccessResult</span><span class="p">,</span> <span class="n">IAmRequest</span><span class="p">,</span> <span class="n">IHaveRequest</span>
+
+<span class="kn">from</span> <span class="nn">bacnet.object</span> <span class="kn">import</span> <span class="n">get_object_class</span>
+
+<span class="kn">from</span> <span class="nn">bacnet.console.creator</span> <span class="kn">import</span> <span class="n">cast_value</span>
+
+<span class="kn">from</span> <span class="nn">bacnet.debugging</span> <span class="kn">import</span> <span class="n">bacnet_debug</span><span class="p">,</span> <span class="n">ModuleLogger</span>
+
+
+<span class="c"># enable logging</span>
+<span class="n">ModuleLogger</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="do_WhoIsRequest"><a class="viewcode-back" href="../../../../bacnet.app.handler.html#bacnet.app.handler.simple.do_WhoIsRequest">[docs]</a><span class="k">def</span> <span class="nf">do_WhoIsRequest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">apdu</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function responses to WhoIs requests.</span>
+
+<span class="sd">    :param apdu: incoming message</span>
+<span class="sd">    :return: None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;do_WhoIsRequest </span><span class="si">%r</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">apdu</span><span class="p">)</span>
+
+    <span class="c"># check if restrictions exist</span>
+    <span class="k">if</span> <span class="n">apdu</span><span class="o">.</span><span class="n">deviceInstanceRangeLowLimit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> \
+            <span class="n">apdu</span><span class="o">.</span><span class="n">deviceInstanceRangeHighLimit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+
+        <span class="c"># get device identifier</span>
+        <span class="n">device_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">localDevice</span><span class="o">.</span><span class="n">objectIdentifier</span>
+
+        <span class="c"># check if identifier is of class object identifier</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">device_id</span><span class="p">,</span> <span class="s">&#39;get_tuple&#39;</span><span class="p">):</span>
+            <span class="c"># make device identifier tuple</span>
+            <span class="n">device_id</span> <span class="o">=</span> <span class="n">device_id</span><span class="o">.</span><span class="n">get_tuple</span><span class="p">()</span>
+
+        <span class="c"># check if device id is below limit</span>
+        <span class="k">if</span> <span class="n">device_id</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">apdu</span><span class="o">.</span><span class="n">deviceInstanceRangeLowLimit</span> <span class="ow">or</span> \
+            <span class="n">device_id</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">apdu</span><span class="o">.</span><span class="n">deviceInstanceRangeHighLimit</span><span class="p">:</span>
+
+            <span class="c"># exit</span>
+            <span class="k">return</span>
+
+    <span class="c"># create IAm request</span>
+    <span class="n">request</span> <span class="o">=</span> <span class="n">IAmRequest</span><span class="p">()</span>
+    <span class="n">request</span><span class="o">.</span><span class="n">pduDestination</span> <span class="o">=</span> <span class="n">apdu</span><span class="o">.</span><span class="n">pduSource</span>
+    <span class="n">request</span><span class="o">.</span><span class="n">iAmDeviceIdentifier</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">localDevice</span><span class="o">.</span><span class="n">objectIdentifier</span>
+    <span class="n">request</span><span class="o">.</span><span class="n">maxAPDULengthAccepted</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">localDevice</span><span class="o">.</span><span class="n">maxApduLengthAccepted</span>
+    <span class="n">request</span><span class="o">.</span><span class="n">segmentationSupported</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">localDevice</span><span class="o">.</span><span class="n">segmentationSupported</span>
+    <span class="n">request</span><span class="o">.</span><span class="n">vendorID</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">localDevice</span><span class="o">.</span><span class="n">vendorIdentifier</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;   - request: </span><span class="si">%r</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">request</span><span class="p">)</span>
+
+    <span class="c"># send request to request queue - IAm is not a response!</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">requests</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+
+    <span class="c"># return</span>
+    <span class="k">return</span>
+
+</div>
+<div class="viewcode-block" id="do_IAmRequest"><a class="viewcode-back" href="../../../../bacnet.app.handler.html#bacnet.app.handler.simple.do_IAmRequest">[docs]</a><span class="k">def</span> <span class="nf">do_IAmRequest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">apdu</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function reads data from I Am request.</span>
+
+<span class="sd">    :param apdu: incoming message</span>
+<span class="sd">    :return: None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;do_IAmRequest </span><span class="si">%r</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">apdu</span><span class="p">)</span>
+
+    <span class="c"># update known devices</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">known_devices</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">apdu</span><span class="o">.</span><span class="n">pduSource</span><span class="p">)]</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s">&#39;id&#39;</span><span class="p">:</span> <span class="n">apdu</span><span class="o">.</span><span class="n">iAmDeviceIdentifier</span><span class="p">,</span>
+        <span class="s">&#39;last_seen&#39;</span><span class="p">:</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">(),</span>
+    <span class="p">}</span>
+
+    <span class="c"># update unknown device identifiers within remote subscriptions</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">check_remote_subscription_updates</span><span class="p">(</span><span class="n">apdu</span><span class="p">)</span>
+
+    <span class="c"># check for subscription that need an update</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">check_subscription_updates</span><span class="p">(</span><span class="n">apdu</span><span class="p">)</span>
+
+    <span class="c"># return</span>
+    <span class="k">return</span>
+
+</div>
+<div class="viewcode-block" id="do_WhoHasRequest"><a class="viewcode-back" href="../../../../bacnet.app.handler.html#bacnet.app.handler.simple.do_WhoHasRequest">[docs]</a><span class="k">def</span> <span class="nf">do_WhoHasRequest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">apdu</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function responses to WhoHas requests.</span>
+
+<span class="sd">    :param apdu: incoming message</span>
+<span class="sd">    :return: None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;do_WhoHasRequest </span><span class="si">%r</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">apdu</span><span class="p">)</span>
+
+    <span class="c"># check if restrictions exist</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">apdu</span><span class="p">,</span> <span class="s">&#39;deviceInstanceRangeLowLimit&#39;</span><span class="p">)</span> <span class="ow">and</span> \
+            <span class="n">apdu</span><span class="o">.</span><span class="n">deviceInstanceRangeLowLimit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> \
+            <span class="n">apdu</span><span class="o">.</span><span class="n">deviceInstanceRangeHighLimit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+
+        <span class="c"># get device identifier</span>
+        <span class="n">device_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">localDevice</span><span class="o">.</span><span class="n">objectIdentifier</span>
+
+        <span class="c"># check if identifier is of class object identifier</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">device_id</span><span class="p">,</span> <span class="s">&#39;get_tuple&#39;</span><span class="p">):</span>
+            <span class="c"># make device identifier tuple</span>
+            <span class="n">device_id</span> <span class="o">=</span> <span class="n">device_id</span><span class="o">.</span><span class="n">get_tuple</span><span class="p">()</span>
+
+        <span class="c"># check if device id is above or below limit</span>
+        <span class="k">if</span> <span class="n">device_id</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">apdu</span><span class="o">.</span><span class="n">deviceInstanceRangeLowLimit</span> <span class="ow">or</span> \
+            <span class="n">device_id</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">apdu</span><span class="o">.</span><span class="n">deviceInstanceRangeHighLimit</span><span class="p">:</span>
+
+            <span class="c"># exit</span>
+            <span class="k">return</span>
+
+    <span class="c"># read object identifier or name</span>
+    <span class="k">if</span> <span class="n">apdu</span><span class="o">.</span><span class="n">object</span><span class="o">.</span><span class="n">objectIdentifier</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_object_by_id</span><span class="p">(</span><span class="n">apdu</span><span class="o">.</span><span class="n">object</span><span class="o">.</span><span class="n">objectIdentifier</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">apdu</span><span class="o">.</span><span class="n">object</span><span class="o">.</span><span class="n">objectName</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_object_by_name</span><span class="p">(</span><span class="n">apdu</span><span class="o">.</span><span class="n">object</span><span class="o">.</span><span class="n">objectName</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">apdu</span><span class="o">.</span><span class="n">debug_contents</span><span class="p">(</span><span class="nb">file</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+
+        <span class="c"># exit</span>
+        <span class="k">return</span>
+
+    <span class="c"># check if object exists</span>
+    <span class="k">if</span> <span class="n">obj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="c"># read device identifier</span>
+        <span class="n">device_id</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">localDevice</span><span class="o">.</span><span class="n">objectIdentifier</span><span class="p">,</span>
+            <span class="s">&#39;value&#39;</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">localDevice</span><span class="o">.</span><span class="n">objectIdentifier</span>
+        <span class="p">)</span>
+
+        <span class="c"># read object identifier</span>
+        <span class="n">obj_id</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">objectIdentifier</span><span class="p">,</span> <span class="s">&#39;value&#39;</span><span class="p">,</span> <span class="n">obj</span><span class="o">.</span><span class="n">objectIdentifier</span><span class="p">)</span>
+
+        <span class="c"># read object name</span>
+        <span class="n">obj_name</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">objectName</span><span class="p">,</span> <span class="s">&#39;value&#39;</span><span class="p">,</span> <span class="n">obj</span><span class="o">.</span><span class="n">objectName</span><span class="p">)</span>
+
+        <span class="c"># create IHave request</span>
+        <span class="n">request</span> <span class="o">=</span> <span class="n">IHaveRequest</span><span class="p">()</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">pduDestination</span> <span class="o">=</span> <span class="n">apdu</span><span class="o">.</span><span class="n">pduSource</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">deviceIdentifier</span> <span class="o">=</span> <span class="n">device_id</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">objectIdentifier</span> <span class="o">=</span> <span class="n">obj_id</span>
+        <span class="n">request</span><span class="o">.</span><span class="n">objectName</span> <span class="o">=</span> <span class="n">obj_name</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;   - request: </span><span class="si">%r</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">request</span><span class="p">)</span>
+
+        <span class="c"># send request to request queue - IHave is not a response!</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">requests</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+
+    <span class="c"># return</span>
+    <span class="k">return</span>
+
+</div>
+<div class="viewcode-block" id="do_IHaveRequest"><a class="viewcode-back" href="../../../../bacnet.app.handler.html#bacnet.app.handler.simple.do_IHaveRequest">[docs]</a><span class="k">def</span> <span class="nf">do_IHaveRequest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">apdu</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function reads data from I Have request.</span>
+
+<span class="sd">    :param apdu: incoming message</span>
+<span class="sd">    :return: None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;do_IHaveRequest </span><span class="si">%r</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">apdu</span><span class="p">)</span>
+
+    <span class="c"># return</span>
+    <span class="k">return</span>
+
+</div>
+<span class="nd">@bacnet_debug</span>
+<div class="viewcode-block" id="read_property_any"><a class="viewcode-back" href="../../../../bacnet.app.handler.html#bacnet.app.handler.simple.read_property_any">[docs]</a><span class="k">def</span> <span class="nf">read_property_any</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">prop_id</span><span class="p">,</span> <span class="n">prop_index</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">prop</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function creates an appropriate property value of type Any.</span>
+
+<span class="sd">    :param obj: object</span>
+<span class="sd">    :param prop_id: property id</span>
+<span class="sd">    :param prop_index: property array index</span>
+<span class="sd">    :param prop: property instance</span>
+<span class="sd">    :return: Any instance</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">read_property_any</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span>
+        <span class="s">&#39;ReadPropertyToAny </span><span class="si">%s</span><span class="s"> </span><span class="si">%r</span><span class="s"> </span><span class="si">%r</span><span class="s">&#39;</span><span class="p">,</span>
+        <span class="n">obj</span><span class="p">,</span>
+        <span class="n">prop_id</span><span class="p">,</span>
+        <span class="n">prop_index</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c"># get property</span>
+    <span class="n">prop_instance</span> <span class="o">=</span> <span class="n">prop</span> <span class="k">if</span> <span class="n">prop</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="k">else</span> <span class="n">obj</span><span class="o">.</span><span class="n">_properties</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">prop_id</span><span class="p">)</span>
+
+    <span class="c"># check if obj exists</span>
+    <span class="k">if</span> <span class="n">obj</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">ExecutionError</span><span class="p">(</span><span class="n">errorClass</span><span class="o">=</span><span class="s">&#39;object&#39;</span><span class="p">,</span> <span class="n">errorCode</span><span class="o">=</span><span class="s">&#39;objectNotFound&#39;</span><span class="p">)</span>
+
+    <span class="c"># get data type</span>
+    <span class="n">data_type</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get_datatype</span><span class="p">(</span><span class="n">prop_id</span><span class="p">)</span>
+
+    <span class="n">read_property_any</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;   - datatype: </span><span class="si">%r</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">data_type</span><span class="p">)</span>
+
+    <span class="c"># check if data type was set</span>
+    <span class="k">if</span> <span class="n">data_type</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">ExecutionError</span><span class="p">(</span><span class="n">errorClass</span><span class="o">=</span><span class="s">&#39;property&#39;</span><span class="p">,</span> <span class="n">errorCode</span><span class="o">=</span><span class="s">&#39;datatypeNotSupported&#39;</span><span class="p">)</span>
+
+    <span class="c"># read value</span>
+    <span class="n">value</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">ReadProperty</span><span class="p">(</span><span class="n">prop_id</span><span class="p">,</span> <span class="n">prop_index</span><span class="p">)</span>
+
+    <span class="n">read_property_any</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;   - value: </span><span class="si">%r</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+    <span class="c"># cast value</span>
+    <span class="n">value</span> <span class="o">=</span> <span class="n">cast_value</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">data_type</span><span class="p">,</span> <span class="n">prop_index</span><span class="p">,</span> <span class="n">prop</span><span class="o">=</span><span class="n">prop_instance</span><span class="p">)</span>
+
+    <span class="c"># create result</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">Any</span><span class="p">()</span>
+
+    <span class="c"># cast value</span>
+    <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">result</span><span class="o">.</span><span class="n">cast_in</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+    <span class="n">read_property_any</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;   - result: </span><span class="si">%r</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span>
+
+    <span class="c"># return result</span>
+    <span class="k">return</span> <span class="n">result</span>
+
+</div>
+<span class="nd">@bacnet_debug</span>
+<div class="viewcode-block" id="property_to_result"><a class="viewcode-back" href="../../../../bacnet.app.handler.html#bacnet.app.handler.simple.property_to_result">[docs]</a><span class="k">def</span> <span class="nf">property_to_result</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">prop_id</span><span class="p">,</span> <span class="n">prop_index</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function creates an appropriate ReadAccessResultElement.</span>
+
+<span class="sd">    :param obj: object</span>
+<span class="sd">    :param prop_id: property id</span>
+<span class="sd">    :param prop_index: property array index</span>
+<span class="sd">    :return: ReadAccessResultElement instance</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="bp">self</span> <span class="o">=</span> <span class="n">property_to_result</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span>
+        <span class="s">&#39;ReadPropertyToResultElement </span><span class="si">%s</span><span class="s"> </span><span class="si">%r</span><span class="s"> </span><span class="si">%r</span><span class="s">&#39;</span><span class="p">,</span>
+        <span class="n">obj</span><span class="p">,</span>
+        <span class="n">prop_id</span><span class="p">,</span>
+        <span class="n">prop_index</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c"># create read result</span>
+    <span class="n">read_result</span> <span class="o">=</span> <span class="n">ReadAccessResultElementChoice</span><span class="p">()</span>
+
+    <span class="c"># check if object exists</span>
+    <span class="k">if</span> <span class="n">obj</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="c"># set access error</span>
+        <span class="n">read_result</span><span class="o">.</span><span class="n">propertyAccessError</span> <span class="o">=</span> <span class="n">ErrorType</span><span class="p">(</span>
+            <span class="n">errorClass</span><span class="o">=</span><span class="s">&#39;object&#39;</span><span class="p">,</span>
+            <span class="n">errorCode</span><span class="o">=</span><span class="s">&#39;unknownObject&#39;</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;   - error: object does not exist&#39;</span><span class="p">,)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c"># set property value</span>
+            <span class="n">read_result</span><span class="o">.</span><span class="n">propertyValue</span> <span class="o">=</span> <span class="n">read_property_any</span><span class="p">(</span>
+                <span class="n">obj</span><span class="p">,</span>
+                <span class="n">prop_id</span><span class="p">,</span>
+                <span class="n">prop_index</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;   - success&#39;</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="n">PropertyError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+            <span class="c"># set access error</span>
+            <span class="n">read_result</span><span class="o">.</span><span class="n">propertyAccessError</span> <span class="o">=</span> <span class="n">ErrorType</span><span class="p">(</span>
+                <span class="n">errorClass</span><span class="o">=</span><span class="s">&#39;property&#39;</span><span class="p">,</span>
+                <span class="n">errorCode</span><span class="o">=</span><span class="s">&#39;unknownProperty&#39;</span>
+            <span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;   - error: </span><span class="si">%r</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">error</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="n">ExecutionError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+            <span class="c"># set access error</span>
+            <span class="n">read_result</span><span class="o">.</span><span class="n">propertyAccessError</span> <span class="o">=</span> <span class="n">ErrorType</span><span class="p">(</span>
+                <span class="n">errorClass</span><span class="o">=</span><span class="n">error</span><span class="o">.</span><span class="n">errorClass</span><span class="p">,</span>
+                <span class="n">errorCode</span><span class="o">=</span><span class="n">error</span><span class="o">.</span><span class="n">errorCode</span>
+            <span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;   - error: </span><span class="si">%r</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">error</span><span class="p">)</span>
+
+    <span class="c"># create result element</span>
+    <span class="n">result_element</span> <span class="o">=</span> <span class="n">ReadAccessResultElement</span><span class="p">(</span>
+        <span class="n">propertyIdentifier</span><span class="o">=</span><span class="n">prop_id</span><span class="p">,</span>
+        <span class="n">propertyArrayIndex</span><span class="o">=</span><span class="n">prop_index</span><span class="p">,</span>
+        <span class="n">readResult</span><span class="o">=</span><span class="n">read_result</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c"># return result element</span>
+    <span class="k">return</span> <span class="n">result_element</span>
+
+</div>
+<span class="k">def</span> <span class="nf">__partial_PropertyMultipleRequest</span><span class="p">(</span><span class="n">write</span><span class="p">,</span> <span class="n">access</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+    <span class="c"># pylint: disable=too-many-branches</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function loops through received properties.</span>
+
+<span class="sd">    :param write: specify if a read or write request is handed over</span>
+<span class="sd">    :param access: current access object</span>
+<span class="sd">    :param obj: object</span>
+<span class="sd">    :return: parsed data</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">result_dict</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="c"># store object</span>
+    <span class="n">result_dict</span><span class="p">[</span><span class="s">&#39;object&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">obj</span>
+
+    <span class="c"># read list of results</span>
+    <span class="k">if</span> <span class="n">write</span><span class="p">:</span>
+        <span class="n">result_list</span> <span class="o">=</span> <span class="n">access</span><span class="o">.</span><span class="n">listOfProperties</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">result_list</span> <span class="o">=</span> <span class="n">access</span><span class="o">.</span><span class="n">listOfPropertyReferences</span>
+
+    <span class="c"># loop through properties</span>
+    <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">result_list</span><span class="p">:</span>
+        <span class="c"># read property id</span>
+        <span class="n">prop_id</span> <span class="o">=</span> <span class="n">element</span><span class="o">.</span><span class="n">propertyIdentifier</span>
+
+        <span class="c"># read property array index</span>
+        <span class="n">prop_index</span> <span class="o">=</span> <span class="n">element</span><span class="o">.</span><span class="n">propertyArrayIndex</span>
+
+        <span class="c"># read property id and array index</span>
+        <span class="n">parameter</span> <span class="o">=</span> <span class="p">(</span><span class="n">prop_id</span><span class="p">,</span> <span class="n">prop_index</span><span class="p">)</span>
+
+        <span class="c"># read property result</span>
+        <span class="k">if</span> <span class="n">write</span><span class="p">:</span>
+
+            <span class="c"># set priority</span>
+            <span class="n">result_dict</span><span class="p">[</span><span class="s">&#39;priority&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">element</span><span class="o">.</span><span class="n">priority</span>
+
+            <span class="c"># read value and priority</span>
+            <span class="n">parameter</span> <span class="o">+=</span> <span class="p">(</span><span class="n">element</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">element</span><span class="o">.</span><span class="n">priority</span><span class="p">)</span>
+
+            <span class="c"># call partial function for request</span>
+            <span class="n">__partial_WritePropertyRequest</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="o">*</span><span class="n">parameter</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+
+            <span class="c"># read element list</span>
+            <span class="n">element_list</span> <span class="o">=</span> <span class="n">result_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;element_list&#39;</span><span class="p">,</span> <span class="p">[])</span>
+
+            <span class="c"># check if property id is special</span>
+            <span class="k">if</span> <span class="n">prop_id</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;all&#39;</span><span class="p">,</span> <span class="s">&#39;required&#39;</span><span class="p">,</span> <span class="s">&#39;optional&#39;</span><span class="p">):</span>
+
+                <span class="c"># get properties</span>
+                <span class="k">if</span> <span class="n">obj</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="n">properties</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
+                        <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">identifier</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span>
+                        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">getattr</span><span class="p">(</span>
+                            <span class="n">get_object_class</span><span class="p">(</span><span class="n">access</span><span class="o">.</span><span class="n">objectIdentifier</span><span class="o">.</span><span class="n">get_tuple</span><span class="p">()[</span><span class="mi">0</span><span class="p">]),</span>
+                            <span class="s">&#39;properties&#39;</span><span class="p">,</span>
+                            <span class="p">()</span>
+                        <span class="p">)</span>
+                    <span class="p">)</span>
+
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">properties</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">_properties</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+
+                <span class="c"># loop through all properties</span>
+                <span class="k">for</span> <span class="n">prop_id_spec</span><span class="p">,</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">properties</span><span class="p">:</span>
+
+                    <span class="c"># check if property is required</span>
+                    <span class="k">if</span> <span class="n">prop_id</span> <span class="o">==</span> <span class="s">&#39;required&#39;</span> <span class="ow">and</span> <span class="n">prop</span><span class="o">.</span><span class="n">optional</span><span class="p">:</span>
+                        <span class="k">continue</span>
+
+                    <span class="c"># check if property is optional</span>
+                    <span class="k">elif</span> <span class="n">prop_id</span> <span class="o">==</span> <span class="s">&#39;optional&#39;</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">prop</span><span class="o">.</span><span class="n">optional</span><span class="p">:</span>
+                        <span class="k">continue</span>
+
+                    <span class="c"># preset property index</span>
+                    <span class="n">prop_index_spec</span> <span class="o">=</span> <span class="bp">None</span>
+
+                    <span class="c"># check if property is array</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">prop</span><span class="o">.</span><span class="n">datatype</span><span class="p">,</span> <span class="n">Array</span><span class="p">):</span>
+                        <span class="c"># set property index to 0</span>
+                        <span class="n">prop_index_spec</span> <span class="o">=</span> <span class="mi">0</span>
+
+                    <span class="c"># create result element for response</span>
+                    <span class="n">result_element</span> <span class="o">=</span> <span class="n">property_to_result</span><span class="p">(</span>
+                        <span class="n">obj</span><span class="p">,</span>
+                        <span class="n">prop_id_spec</span><span class="p">,</span>
+                        <span class="n">prop_index_spec</span><span class="p">,</span>
+                    <span class="p">)</span>
+
+                    <span class="c"># append element to list</span>
+                    <span class="n">element_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">result_element</span><span class="p">)</span>
+
+                    <span class="c"># store property</span>
+                    <span class="n">result_dict</span><span class="p">[</span><span class="n">prop_id_spec</span><span class="p">]</span> <span class="o">=</span> <span class="n">prop</span>
+
+            <span class="k">else</span><span class="p">:</span>
+
+                <span class="c"># create result element for response</span>
+                <span class="n">result_element</span> <span class="o">=</span> <span class="n">property_to_result</span><span class="p">(</span>
+                    <span class="n">obj</span><span class="p">,</span>
+                    <span class="n">prop_id</span><span class="p">,</span>
+                    <span class="n">prop_index</span><span class="p">,</span>
+                <span class="p">)</span>
+
+                <span class="c"># append element to list</span>
+                <span class="n">element_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">result_element</span><span class="p">)</span>
+
+            <span class="c"># store element list</span>
+            <span class="n">result_dict</span><span class="p">[</span><span class="s">&#39;element_list&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">element_list</span>
+
+    <span class="c"># return result dict</span>
+    <span class="k">return</span> <span class="n">result_dict</span>
+
+
+<span class="k">def</span> <span class="nf">__do_PropertyMultipleRequest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">apdu</span><span class="p">,</span> <span class="n">write</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function reads all values from request response.</span>
+
+<span class="sd">    :param apdu: incoming message</span>
+<span class="sd">    :param write: specify if a read or write request is handed over</span>
+<span class="sd">    :return: parsed data</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;__do_PropertyMultipleRequest </span><span class="si">%r</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">apdu</span><span class="p">)</span>
+
+    <span class="n">result_dict</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="c"># retrieve objects</span>
+    <span class="k">if</span> <span class="n">write</span><span class="p">:</span>
+        <span class="n">access_list</span> <span class="o">=</span> <span class="n">apdu</span><span class="o">.</span><span class="n">listOfWriteAccessSpecs</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">access_list</span> <span class="o">=</span> <span class="n">apdu</span><span class="o">.</span><span class="n">listOfReadAccessSpecs</span>
+
+    <span class="c"># loop through objects</span>
+    <span class="k">for</span> <span class="n">access</span> <span class="ow">in</span> <span class="n">access_list</span><span class="p">:</span>
+
+        <span class="c"># read object id</span>
+        <span class="n">obj_id</span> <span class="o">=</span> <span class="n">access</span><span class="o">.</span><span class="n">objectIdentifier</span>
+
+        <span class="c"># get object by id</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_object_by_id</span><span class="p">(</span><span class="n">obj_id</span><span class="p">)</span>
+
+        <span class="c"># get result</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">__partial_PropertyMultipleRequest</span><span class="p">(</span><span class="n">write</span><span class="p">,</span> <span class="n">access</span><span class="p">,</span> <span class="n">obj</span><span class="p">)</span>
+
+        <span class="c"># check if request is to read data</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">write</span><span class="p">:</span>
+
+            <span class="c"># get element list</span>
+            <span class="n">element_list</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;element_list&#39;</span><span class="p">,</span> <span class="p">[])</span>
+
+            <span class="c"># check if element list is defined in result</span>
+            <span class="k">if</span> <span class="s">&#39;element_list&#39;</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+                <span class="c"># remove element list from result</span>
+                <span class="k">del</span> <span class="n">result</span><span class="p">[</span><span class="s">&#39;element_list&#39;</span><span class="p">]</span>
+
+                <span class="c"># create results</span>
+                <span class="n">access_results</span> <span class="o">=</span> <span class="n">ReadAccessResult</span><span class="p">(</span>
+                    <span class="n">objectIdentifier</span><span class="o">=</span><span class="n">obj_id</span><span class="p">,</span>
+                    <span class="n">listOfResults</span><span class="o">=</span><span class="n">element_list</span><span class="p">,</span>
+                <span class="p">)</span>
+
+                <span class="c"># get result list</span>
+                <span class="n">result_list</span> <span class="o">=</span> <span class="n">result_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;result_list&#39;</span><span class="p">,</span> <span class="p">[])</span>
+
+                <span class="c"># append access results to result list</span>
+                <span class="n">result_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">access_results</span><span class="p">)</span>
+
+                <span class="c"># store result list</span>
+                <span class="n">result_dict</span><span class="p">[</span><span class="s">&#39;result_list&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">result_list</span>
+
+        <span class="c"># read stored object ids</span>
+        <span class="n">obj_ids</span> <span class="o">=</span> <span class="n">result_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">obj_id</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">{})</span>
+
+        <span class="c"># read stored properties</span>
+        <span class="n">properties</span> <span class="o">=</span> <span class="n">obj_ids</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">obj_id</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="p">{})</span>
+
+        <span class="c"># update properties</span>
+        <span class="n">properties</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+
+        <span class="c"># store updated properties</span>
+        <span class="n">obj_ids</span><span class="p">[</span><span class="n">obj_id</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="n">properties</span>
+
+        <span class="c"># store updated object ids</span>
+        <span class="n">result_dict</span><span class="p">[</span><span class="n">obj_id</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="n">obj_ids</span>
+
+    <span class="c"># return result dict</span>
+    <span class="k">return</span> <span class="n">result_dict</span>
+
+
+<div class="viewcode-block" id="do_ReadPropertyMultipleRequest"><a class="viewcode-back" href="../../../../bacnet.app.handler.html#bacnet.app.handler.simple.do_ReadPropertyMultipleRequest">[docs]</a><span class="k">def</span> <span class="nf">do_ReadPropertyMultipleRequest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">apdu</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function reads all values from request.</span>
+
+<span class="sd">    :param apdu: incoming message</span>
+<span class="sd">    :return: response</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;do_ReadPropertyMultipleRequest </span><span class="si">%r</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">apdu</span><span class="p">)</span>
+
+    <span class="c"># retrieve data</span>
+    <span class="n">result_dict</span> <span class="o">=</span> <span class="n">__do_PropertyMultipleRequest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">apdu</span><span class="p">,</span> <span class="n">write</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+    <span class="c"># get result list</span>
+    <span class="n">result_list</span> <span class="o">=</span> <span class="n">result_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;result_list&#39;</span><span class="p">,</span> <span class="p">[])</span>
+    <span class="k">if</span> <span class="s">&#39;result_list&#39;</span> <span class="ow">in</span> <span class="n">result_dict</span><span class="p">:</span>
+        <span class="k">del</span> <span class="n">result_dict</span><span class="p">[</span><span class="s">&#39;result_list&#39;</span><span class="p">]</span>
+
+    <span class="c"># create acknowledgement</span>
+    <span class="n">resp</span> <span class="o">=</span> <span class="n">ReadPropertyMultipleACK</span><span class="p">(</span><span class="n">context</span><span class="o">=</span><span class="n">apdu</span><span class="p">)</span>
+    <span class="n">resp</span><span class="o">.</span><span class="n">listOfReadAccessResults</span> <span class="o">=</span> <span class="n">result_list</span>
+
+    <span class="c"># return response</span>
+    <span class="k">return</span> <span class="n">resp</span>
+
+</div>
+<div class="viewcode-block" id="do_WritePropertyMultipleRequest"><a class="viewcode-back" href="../../../../bacnet.app.handler.html#bacnet.app.handler.simple.do_WritePropertyMultipleRequest">[docs]</a><span class="k">def</span> <span class="nf">do_WritePropertyMultipleRequest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">apdu</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function reads all values from request.</span>
+
+<span class="sd">    :param apdu: incoming message</span>
+<span class="sd">    :return: response</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;do_WritePropertyMultipleRequest </span><span class="si">%r</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">apdu</span><span class="p">)</span>
+
+    <span class="n">resp</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="c"># loop through objects</span>
+    <span class="k">for</span> <span class="n">access</span> <span class="ow">in</span> <span class="n">apdu</span><span class="o">.</span><span class="n">listOfWriteAccessSpecs</span><span class="p">:</span>
+
+        <span class="c"># read object id</span>
+        <span class="n">obj_id</span> <span class="o">=</span> <span class="n">access</span><span class="o">.</span><span class="n">objectIdentifier</span>
+
+        <span class="c"># get object by id</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_object_by_id</span><span class="p">(</span><span class="n">obj_id</span><span class="p">)</span>
+
+        <span class="c"># check if object exists</span>
+        <span class="k">if</span> <span class="n">obj</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+
+            <span class="c"># create error</span>
+            <span class="k">raise</span> <span class="n">ExecutionError</span><span class="p">(</span><span class="n">errorClass</span><span class="o">=</span><span class="s">&#39;object&#39;</span><span class="p">,</span> <span class="n">errorCode</span><span class="o">=</span><span class="s">&#39;unknownObject&#39;</span><span class="p">)</span>
+
+        <span class="c"># loop though properties</span>
+        <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">access</span><span class="o">.</span><span class="n">listOfProperties</span><span class="p">:</span>
+
+            <span class="c"># read property id</span>
+            <span class="n">prop_id</span> <span class="o">=</span> <span class="n">prop</span><span class="o">.</span><span class="n">propertyIdentifier</span>
+
+            <span class="c"># read property index</span>
+            <span class="n">prop_index</span> <span class="o">=</span> <span class="n">prop</span><span class="o">.</span><span class="n">propertyArrayIndex</span>
+
+            <span class="k">try</span><span class="p">:</span>
+
+                <span class="c"># read property value</span>
+                <span class="n">obj</span><span class="o">.</span><span class="n">ReadProperty</span><span class="p">(</span><span class="n">prop_id</span><span class="p">,</span> <span class="n">prop_index</span><span class="p">)</span>
+
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_error</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
+
+                <span class="c"># create error</span>
+                <span class="k">raise</span> <span class="n">ExecutionError</span><span class="p">(</span><span class="n">errorClass</span><span class="o">=</span><span class="s">&#39;object&#39;</span><span class="p">,</span> <span class="n">errorCode</span><span class="o">=</span><span class="s">&#39;unknownProperty&#39;</span><span class="p">)</span>
+
+        <span class="c"># check if error was created</span>
+        <span class="k">if</span> <span class="n">resp</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+
+            <span class="c"># stop here</span>
+            <span class="k">break</span>
+
+    <span class="k">if</span> <span class="n">resp</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="c"># retrieve data</span>
+        <span class="n">__do_PropertyMultipleRequest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">apdu</span><span class="p">,</span> <span class="n">write</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+        <span class="c"># create acknowledgement</span>
+        <span class="n">resp</span> <span class="o">=</span> <span class="n">SimpleAckPDU</span><span class="p">(</span><span class="n">context</span><span class="o">=</span><span class="n">apdu</span><span class="p">)</span>
+
+    <span class="c"># return response</span>
+    <span class="k">return</span> <span class="n">resp</span>
+
+</div>
+<span class="k">def</span> <span class="nf">__partial_ReadPropertyRequest</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">prop_id</span><span class="p">,</span> <span class="n">prop_index</span><span class="p">,</span> <span class="n">prop</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function reads values from request and returns value.</span>
+
+<span class="sd">    :param obj: object</span>
+<span class="sd">    :param prop_id: property id</span>
+<span class="sd">    :param prop_index: property array index</span>
+<span class="sd">    :param prop: property instance</span>
+<span class="sd">    :return: value</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># check if obj exists</span>
+    <span class="k">if</span> <span class="n">obj</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">ExecutionError</span><span class="p">(</span><span class="n">errorClass</span><span class="o">=</span><span class="s">&#39;object&#39;</span><span class="p">,</span> <span class="n">errorCode</span><span class="o">=</span><span class="s">&#39;unknownObject&#39;</span><span class="p">)</span>
+
+    <span class="c"># get property</span>
+    <span class="n">prop_instance</span> <span class="o">=</span> <span class="n">prop</span> <span class="k">if</span> <span class="n">prop</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="k">else</span> <span class="n">obj</span><span class="o">.</span><span class="n">_properties</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">prop_id</span><span class="p">)</span>
+
+    <span class="c"># get data type</span>
+    <span class="n">data_type</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get_datatype</span><span class="p">(</span><span class="n">prop_id</span><span class="p">)</span>
+
+    <span class="c"># read value</span>
+    <span class="n">value</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">ReadProperty</span><span class="p">(</span><span class="n">prop_id</span><span class="p">,</span> <span class="n">prop_index</span><span class="p">)</span>
+
+    <span class="c"># check if value was set</span>
+    <span class="k">if</span> <span class="n">data_type</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">PropertyError</span><span class="p">(</span><span class="n">prop_id</span><span class="p">)</span>
+
+    <span class="c"># cast value</span>
+    <span class="n">value</span> <span class="o">=</span> <span class="n">cast_value</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">data_type</span><span class="p">,</span> <span class="n">prop_index</span><span class="p">,</span> <span class="n">prop</span><span class="o">=</span><span class="n">prop_instance</span><span class="p">)</span>
+
+    <span class="c"># return value</span>
+    <span class="k">return</span> <span class="n">value</span>
+
+
+<div class="viewcode-block" id="do_ReadPropertyRequest"><a class="viewcode-back" href="../../../../bacnet.app.handler.html#bacnet.app.handler.simple.do_ReadPropertyRequest">[docs]</a><span class="k">def</span> <span class="nf">do_ReadPropertyRequest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">apdu</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function reads value from request response.</span>
+
+<span class="sd">    :param apdu: incoming message</span>
+<span class="sd">    :return: None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;do_ReadPropertyRequest </span><span class="si">%r</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">apdu</span><span class="p">)</span>
+
+    <span class="c"># read object id</span>
+    <span class="n">obj_id</span> <span class="o">=</span> <span class="n">apdu</span><span class="o">.</span><span class="n">objectIdentifier</span>
+
+    <span class="c"># check if device has wildcard</span>
+    <span class="k">if</span> <span class="n">obj_id</span> <span class="o">==</span> <span class="p">(</span><span class="s">&#39;device&#39;</span><span class="p">,</span> <span class="mi">4194303</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;   - wildcard device identifier&#39;</span><span class="p">)</span>
+
+        <span class="c"># read object id from local device</span>
+        <span class="n">obj_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">localDevice</span><span class="o">.</span><span class="n">objectIdentifier</span>
+
+    <span class="c"># get the object</span>
+    <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_object_by_id</span><span class="p">(</span><span class="n">obj_id</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;   - object: </span><span class="si">%r</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">obj</span><span class="p">)</span>
+
+    <span class="c"># check if object was found</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">obj</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">ExecutionError</span><span class="p">(</span><span class="n">errorClass</span><span class="o">=</span><span class="s">&#39;object&#39;</span><span class="p">,</span> <span class="n">errorCode</span><span class="o">=</span><span class="s">&#39;unknownObject&#39;</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c"># read value from apdu</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">__partial_ReadPropertyRequest</span><span class="p">(</span>
+            <span class="n">obj</span><span class="p">,</span>
+            <span class="n">apdu</span><span class="o">.</span><span class="n">propertyIdentifier</span><span class="p">,</span>
+            <span class="n">apdu</span><span class="o">.</span><span class="n">propertyArrayIndex</span>
+        <span class="p">)</span>
+
+        <span class="c"># create acknowledgement</span>
+        <span class="n">resp</span> <span class="o">=</span> <span class="n">ReadPropertyACK</span><span class="p">(</span><span class="n">context</span><span class="o">=</span><span class="n">apdu</span><span class="p">)</span>
+        <span class="n">resp</span><span class="o">.</span><span class="n">objectIdentifier</span> <span class="o">=</span> <span class="n">obj_id</span>
+        <span class="n">resp</span><span class="o">.</span><span class="n">propertyIdentifier</span> <span class="o">=</span> <span class="n">apdu</span><span class="o">.</span><span class="n">propertyIdentifier</span>
+        <span class="n">resp</span><span class="o">.</span><span class="n">propertyArrayIndex</span> <span class="o">=</span> <span class="n">apdu</span><span class="o">.</span><span class="n">propertyArrayIndex</span>
+
+        <span class="c"># cast in value</span>
+        <span class="n">resp</span><span class="o">.</span><span class="n">propertyValue</span> <span class="o">=</span> <span class="n">Any</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">resp</span><span class="o">.</span><span class="n">propertyValue</span><span class="o">.</span><span class="n">cast_in</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+    <span class="k">except</span> <span class="n">PropertyError</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">ExecutionError</span><span class="p">(</span><span class="n">errorClass</span><span class="o">=</span><span class="s">&#39;property&#39;</span><span class="p">,</span> <span class="n">errorCode</span><span class="o">=</span><span class="s">&#39;unknownProperty&#39;</span><span class="p">)</span>
+
+    <span class="c"># return response</span>
+    <span class="k">return</span> <span class="n">resp</span>
+
+</div>
+<span class="k">def</span> <span class="nf">__partial_WritePropertyRequest</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function reads values from request response and returns value.</span>
+
+<span class="sd">    :param obj: object</span>
+<span class="sd">    :param prop_id: property id</span>
+<span class="sd">    :param prop_index: property array index</span>
+<span class="sd">    :param priority: property priority</span>
+<span class="sd">    :return: value</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">prop_id</span><span class="p">,</span> <span class="n">prop_index</span><span class="p">,</span> <span class="n">prop_value</span><span class="p">,</span> <span class="n">prop_priority</span> <span class="o">=</span> <span class="n">args</span>
+
+    <span class="c"># check if property exists</span>
+    <span class="k">if</span> <span class="n">obj</span><span class="o">.</span><span class="n">get_datatype</span><span class="p">(</span><span class="n">prop_id</span><span class="p">)</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">PropertyError</span><span class="p">(</span><span class="s">&#39;property </span><span class="si">%s</span><span class="s"> does not exist&#39;</span> <span class="o">%</span> <span class="n">prop_id</span><span class="p">)</span>
+
+    <span class="c"># get data type</span>
+    <span class="k">if</span> <span class="n">prop_value</span><span class="o">.</span><span class="n">is_application_class_null</span><span class="p">():</span>
+        <span class="n">datatype</span> <span class="o">=</span> <span class="n">Null</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">datatype</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">get_datatype</span><span class="p">(</span><span class="n">prop_id</span><span class="p">)</span>
+
+    <span class="c"># cast value if necessary</span>
+    <span class="k">if</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">datatype</span><span class="p">,</span> <span class="n">Array</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">prop_index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="n">prop_index</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">prop_value</span><span class="o">.</span><span class="n">cast_out</span><span class="p">(</span><span class="n">Unsigned</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">prop_value</span><span class="o">.</span><span class="n">cast_out</span><span class="p">(</span><span class="n">datatype</span><span class="o">.</span><span class="n">subtype</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">prop_value</span><span class="o">.</span><span class="n">cast_out</span><span class="p">(</span><span class="n">datatype</span><span class="p">)</span>
+
+    <span class="c"># change the value</span>
+    <span class="n">obj</span><span class="o">.</span><span class="n">WriteProperty</span><span class="p">(</span>
+        <span class="n">prop_id</span><span class="p">,</span>
+        <span class="n">value</span><span class="p">,</span>
+        <span class="n">prop_index</span><span class="p">,</span>
+        <span class="n">prop_priority</span>
+    <span class="p">)</span>
+
+    <span class="c"># return value</span>
+    <span class="k">return</span> <span class="n">value</span>
+
+
+<div class="viewcode-block" id="do_WritePropertyRequest"><a class="viewcode-back" href="../../../../bacnet.app.handler.html#bacnet.app.handler.simple.do_WritePropertyRequest">[docs]</a><span class="k">def</span> <span class="nf">do_WritePropertyRequest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">apdu</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function reads value from request response.</span>
+
+<span class="sd">    :param apdu: incoming message</span>
+<span class="sd">    :return: None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># get object</span>
+    <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_object_by_id</span><span class="p">(</span><span class="n">apdu</span><span class="o">.</span><span class="n">objectIdentifier</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;do_WritePropertyRequest </span><span class="si">%r</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">apdu</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;   - object: </span><span class="si">%r</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">obj</span><span class="p">)</span>
+
+    <span class="c"># check if object was found</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">obj</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">ExecutionError</span><span class="p">(</span><span class="n">errorClass</span><span class="o">=</span><span class="s">&#39;object&#39;</span><span class="p">,</span> <span class="n">errorCode</span><span class="o">=</span><span class="s">&#39;unknownObject&#39;</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c"># read value from apdu</span>
+        <span class="n">__partial_WritePropertyRequest</span><span class="p">(</span>
+            <span class="n">obj</span><span class="p">,</span>
+            <span class="n">apdu</span><span class="o">.</span><span class="n">propertyIdentifier</span><span class="p">,</span>
+            <span class="n">apdu</span><span class="o">.</span><span class="n">propertyArrayIndex</span><span class="p">,</span>
+            <span class="n">apdu</span><span class="o">.</span><span class="n">propertyValue</span><span class="p">,</span>
+            <span class="n">apdu</span><span class="o">.</span><span class="n">priority</span>
+        <span class="p">)</span>
+
+        <span class="c"># create acknowledgement</span>
+        <span class="n">resp</span> <span class="o">=</span> <span class="n">SimpleAckPDU</span><span class="p">(</span><span class="n">context</span><span class="o">=</span><span class="n">apdu</span><span class="p">)</span>
+
+    <span class="k">except</span> <span class="n">PropertyError</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">ExecutionError</span><span class="p">(</span><span class="n">errorClass</span><span class="o">=</span><span class="s">&#39;property&#39;</span><span class="p">,</span> <span class="n">errorCode</span><span class="o">=</span><span class="s">&#39;unknownProperty&#39;</span><span class="p">)</span>
+
+    <span class="c"># return response</span>
+    <span class="k">return</span> <span class="n">resp</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Tobias Grosch.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.3</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

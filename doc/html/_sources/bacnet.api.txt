@@ -1,0 +1,10 @@
+bacnet.api package
+==================
+
+Module contents
+---------------
+
+.. automodule:: bacnet.api
+    :members:
+    :undoc-members:
+    :show-inheritance:

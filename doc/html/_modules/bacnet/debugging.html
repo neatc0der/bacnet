@@ -1,0 +1,433 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>bacnet.debugging &mdash; Masterarbeit Grosch 0.4c0 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.4c0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="Masterarbeit Grosch 0.4c0 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Masterarbeit Grosch 0.4c0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for bacnet.debugging</h1><div class="highlight"><pre>
+<span class="c"># pylint: disable=broad-except, too-few-public-methods, invalid-name, too-many-arguments</span>
+<span class="c"># pylint: disable=too-many-branches, global-statement</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Debugging Module</span>
+<span class="sd">----------------</span>
+
+<span class="sd">This module contains basic debugging functionality.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">import</span> <span class="nn">dateutil.tz</span>
+<span class="kn">import</span> <span class="nn">inspect</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">multiprocessing.queues</span> <span class="kn">import</span> <span class="n">JoinableQueue</span>
+<span class="kn">from</span> <span class="nn">threading</span> <span class="kn">import</span> <span class="n">Lock</span><span class="p">,</span> <span class="n">Event</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+<span class="kn">from</span> <span class="nn">bacnet.debugging.log</span> <span class="kn">import</span> <span class="n">LoggingFormatter</span><span class="p">,</span> <span class="n">MultiProcessingLog</span>
+
+<span class="n">LOGGER</span> <span class="o">=</span> <span class="p">[]</span>
+
+<span class="n">LOG_HANDLER</span> <span class="o">=</span> <span class="bp">None</span>
+<span class="n">LOG_QUEUE</span> <span class="o">=</span> <span class="bp">None</span>
+
+
+<div class="viewcode-block" id="TimeoutJoinableQueue"><a class="viewcode-back" href="../../bacnet.debugging.html#bacnet.debugging.TimeoutJoinableQueue">[docs]</a><span class="k">class</span> <span class="nc">TimeoutJoinableQueue</span><span class="p">(</span><span class="n">JoinableQueue</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class is an updated version of JoinableQueue with join timeout.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function initializes the object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># call predecessor</span>
+        <span class="n">JoinableQueue</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="c"># initialize lock and event</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">all_tasks_done</span> <span class="o">=</span> <span class="n">Lock</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">all_tasks_done_event</span> <span class="o">=</span> <span class="n">Event</span><span class="p">()</span>
+
+<div class="viewcode-block" id="TimeoutJoinableQueue.join"><a class="viewcode-back" href="../../bacnet.debugging.html#bacnet.debugging.TimeoutJoinableQueue.join">[docs]</a>    <span class="k">def</span> <span class="nf">join</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="c"># pylint: disable=arguments-differ</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function overrides the join function with timeout support.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">all_tasks_done</span><span class="o">.</span><span class="n">acquire</span><span class="p">()</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">endtime</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">+</span> <span class="n">timeout</span>
+            <span class="k">while</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unfinished_tasks</span><span class="o">.</span><span class="n">_semlock</span><span class="o">.</span><span class="n">_is_zero</span><span class="p">():</span>
+                <span class="n">remaining</span> <span class="o">=</span> <span class="n">endtime</span> <span class="o">-</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">remaining</span> <span class="o">&lt;=</span> <span class="mf">0.0</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">all_tasks_done_event</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="n">remaining</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">all_tasks_done</span><span class="o">.</span><span class="n">release</span><span class="p">()</span>
+
+</div></div>
+<div class="viewcode-block" id="iso_now"><a class="viewcode-back" href="../../bacnet.debugging.html#bacnet.debugging.iso_now">[docs]</a><span class="k">def</span> <span class="nf">iso_now</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function returns current time in iso format.</span>
+
+<span class="sd">    :return: time in iso format</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">tzinfo</span><span class="o">=</span><span class="n">dateutil</span><span class="o">.</span><span class="n">tz</span><span class="o">.</span><span class="n">tzutc</span><span class="p">())</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span>
+
+</div>
+<div class="viewcode-block" id="get_formatter"><a class="viewcode-back" href="../../bacnet.debugging.html#bacnet.debugging.get_formatter">[docs]</a><span class="k">def</span> <span class="nf">get_formatter</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function returns a logging formatter instance.</span>
+
+<span class="sd">    :param color: set color</span>
+<span class="sd">    :return: logging formatter</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">LoggingFormatter</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%(levelname)s</span><span class="s">:</span><span class="si">%(filename)s</span><span class="s">:</span><span class="si">%(lineno)04d</span><span class="s">:</span><span class="si">%(name)s</span><span class="s">: </span><span class="si">%(message)s</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">color</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="get_loggers"><a class="viewcode-back" href="../../bacnet.debugging.html#bacnet.debugging.get_loggers">[docs]</a><span class="k">def</span> <span class="nf">get_loggers</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function returns the list of all loggers.</span>
+
+<span class="sd">    :return: list of loggers</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># get all loggers</span>
+    <span class="n">loggers</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">Logger</span><span class="o">.</span><span class="n">manager</span><span class="o">.</span><span class="n">loggerDict</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+    <span class="c"># filter loggers by prefix</span>
+    <span class="k">if</span> <span class="n">prefix</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">loggers</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">l</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">loggers</span> <span class="k">if</span> <span class="n">l</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">prefix</span><span class="p">))</span>
+
+    <span class="c"># sort loggers</span>
+    <span class="n">loggers</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+
+    <span class="c"># return loggers</span>
+    <span class="k">return</span> <span class="n">loggers</span>
+
+</div>
+<div class="viewcode-block" id="set_handler"><a class="viewcode-back" href="../../bacnet.debugging.html#bacnet.debugging.set_handler">[docs]</a><span class="k">def</span> <span class="nf">set_handler</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function assigns logging handler to certain loggers.</span>
+
+<span class="sd">    :param name: logger name</span>
+<span class="sd">    :return: None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">details</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;details&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+    <span class="n">color</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;color&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+    <span class="n">level</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;level&#39;</span><span class="p">,</span> <span class="n">logging</span><span class="o">.</span><span class="n">ERROR</span><span class="p">)</span>
+    <span class="n">formatter</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;formatter&#39;</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
+    <span class="n">init</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;init&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+    <span class="n">obj</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;obj&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+    <span class="n">queue</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">LOG_HANDLER</span><span class="p">,</span> <span class="s">&#39;queue&#39;</span><span class="p">,</span> <span class="n">LOG_QUEUE</span><span class="p">)</span>
+
+    <span class="c"># get logger by name</span>
+    <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="c"># remove all handlers</span>
+    <span class="k">for</span> <span class="n">handler_obj</span> <span class="ow">in</span> <span class="n">logger</span><span class="o">.</span><span class="n">handlers</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">formatter</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">logger</span><span class="o">.</span><span class="n">handlers</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">handler_obj</span><span class="p">:</span>
+            <span class="n">formatter</span> <span class="o">=</span> <span class="n">handler_obj</span><span class="o">.</span><span class="n">formatter</span>
+
+        <span class="n">handler_obj</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">removeHandler</span><span class="p">(</span><span class="n">handler_obj</span><span class="p">)</span>
+
+    <span class="c"># check for preset level</span>
+    <span class="k">if</span> <span class="n">init</span> <span class="ow">is</span> <span class="bp">True</span> <span class="ow">and</span> <span class="mi">1</span> <span class="o">&lt;</span> <span class="n">logger</span><span class="o">.</span><span class="n">level</span> <span class="o">&lt;</span> <span class="n">level</span><span class="p">:</span>
+        <span class="n">level</span> <span class="o">=</span> <span class="n">logger</span><span class="o">.</span><span class="n">level</span>
+
+    <span class="c"># create handler</span>
+    <span class="n">hdlr</span> <span class="o">=</span> <span class="n">MultiProcessingLog</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">.log&#39;</span> <span class="o">%</span> <span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span> <span class="n">queue</span><span class="o">=</span><span class="n">queue</span><span class="p">,</span> <span class="n">obj</span><span class="o">=</span><span class="n">obj</span><span class="p">)</span>
+    <span class="n">hdlr</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">level</span><span class="p">)</span>
+
+    <span class="c"># set formatter if color is set</span>
+    <span class="k">if</span> <span class="n">formatter</span> <span class="ow">is</span> <span class="bp">True</span> <span class="ow">or</span> <span class="p">(</span><span class="n">formatter</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">logger</span><span class="o">.</span><span class="n">handlers</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="n">hdlr</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span>
+            <span class="n">get_formatter</span><span class="p">(</span><span class="n">color</span><span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="k">elif</span> <span class="ow">not</span> <span class="n">formatter</span> <span class="ow">in</span> <span class="p">(</span><span class="bp">False</span><span class="p">,</span> <span class="bp">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">formatter</span><span class="p">,</span> <span class="n">LoggingFormatter</span><span class="p">):</span>
+            <span class="n">hdlr</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">formatter</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">hdlr</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">LoggingFormatter</span><span class="p">(</span><span class="n">formatter</span><span class="p">,</span> <span class="n">color</span><span class="p">))</span>
+
+    <span class="c"># set details</span>
+    <span class="k">if</span> <span class="n">details</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">globs</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">logger</span><span class="p">,</span> <span class="s">&#39;globs&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">globs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">globs</span><span class="p">[</span><span class="s">&#39;_debug&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">details</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">init</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">logger_name</span> <span class="ow">in</span> <span class="n">get_loggers</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">logger_name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="ow">and</span> <span class="n">logger_name</span> <span class="o">!=</span> <span class="n">name</span><span class="p">:</span>
+                    <span class="n">set_handler</span><span class="p">(</span><span class="n">logger_name</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="c"># add handler to logger</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">hdlr</span><span class="p">)</span>
+
+    <span class="c"># do not propagate</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">propagate</span> <span class="o">=</span> <span class="bp">False</span>
+
+    <span class="c"># set logging level</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">level</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="bacnet_debug"><a class="viewcode-back" href="../../bacnet.debugging.html#bacnet.debugging.bacnet_debug">[docs]</a><span class="k">def</span> <span class="nf">bacnet_debug</span><span class="p">(</span><span class="n">func</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">formatter</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function is a decorator for objects to add debugging methods.</span>
+
+<span class="sd">    :param formatter: set formatter string</span>
+<span class="sd">    :param level: set log level</span>
+<span class="sd">    :return: updated object</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function is a decorator wrapper.</span>
+
+<span class="sd">        :param obj: object</span>
+<span class="sd">        :return: updated object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># set name</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">.</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">__module__</span><span class="p">,</span> <span class="n">obj</span><span class="o">.</span><span class="n">__name__</span><span class="p">)</span>
+
+        <span class="c"># create a logger for this object</span>
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+
+        <span class="c"># get module logger</span>
+        <span class="n">module_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">__module__</span><span class="p">)</span>
+
+        <span class="c"># set new level</span>
+        <span class="n">new_level</span> <span class="o">=</span> <span class="n">module_logger</span><span class="o">.</span><span class="n">level</span> <span class="k">if</span> <span class="n">level</span> <span class="ow">is</span> <span class="bp">None</span> <span class="k">else</span> <span class="n">level</span>
+
+        <span class="c"># set new handler</span>
+        <span class="n">set_handler</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="n">new_level</span><span class="p">,</span> <span class="n">formatter</span><span class="o">=</span><span class="n">formatter</span><span class="p">,</span> <span class="n">obj</span><span class="o">=</span><span class="n">obj</span><span class="p">)</span>
+
+        <span class="c"># do not propagate</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">propagate</span> <span class="o">=</span> <span class="bp">False</span>
+
+        <span class="c"># make it available to instances</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">_logger</span> <span class="o">=</span> <span class="n">logger</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">_debug</span> <span class="o">=</span> <span class="n">logger</span><span class="o">.</span><span class="n">debug</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">_info</span> <span class="o">=</span> <span class="n">logger</span><span class="o">.</span><span class="n">info</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">_warning</span> <span class="o">=</span> <span class="n">logger</span><span class="o">.</span><span class="n">warning</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">_error</span> <span class="o">=</span> <span class="n">logger</span><span class="o">.</span><span class="n">error</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">_exception</span> <span class="o">=</span> <span class="n">logger</span><span class="o">.</span><span class="n">exception</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">_fatal</span> <span class="o">=</span> <span class="n">logger</span><span class="o">.</span><span class="n">fatal</span>
+
+        <span class="k">return</span> <span class="n">obj</span>
+
+    <span class="k">if</span> <span class="n">func</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">wrapper</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">wrapper</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="set_debug"><a class="viewcode-back" href="../../bacnet.debugging.html#bacnet.debugging.set_debug">[docs]</a><span class="k">def</span> <span class="nf">set_debug</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">stream</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function sets basic logging parameters.</span>
+
+<span class="sd">    :param args: arguments</span>
+<span class="sd">    :return: log queue</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">global</span> <span class="n">LOG_HANDLER</span>
+
+    <span class="n">level</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">ERROR</span>
+    <span class="n">bug_list</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">if</span> <span class="n">args</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="c"># check if log level was defined</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="s">&#39;level&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">args</span><span class="o">.</span><span class="n">level</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">level</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+                <span class="n">level</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">level</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">level</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">level</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+
+        <span class="c"># check for debug</span>
+        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">debug</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="c"># --debug not specified</span>
+            <span class="n">bug_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="n">args</span><span class="o">.</span><span class="n">debug</span><span class="p">:</span>
+            <span class="c"># --debug, but no arguments</span>
+            <span class="n">bug_list</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;bacnet&quot;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c"># --debug with arguments</span>
+            <span class="n">bug_list</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">debug</span>
+
+        <span class="c"># disable stream output if quiet is requested</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">args</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+            <span class="n">stream</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="n">loggers</span> <span class="o">=</span> <span class="n">get_loggers</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">logger</span> <span class="ow">in</span> <span class="n">loggers</span><span class="p">:</span>
+        <span class="n">set_handler</span><span class="p">(</span><span class="n">logger</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="n">level</span><span class="p">,</span> <span class="n">formatter</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+    <span class="n">log_queue</span> <span class="o">=</span> <span class="n">LOG_QUEUE</span>
+
+    <span class="k">if</span> <span class="n">LOG_HANDLER</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">LOG_HANDLER</span> <span class="o">=</span> <span class="n">MultiProcessingLog</span><span class="p">(</span><span class="s">&#39;bacnet.log&#39;</span><span class="p">,</span> <span class="n">stream</span><span class="o">=</span><span class="n">stream</span><span class="p">,</span> <span class="n">queue</span><span class="o">=</span><span class="n">log_queue</span><span class="p">,</span> <span class="n">thread</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">LOG_HANDLER</span><span class="o">.</span><span class="n">level</span> <span class="o">=</span> <span class="n">level</span>
+        <span class="n">LOG_HANDLER</span><span class="o">.</span><span class="n">formatter</span> <span class="o">=</span> <span class="n">LoggingFormatter</span><span class="p">(</span>
+            <span class="n">get_formatter</span><span class="p">()</span>
+        <span class="p">)</span>
+
+        <span class="n">logging</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">handlers</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">handlers</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">LOG_HANDLER</span>
+
+    <span class="c"># set level for buggers to debug</span>
+    <span class="k">if</span> <span class="n">level</span> <span class="o">&gt;</span> <span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">:</span>
+        <span class="n">level</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span>
+
+    <span class="c"># attach any that are specified</span>
+    <span class="k">if</span> <span class="n">args</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="s">&#39;color&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">args</span><span class="o">.</span><span class="n">color</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">debug_name</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">bug_list</span><span class="p">):</span>
+            <span class="n">set_handler</span><span class="p">(</span><span class="n">debug_name</span><span class="p">,</span> <span class="n">details</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="n">level</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="p">(</span><span class="n">i</span> <span class="o">%</span> <span class="mi">6</span><span class="p">)</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">debug_name</span> <span class="ow">in</span> <span class="n">bug_list</span><span class="p">:</span>
+            <span class="n">set_handler</span><span class="p">(</span><span class="n">debug_name</span><span class="p">,</span> <span class="n">details</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="n">level</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">log_queue</span>
+
+</div>
+<div class="viewcode-block" id="ModuleLogger"><a class="viewcode-back" href="../../bacnet.debugging.html#bacnet.debugging.ModuleLogger">[docs]</a><span class="k">def</span> <span class="nf">ModuleLogger</span><span class="p">(</span><span class="n">context</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">details</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">module_name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">formatter</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function creates a general logger.</span>
+
+<span class="sd">    :return: None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># check if context was defined</span>
+    <span class="k">if</span> <span class="n">context</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="c"># get frame</span>
+        <span class="n">frame</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">stack</span><span class="p">()[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="c"># read globals</span>
+        <span class="n">globs</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">f_globals</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c"># get globals</span>
+        <span class="n">globs</span> <span class="o">=</span> <span class="n">context</span>
+
+    <span class="c"># read module name</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">globs</span><span class="p">[</span><span class="s">&#39;__name__&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="n">module_name</span> <span class="ow">is</span> <span class="bp">None</span> <span class="k">else</span> <span class="n">module_name</span>
+
+    <span class="c"># create a logger to be assigned to _log</span>
+    <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="c"># put in a reference to the module globals</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">globs</span> <span class="o">=</span> <span class="n">globs</span>
+
+    <span class="c"># set global variables</span>
+    <span class="n">globs</span><span class="p">[</span><span class="s">&#39;_debug&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">details</span>
+    <span class="n">globs</span><span class="p">[</span><span class="s">&#39;_log&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">logger</span>
+
+    <span class="k">global</span> <span class="n">LOG_QUEUE</span>
+
+    <span class="k">if</span> <span class="n">LOG_QUEUE</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">LOG_QUEUE</span> <span class="o">=</span> <span class="n">TimeoutJoinableQueue</span><span class="p">()</span>
+
+    <span class="n">set_handler</span><span class="p">(</span>
+        <span class="n">name</span><span class="p">,</span>
+        <span class="n">level</span><span class="o">=</span><span class="n">level</span> <span class="k">if</span> <span class="n">level</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="k">else</span> <span class="n">logging</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">level</span><span class="p">,</span>
+        <span class="n">formatter</span><span class="o">=</span><span class="n">formatter</span><span class="p">,</span>
+        <span class="n">init</span><span class="o">=</span><span class="bp">True</span>
+    <span class="p">)</span>
+
+    <span class="n">LOGGER</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">logger</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">logger</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Tobias Grosch.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.3</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

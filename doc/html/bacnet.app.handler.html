@@ -1,0 +1,1131 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>bacnet.app.handler package &mdash; Masterarbeit Grosch 0.4c0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.4c0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Masterarbeit Grosch 0.4c0 documentation" href="index.html" />
+    <link rel="up" title="bacnet.app package" href="bacnet.app.html" />
+    <link rel="next" title="bacnet.console package" href="bacnet.console.html" />
+    <link rel="prev" title="bacnet.app package" href="bacnet.app.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="bacnet.console.html" title="bacnet.console package"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="bacnet.app.html" title="bacnet.app package"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Masterarbeit Grosch 0.4c0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="bacnet.html" >bacnet package</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="bacnet.app.html" accesskey="U">bacnet.app package</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="bacnet-app-handler-package">
+<h1>bacnet.app.handler package<a class="headerlink" href="#bacnet-app-handler-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-bacnet.app.handler.error">
+<span id="bacnet-app-handler-error-module"></span><h2>bacnet.app.handler.error module<a class="headerlink" href="#module-bacnet.app.handler.error" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="error-module">
+<h3>Error Module<a class="headerlink" href="#error-module" title="Permalink to this headline">¶</a></h3>
+<p>This module provides error handlers.</p>
+<dl class="function">
+<dt id="bacnet.app.handler.error.do_AbortPDU">
+<code class="descclassname">bacnet.app.handler.error.</code><code class="descname">do_AbortPDU</code><span class="sig-paren">(</span><em>self</em>, <em>apdu</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/app/handler/error.html#do_AbortPDU"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.app.handler.error.do_AbortPDU" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function handles abortions.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>apdu</strong> &#8211; incoming message</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="bacnet.app.handler.error.do_Error">
+<code class="descclassname">bacnet.app.handler.error.</code><code class="descname">do_Error</code><span class="sig-paren">(</span><em>self</em>, <em>apdu</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/app/handler/error.html#do_Error"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.app.handler.error.do_Error" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function handles rejections.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>apdu</strong> &#8211; incoming message</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="bacnet.app.handler.error.do_RejectPDU">
+<code class="descclassname">bacnet.app.handler.error.</code><code class="descname">do_RejectPDU</code><span class="sig-paren">(</span><em>self</em>, <em>apdu</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/app/handler/error.html#do_RejectPDU"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.app.handler.error.do_RejectPDU" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function handles rejections.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>apdu</strong> &#8211; incoming message</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="module-bacnet.app.handler.events">
+<span id="bacnet-app-handler-events-module"></span><h2>bacnet.app.handler.events module<a class="headerlink" href="#module-bacnet.app.handler.events" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="event-handler-module">
+<h3>Event Handler Module<a class="headerlink" href="#event-handler-module" title="Permalink to this headline">¶</a></h3>
+<p>This module provides event handlers.</p>
+<dl class="function">
+<dt id="bacnet.app.handler.events.do_ConfirmedCOVNotificationRequest">
+<code class="descclassname">bacnet.app.handler.events.</code><code class="descname">do_ConfirmedCOVNotificationRequest</code><span class="sig-paren">(</span><em>self</em>, <em>apdu</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/app/handler/events.html#do_ConfirmedCOVNotificationRequest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.app.handler.events.do_ConfirmedCOVNotificationRequest" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function reads data from request and returns response.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>apdu</strong> &#8211; incoming message</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">response</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="bacnet.app.handler.events.do_ConfirmedEventNotificationRequest">
+<code class="descclassname">bacnet.app.handler.events.</code><code class="descname">do_ConfirmedEventNotificationRequest</code><span class="sig-paren">(</span><em>self</em>, <em>apdu</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/app/handler/events.html#do_ConfirmedEventNotificationRequest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.app.handler.events.do_ConfirmedEventNotificationRequest" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function reads data from request and returns response.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>apdu</strong> &#8211; incoming message</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="bacnet.app.handler.events.do_GetEventInformationRequest">
+<code class="descclassname">bacnet.app.handler.events.</code><code class="descname">do_GetEventInformationRequest</code><span class="sig-paren">(</span><em>self</em>, <em>apdu</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/app/handler/events.html#do_GetEventInformationRequest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.app.handler.events.do_GetEventInformationRequest" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function reads data from request and returns response.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>apdu</strong> &#8211; incoming message</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="bacnet.app.handler.events.do_SubscribeCOVPropertyRequest">
+<code class="descclassname">bacnet.app.handler.events.</code><code class="descname">do_SubscribeCOVPropertyRequest</code><span class="sig-paren">(</span><em>self</em>, <em>apdu</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/app/handler/events.html#do_SubscribeCOVPropertyRequest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.app.handler.events.do_SubscribeCOVPropertyRequest" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function reads data from request and returns response.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>apdu</strong> &#8211; incoming message</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">response</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="bacnet.app.handler.events.do_SubscribeCOVRequest">
+<code class="descclassname">bacnet.app.handler.events.</code><code class="descname">do_SubscribeCOVRequest</code><span class="sig-paren">(</span><em>self</em>, <em>apdu</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/app/handler/events.html#do_SubscribeCOVRequest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.app.handler.events.do_SubscribeCOVRequest" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function reads data from request and returns response.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>apdu</strong> &#8211; incoming message</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">response</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="bacnet.app.handler.events.do_UnconfirmedCOVNotificationRequest">
+<code class="descclassname">bacnet.app.handler.events.</code><code class="descname">do_UnconfirmedCOVNotificationRequest</code><span class="sig-paren">(</span><em>self</em>, <em>apdu</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/app/handler/events.html#do_UnconfirmedCOVNotificationRequest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.app.handler.events.do_UnconfirmedCOVNotificationRequest" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function reads data from request.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>apdu</strong> &#8211; incoming message</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="bacnet.app.handler.events.do_UnconfirmedEventNotificationRequest">
+<code class="descclassname">bacnet.app.handler.events.</code><code class="descname">do_UnconfirmedEventNotificationRequest</code><span class="sig-paren">(</span><em>self</em>, <em>apdu</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/app/handler/events.html#do_UnconfirmedEventNotificationRequest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.app.handler.events.do_UnconfirmedEventNotificationRequest" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function reads data from request and returns response.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>apdu</strong> &#8211; incoming message</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="module-bacnet.app.handler.fileaccess">
+<span id="bacnet-app-handler-fileaccess-module"></span><h2>bacnet.app.handler.fileaccess module<a class="headerlink" href="#module-bacnet.app.handler.fileaccess" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="file-access-handler-module">
+<h3>File Access Handler Module<a class="headerlink" href="#file-access-handler-module" title="Permalink to this headline">¶</a></h3>
+<p>This module provides file access handlers.</p>
+<dl class="function">
+<dt id="bacnet.app.handler.fileaccess.do_AtomicReadFileRequest">
+<code class="descclassname">bacnet.app.handler.fileaccess.</code><code class="descname">do_AtomicReadFileRequest</code><span class="sig-paren">(</span><em>self</em>, <em>apdu</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/app/handler/fileaccess.html#do_AtomicReadFileRequest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.app.handler.fileaccess.do_AtomicReadFileRequest" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function reads data from read file request.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>apdu</strong> &#8211; incoming message</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">response</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="bacnet.app.handler.fileaccess.do_AtomicWriteFileRequest">
+<code class="descclassname">bacnet.app.handler.fileaccess.</code><code class="descname">do_AtomicWriteFileRequest</code><span class="sig-paren">(</span><em>self</em>, <em>apdu</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/app/handler/fileaccess.html#do_AtomicWriteFileRequest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.app.handler.fileaccess.do_AtomicWriteFileRequest" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function reads data from write file request.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>apdu</strong> &#8211; incoming message</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">response</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="module-bacnet.app.handler.objects">
+<span id="bacnet-app-handler-objects-module"></span><h2>bacnet.app.handler.objects module<a class="headerlink" href="#module-bacnet.app.handler.objects" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="objects-handler-module">
+<h3>Objects Handler Module<a class="headerlink" href="#objects-handler-module" title="Permalink to this headline">¶</a></h3>
+<p>This module provides object handlers.</p>
+<dl class="function">
+<dt id="bacnet.app.handler.objects.do_CreateObjectRequest">
+<code class="descclassname">bacnet.app.handler.objects.</code><code class="descname">do_CreateObjectRequest</code><span class="sig-paren">(</span><em>self</em>, <em>apdu</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/app/handler/objects.html#do_CreateObjectRequest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.app.handler.objects.do_CreateObjectRequest" title="Permalink to this definition">¶</a></dt>
+<dd><p>This functions handles object creation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>apdu</strong> &#8211; incoming message</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="bacnet.app.handler.objects.do_DeleteObjectRequest">
+<code class="descclassname">bacnet.app.handler.objects.</code><code class="descname">do_DeleteObjectRequest</code><span class="sig-paren">(</span><em>self</em>, <em>apdu</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/app/handler/objects.html#do_DeleteObjectRequest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.app.handler.objects.do_DeleteObjectRequest" title="Permalink to this definition">¶</a></dt>
+<dd><p>This functions handles object deletion.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>apdu</strong> &#8211; incoming message</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="module-bacnet.app.handler.simple">
+<span id="bacnet-app-handler-simple-module"></span><h2>bacnet.app.handler.simple module<a class="headerlink" href="#module-bacnet.app.handler.simple" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="application-handler-module">
+<h3>Application Handler Module<a class="headerlink" href="#application-handler-module" title="Permalink to this headline">¶</a></h3>
+<p>This module provides basic functions for value casting, property creation and general handlers.</p>
+<dl class="function">
+<dt id="bacnet.app.handler.simple.do_IAmRequest">
+<code class="descclassname">bacnet.app.handler.simple.</code><code class="descname">do_IAmRequest</code><span class="sig-paren">(</span><em>self</em>, <em>apdu</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/app/handler/simple.html#do_IAmRequest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.app.handler.simple.do_IAmRequest" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function reads data from I Am request.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>apdu</strong> &#8211; incoming message</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="bacnet.app.handler.simple.do_IHaveRequest">
+<code class="descclassname">bacnet.app.handler.simple.</code><code class="descname">do_IHaveRequest</code><span class="sig-paren">(</span><em>self</em>, <em>apdu</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/app/handler/simple.html#do_IHaveRequest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.app.handler.simple.do_IHaveRequest" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function reads data from I Have request.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>apdu</strong> &#8211; incoming message</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="bacnet.app.handler.simple.do_ReadPropertyMultipleRequest">
+<code class="descclassname">bacnet.app.handler.simple.</code><code class="descname">do_ReadPropertyMultipleRequest</code><span class="sig-paren">(</span><em>self</em>, <em>apdu</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/app/handler/simple.html#do_ReadPropertyMultipleRequest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.app.handler.simple.do_ReadPropertyMultipleRequest" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function reads all values from request.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>apdu</strong> &#8211; incoming message</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">response</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="bacnet.app.handler.simple.do_ReadPropertyRequest">
+<code class="descclassname">bacnet.app.handler.simple.</code><code class="descname">do_ReadPropertyRequest</code><span class="sig-paren">(</span><em>self</em>, <em>apdu</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/app/handler/simple.html#do_ReadPropertyRequest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.app.handler.simple.do_ReadPropertyRequest" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function reads value from request response.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>apdu</strong> &#8211; incoming message</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="bacnet.app.handler.simple.do_WhoHasRequest">
+<code class="descclassname">bacnet.app.handler.simple.</code><code class="descname">do_WhoHasRequest</code><span class="sig-paren">(</span><em>self</em>, <em>apdu</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/app/handler/simple.html#do_WhoHasRequest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.app.handler.simple.do_WhoHasRequest" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function responses to WhoHas requests.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>apdu</strong> &#8211; incoming message</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="bacnet.app.handler.simple.do_WhoIsRequest">
+<code class="descclassname">bacnet.app.handler.simple.</code><code class="descname">do_WhoIsRequest</code><span class="sig-paren">(</span><em>self</em>, <em>apdu</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/app/handler/simple.html#do_WhoIsRequest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.app.handler.simple.do_WhoIsRequest" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function responses to WhoIs requests.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>apdu</strong> &#8211; incoming message</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="bacnet.app.handler.simple.do_WritePropertyMultipleRequest">
+<code class="descclassname">bacnet.app.handler.simple.</code><code class="descname">do_WritePropertyMultipleRequest</code><span class="sig-paren">(</span><em>self</em>, <em>apdu</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/app/handler/simple.html#do_WritePropertyMultipleRequest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.app.handler.simple.do_WritePropertyMultipleRequest" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function reads all values from request.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>apdu</strong> &#8211; incoming message</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">response</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="bacnet.app.handler.simple.do_WritePropertyRequest">
+<code class="descclassname">bacnet.app.handler.simple.</code><code class="descname">do_WritePropertyRequest</code><span class="sig-paren">(</span><em>self</em>, <em>apdu</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/app/handler/simple.html#do_WritePropertyRequest"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.app.handler.simple.do_WritePropertyRequest" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function reads value from request response.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>apdu</strong> &#8211; incoming message</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="bacnet.app.handler.simple.property_to_result">
+<code class="descclassname">bacnet.app.handler.simple.</code><code class="descname">property_to_result</code><span class="sig-paren">(</span><em>obj</em>, <em>prop_id</em>, <em>prop_index=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/app/handler/simple.html#property_to_result"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.app.handler.simple.property_to_result" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function creates an appropriate ReadAccessResultElement.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>obj</strong> &#8211; object</li>
+<li><strong>prop_id</strong> &#8211; property id</li>
+<li><strong>prop_index</strong> &#8211; property array index</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">ReadAccessResultElement instance</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="bacnet.app.handler.simple.read_property_any">
+<code class="descclassname">bacnet.app.handler.simple.</code><code class="descname">read_property_any</code><span class="sig-paren">(</span><em>obj</em>, <em>prop_id</em>, <em>prop_index=None</em>, <em>prop=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/app/handler/simple.html#read_property_any"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.app.handler.simple.read_property_any" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function creates an appropriate property value of type Any.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>obj</strong> &#8211; object</li>
+<li><strong>prop_id</strong> &#8211; property id</li>
+<li><strong>prop_index</strong> &#8211; property array index</li>
+<li><strong>prop</strong> &#8211; property instance</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Any instance</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="module-bacnet.app.handler">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-bacnet.app.handler" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id1">
+<h3>Application Handler Module<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<p>This module provides handler for communication callbacks.</p>
+<dl class="class">
+<dt id="bacnet.app.handler.HandlerApplication">
+<em class="property">class </em><code class="descclassname">bacnet.app.handler.</code><code class="descname">HandlerApplication</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/app/handler.html#HandlerApplication"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.app.handler.HandlerApplication" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">bacpypes.app.Application</span></code></p>
+<p>This class provides handler functionality for basic requests.</p>
+<dl class="method">
+<dt id="bacnet.app.handler.HandlerApplication.add_cov_subscription">
+<code class="descname">add_cov_subscription</code><span class="sig-paren">(</span><em>apdu</em>, <em>obj</em>, <em>prop=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/app/handler.html#HandlerApplication.add_cov_subscription"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.app.handler.HandlerApplication.add_cov_subscription" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function adds subscription to cov subscription list.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>apdu</strong> &#8211; incoming message</li>
+<li><strong>obj</strong> &#8211; object</li>
+<li><strong>prop</strong> &#8211; property</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.app.handler.HandlerApplication.check_remote_subscription_updates">
+<code class="descname">check_remote_subscription_updates</code><span class="sig-paren">(</span><em>apdu</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/app/handler.html#HandlerApplication.check_remote_subscription_updates"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.app.handler.HandlerApplication.check_remote_subscription_updates" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function checks if the cov notification was initiated correctly.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>apdu</strong> &#8211; incoming message</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">remote subscription exists</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.app.handler.HandlerApplication.check_subscription_updates">
+<code class="descname">check_subscription_updates</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/app/handler.html#HandlerApplication.check_subscription_updates"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.app.handler.HandlerApplication.check_subscription_updates" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function is the actual wrapper of the function call.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.app.handler.HandlerApplication.delete_cov_subscription">
+<code class="descname">delete_cov_subscription</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/app/handler.html#HandlerApplication.delete_cov_subscription"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.app.handler.HandlerApplication.delete_cov_subscription" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function is the actual wrapper of the function call.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.app.handler.HandlerApplication.delete_cov_subscriptions">
+<code class="descname">delete_cov_subscriptions</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/app/handler.html#HandlerApplication.delete_cov_subscriptions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.app.handler.HandlerApplication.delete_cov_subscriptions" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function is the actual wrapper of the function call.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.app.handler.HandlerApplication.do_AbortPDU">
+<code class="descname">do_AbortPDU</code><span class="sig-paren">(</span><em>apdu</em><span class="sig-paren">)</span><a class="headerlink" href="#bacnet.app.handler.HandlerApplication.do_AbortPDU" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function handles abortions.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>apdu</strong> &#8211; incoming message</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.app.handler.HandlerApplication.do_AtomicReadFileRequest">
+<code class="descname">do_AtomicReadFileRequest</code><span class="sig-paren">(</span><em>apdu</em><span class="sig-paren">)</span><a class="headerlink" href="#bacnet.app.handler.HandlerApplication.do_AtomicReadFileRequest" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function reads data from read file request.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>apdu</strong> &#8211; incoming message</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">response</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.app.handler.HandlerApplication.do_AtomicWriteFileRequest">
+<code class="descname">do_AtomicWriteFileRequest</code><span class="sig-paren">(</span><em>apdu</em><span class="sig-paren">)</span><a class="headerlink" href="#bacnet.app.handler.HandlerApplication.do_AtomicWriteFileRequest" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function reads data from write file request.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>apdu</strong> &#8211; incoming message</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">response</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.app.handler.HandlerApplication.do_ConfirmedCOVNotificationRequest">
+<code class="descname">do_ConfirmedCOVNotificationRequest</code><span class="sig-paren">(</span><em>apdu</em><span class="sig-paren">)</span><a class="headerlink" href="#bacnet.app.handler.HandlerApplication.do_ConfirmedCOVNotificationRequest" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function reads data from request and returns response.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>apdu</strong> &#8211; incoming message</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">response</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.app.handler.HandlerApplication.do_CreateObjectRequest">
+<code class="descname">do_CreateObjectRequest</code><span class="sig-paren">(</span><em>apdu</em><span class="sig-paren">)</span><a class="headerlink" href="#bacnet.app.handler.HandlerApplication.do_CreateObjectRequest" title="Permalink to this definition">¶</a></dt>
+<dd><p>This functions handles object creation.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>apdu</strong> &#8211; incoming message</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.app.handler.HandlerApplication.do_DeleteObjectRequest">
+<code class="descname">do_DeleteObjectRequest</code><span class="sig-paren">(</span><em>apdu</em><span class="sig-paren">)</span><a class="headerlink" href="#bacnet.app.handler.HandlerApplication.do_DeleteObjectRequest" title="Permalink to this definition">¶</a></dt>
+<dd><p>This functions handles object deletion.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>apdu</strong> &#8211; incoming message</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.app.handler.HandlerApplication.do_Error">
+<code class="descname">do_Error</code><span class="sig-paren">(</span><em>apdu</em><span class="sig-paren">)</span><a class="headerlink" href="#bacnet.app.handler.HandlerApplication.do_Error" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function handles rejections.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>apdu</strong> &#8211; incoming message</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.app.handler.HandlerApplication.do_IAmRequest">
+<code class="descname">do_IAmRequest</code><span class="sig-paren">(</span><em>apdu</em><span class="sig-paren">)</span><a class="headerlink" href="#bacnet.app.handler.HandlerApplication.do_IAmRequest" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function reads data from I Am request.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>apdu</strong> &#8211; incoming message</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.app.handler.HandlerApplication.do_IHaveRequest">
+<code class="descname">do_IHaveRequest</code><span class="sig-paren">(</span><em>apdu</em><span class="sig-paren">)</span><a class="headerlink" href="#bacnet.app.handler.HandlerApplication.do_IHaveRequest" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function reads data from I Have request.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>apdu</strong> &#8211; incoming message</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.app.handler.HandlerApplication.do_ReadPropertyMultipleRequest">
+<code class="descname">do_ReadPropertyMultipleRequest</code><span class="sig-paren">(</span><em>apdu</em><span class="sig-paren">)</span><a class="headerlink" href="#bacnet.app.handler.HandlerApplication.do_ReadPropertyMultipleRequest" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function reads all values from request.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>apdu</strong> &#8211; incoming message</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">response</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.app.handler.HandlerApplication.do_ReadPropertyRequest">
+<code class="descname">do_ReadPropertyRequest</code><span class="sig-paren">(</span><em>apdu</em><span class="sig-paren">)</span><a class="headerlink" href="#bacnet.app.handler.HandlerApplication.do_ReadPropertyRequest" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function reads value from request response.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>apdu</strong> &#8211; incoming message</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.app.handler.HandlerApplication.do_RejectPDU">
+<code class="descname">do_RejectPDU</code><span class="sig-paren">(</span><em>apdu</em><span class="sig-paren">)</span><a class="headerlink" href="#bacnet.app.handler.HandlerApplication.do_RejectPDU" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function handles rejections.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>apdu</strong> &#8211; incoming message</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.app.handler.HandlerApplication.do_SubscribeCOVPropertyRequest">
+<code class="descname">do_SubscribeCOVPropertyRequest</code><span class="sig-paren">(</span><em>apdu</em><span class="sig-paren">)</span><a class="headerlink" href="#bacnet.app.handler.HandlerApplication.do_SubscribeCOVPropertyRequest" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function reads data from request and returns response.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>apdu</strong> &#8211; incoming message</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">response</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.app.handler.HandlerApplication.do_SubscribeCOVRequest">
+<code class="descname">do_SubscribeCOVRequest</code><span class="sig-paren">(</span><em>apdu</em><span class="sig-paren">)</span><a class="headerlink" href="#bacnet.app.handler.HandlerApplication.do_SubscribeCOVRequest" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function reads data from request and returns response.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>apdu</strong> &#8211; incoming message</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">response</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.app.handler.HandlerApplication.do_UnconfirmedCOVNotificationRequest">
+<code class="descname">do_UnconfirmedCOVNotificationRequest</code><span class="sig-paren">(</span><em>apdu</em><span class="sig-paren">)</span><a class="headerlink" href="#bacnet.app.handler.HandlerApplication.do_UnconfirmedCOVNotificationRequest" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function reads data from request.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>apdu</strong> &#8211; incoming message</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.app.handler.HandlerApplication.do_WhoHasRequest">
+<code class="descname">do_WhoHasRequest</code><span class="sig-paren">(</span><em>apdu</em><span class="sig-paren">)</span><a class="headerlink" href="#bacnet.app.handler.HandlerApplication.do_WhoHasRequest" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function responses to WhoHas requests.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>apdu</strong> &#8211; incoming message</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.app.handler.HandlerApplication.do_WhoIsRequest">
+<code class="descname">do_WhoIsRequest</code><span class="sig-paren">(</span><em>apdu</em><span class="sig-paren">)</span><a class="headerlink" href="#bacnet.app.handler.HandlerApplication.do_WhoIsRequest" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function responses to WhoIs requests.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>apdu</strong> &#8211; incoming message</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.app.handler.HandlerApplication.do_WritePropertyMultipleRequest">
+<code class="descname">do_WritePropertyMultipleRequest</code><span class="sig-paren">(</span><em>apdu</em><span class="sig-paren">)</span><a class="headerlink" href="#bacnet.app.handler.HandlerApplication.do_WritePropertyMultipleRequest" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function reads all values from request.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>apdu</strong> &#8211; incoming message</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">response</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.app.handler.HandlerApplication.do_WritePropertyRequest">
+<code class="descname">do_WritePropertyRequest</code><span class="sig-paren">(</span><em>apdu</em><span class="sig-paren">)</span><a class="headerlink" href="#bacnet.app.handler.HandlerApplication.do_WritePropertyRequest" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function reads value from request response.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>apdu</strong> &#8211; incoming message</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.app.handler.HandlerApplication.do_indication">
+<code class="descname">do_indication</code><span class="sig-paren">(</span><em>apdu</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/app/handler.html#HandlerApplication.do_indication"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.app.handler.HandlerApplication.do_indication" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function initiates appropriate function call for a received request.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>apdu</strong> &#8211; incoming message</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.app.handler.HandlerApplication.get_device">
+<code class="descname">get_device</code><span class="sig-paren">(</span><em>address</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/app/handler.html#HandlerApplication.get_device"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.app.handler.HandlerApplication.get_device" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function returns device identifier if known.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>address</strong> &#8211; device address</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">device identifier</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.app.handler.HandlerApplication.get_object_by_id">
+<code class="descname">get_object_by_id</code><span class="sig-paren">(</span><em>obj_id</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/app/handler.html#HandlerApplication.get_object_by_id"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.app.handler.HandlerApplication.get_object_by_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function returns object by id.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>obj_id</strong> &#8211; object id</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">object</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.app.handler.HandlerApplication.get_object_by_name">
+<code class="descname">get_object_by_name</code><span class="sig-paren">(</span><em>obj_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/app/handler.html#HandlerApplication.get_object_by_name"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.app.handler.HandlerApplication.get_object_by_name" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function returns object by name.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>obj_name</strong> &#8211; object name</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">object</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.app.handler.HandlerApplication.get_object_id">
+<code class="descname">get_object_id</code><span class="sig-paren">(</span><em>obj_type</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/app/handler.html#HandlerApplication.get_object_id"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.app.handler.HandlerApplication.get_object_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function provides a unique object id.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>obj_type</strong> &#8211; object type</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">object id</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.app.handler.HandlerApplication.handle_remote_subscription">
+<code class="descname">handle_remote_subscription</code><span class="sig-paren">(</span><em>apdu</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/app/handler.html#HandlerApplication.handle_remote_subscription"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.app.handler.HandlerApplication.handle_remote_subscription" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function stores a new remote subscription.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>apdu</strong> &#8211; outgoing request</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.app.handler.HandlerApplication.receive_remote_notification">
+<code class="descname">receive_remote_notification</code><span class="sig-paren">(</span><em>apdu</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/app/handler.html#HandlerApplication.receive_remote_notification"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.app.handler.HandlerApplication.receive_remote_notification" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function checks if the cov notification was initiated correctly.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>apdu</strong> &#8211; incoming message</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">remote subscription exists</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.app.handler.HandlerApplication.renew_cov_subscription">
+<code class="descname">renew_cov_subscription</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/app/handler.html#HandlerApplication.renew_cov_subscription"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.app.handler.HandlerApplication.renew_cov_subscription" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function is the actual wrapper of the function call.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.app.handler.HandlerApplication.send_cov_notification">
+<code class="descname">send_cov_notification</code><span class="sig-paren">(</span><em>subscription</em>, <em>values</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/app/handler.html#HandlerApplication.send_cov_notification"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.app.handler.HandlerApplication.send_cov_notification" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function transmits cov notifications for subscriptions</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>subscription</strong> &#8211; subscription</li>
+<li><strong>values</strong> &#8211; sequence of property values</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="bacnet.app.handler.lock_subscriptions">
+<code class="descclassname">bacnet.app.handler.</code><code class="descname">lock_subscriptions</code><span class="sig-paren">(</span><em>func=None</em>, <em>block=True</em>, <em>retries=3</em>, <em>sleep=0.05</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/app/handler.html#lock_subscriptions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.app.handler.lock_subscriptions" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function is a decorator for functions to lock subscriptions during execution.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>func</strong> &#8211; function reference</li>
+<li><strong>block</strong> &#8211; wait until lock is acquired</li>
+<li><strong>retries</strong> &#8211; retry count if not block</li>
+<li><strong>sleep</strong> &#8211; sleep time in secs if not block</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">updated function</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="bacnet.app.handler.restart_on_failure">
+<code class="descclassname">bacnet.app.handler.</code><code class="descname">restart_on_failure</code><span class="sig-paren">(</span><em>func=None</em>, <em>retries=3</em>, <em>fail_time=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/app/handler.html#restart_on_failure"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.app.handler.restart_on_failure" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function is a decorator for thread functions to restart after failure
+:param func: function reference
+:param retries: restart count within fail time
+:param fail_time: time between failures to count retries
+:return: updated function</p>
+</dd></dl>
+
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">bacnet.app.handler package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-bacnet.app.handler.error">bacnet.app.handler.error module</a><ul>
+<li><a class="reference internal" href="#error-module">Error Module</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-bacnet.app.handler.events">bacnet.app.handler.events module</a><ul>
+<li><a class="reference internal" href="#event-handler-module">Event Handler Module</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-bacnet.app.handler.fileaccess">bacnet.app.handler.fileaccess module</a><ul>
+<li><a class="reference internal" href="#file-access-handler-module">File Access Handler Module</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-bacnet.app.handler.objects">bacnet.app.handler.objects module</a><ul>
+<li><a class="reference internal" href="#objects-handler-module">Objects Handler Module</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-bacnet.app.handler.simple">bacnet.app.handler.simple module</a><ul>
+<li><a class="reference internal" href="#application-handler-module">Application Handler Module</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-bacnet.app.handler">Module contents</a><ul>
+<li><a class="reference internal" href="#id1">Application Handler Module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="bacnet.app.html"
+                        title="previous chapter">bacnet.app package</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="bacnet.console.html"
+                        title="next chapter">bacnet.console package</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/bacnet.app.handler.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Tobias Grosch.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.3</a>
+      
+      |
+      <a href="_sources/bacnet.app.handler.txt"
+          rel="nofollow">Page source</a></li>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,67 @@
+.linke_spalte > .nav-pills > li > a {
+  border-radius: 0px;
+  border-top: solid black 1px;
+}
+
+.linke_spalte > .nav-pills > li:first-child > a {
+  border-radius: 0px;
+  border-top: none;
+}
+
+.linke_spalte > .nav-pills > li {
+  margin: 0px;
+}
+
+.nav-red.nav-pills > li > a:hover {
+  color: #BE1E3C;
+}
+
+.img-title {
+  max-height: 32px;
+  width: auto;
+}
+
+.nav-red.nav-pills > li.active > a,
+.nav-red.nav-pills > li.active > a:hover,
+.nav-red.nav-pills > li.active > a:focus {
+  color: #fff;
+  background-color: #BE1E3C;
+}
+
+.nav-red.nav-pills > .active > a > .badge {
+  color: #BE1E3C;
+  background-color: #fff;
+}
+
+#tubraunschweig_tabelle table,
+#tubraunschweig_tabelle tr {
+  border: 1px solid #DCDCDC;
+  min-width: 100%;
+  max-width: 505px;
+}
+
+#tubraunschweig_tabelle td {
+  border: 1px solid #DCDCDC;
+}
+
+#tubraunschweig_tabelle td #value {
+  max-width: 350px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  display: inline-block;
+}
+
+.img-xs {
+  width: auto;
+  height: auto;
+}
+
+.btn.btn-medium > .img-xs {
+  max-width: 14px;
+  max-height: 14px;
+}
+
+.btn.btn-xs > .img-xs {
+  max-width: 12px;
+  max-height: 12px;
+}

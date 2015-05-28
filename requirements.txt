@@ -1,0 +1,11 @@
+pylint
+git-pylint-commit-hook
+verlib
+netifaces
+python-dateutil
+django<1.8
+redis
+hiredis
+django-redis<4
+six
+sphinx

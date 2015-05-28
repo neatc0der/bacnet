@@ -1,0 +1,770 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>bacnet.object package &mdash; Masterarbeit Grosch 0.4c0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.4c0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Masterarbeit Grosch 0.4c0 documentation" href="index.html" />
+    <link rel="up" title="bacnet package" href="bacnet.html" />
+    <link rel="next" title="bacnet.object.basic package" href="bacnet.object.basic.html" />
+    <link rel="prev" title="bacnet.debugging package" href="bacnet.debugging.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="bacnet.object.basic.html" title="bacnet.object.basic package"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="bacnet.debugging.html" title="bacnet.debugging package"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Masterarbeit Grosch 0.4c0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="bacnet.html" accesskey="U">bacnet package</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="bacnet-object-package">
+<h1>bacnet.object package<a class="headerlink" href="#bacnet-object-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="bacnet.object.basic.html">bacnet.object.basic package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="bacnet.object.basic.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bacnet.object.basic.html#module-bacnet.object.basic.cov_support">bacnet.object.basic.cov_support module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="bacnet.object.basic.html#cov-support-module">COV Support Module</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="bacnet.object.basic.html#module-bacnet.object.basic.device">bacnet.object.basic.device module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="bacnet.object.basic.html#object-basic-module">Object Basic Module</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="bacnet.object.basic.html#module-bacnet.object.basic.fileaccess">bacnet.object.basic.fileaccess module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="bacnet.object.basic.html#file-access-object-module">File Access Object Module</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="bacnet.object.basic.html#module-bacnet.object.basic.general">bacnet.object.basic.general module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="bacnet.object.basic.html#id1">Object Basic Module</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="bacnet.object.basic.html#module-bacnet.object.basic.program">bacnet.object.basic.program module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="bacnet.object.basic.html#id2">Object Basic Module</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="bacnet.object.basic.html#module-bacnet.object.basic">Module contents</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="bacnet.object.basic.html#id3">Object Basic Module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="bacnet.object.hardware.html">bacnet.object.hardware package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="bacnet.object.hardware.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="bacnet.object.hardware.terra.html">bacnet.object.hardware.terra package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="bacnet.object.hardware.terra.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="bacnet.object.hardware.terra.html#module-bacnet.object.hardware.terra.ablib_dummy">bacnet.object.hardware.terra.ablib_dummy module</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="bacnet.object.hardware.terra.html#terra-board-ablib-dummy-module">Terra_Board ABLIB_Dummy Module</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="bacnet.object.hardware.terra.html#module-bacnet.object.hardware.terra">Module contents</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="bacnet.object.hardware.terra.html#terra-module">Terra Module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="bacnet.object.hardware.html#module-bacnet.object.hardware">Module contents</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="bacnet.object.hardware.html#objects-hardware-module">Objects Hardware Module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-bacnet.object.define">
+<span id="bacnet-object-define-module"></span><h2>bacnet.object.define module<a class="headerlink" href="#module-bacnet.object.define" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="object-define-module">
+<h3>Object Define Module<a class="headerlink" href="#object-define-module" title="Permalink to this headline">¶</a></h3>
+<p>This module contains user specific definitions of BACpypes Object and a list to collect all builtin
+Objects needed.</p>
+<dl class="function">
+<dt id="bacnet.object.define.get_initial_object_list">
+<code class="descclassname">bacnet.object.define.</code><code class="descname">get_initial_object_list</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/object/define.html#get_initial_object_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.object.define.get_initial_object_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function creates the object list.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">object list</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="module-bacnet.object.primitivedata">
+<span id="bacnet-object-primitivedata-module"></span><h2>bacnet.object.primitivedata module<a class="headerlink" href="#module-bacnet.object.primitivedata" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="primitive-data-module">
+<h3>Primitive Data Module<a class="headerlink" href="#primitive-data-module" title="Permalink to this headline">¶</a></h3>
+<p>This module contains improved bacpypes primitive data classes.</p>
+<dl class="class">
+<dt id="bacnet.object.primitivedata.COVSubscription">
+<em class="property">class </em><code class="descclassname">bacnet.object.primitivedata.</code><code class="descname">COVSubscription</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/object/primitivedata.html#COVSubscription"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.object.primitivedata.COVSubscription" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">bacpypes.basetypes.COVSubscription</span></code></p>
+<p>This class has specific updates.</p>
+<dl class="attribute">
+<dt id="bacnet.object.primitivedata.COVSubscription.sequenceElements">
+<code class="descname">sequenceElements</code><em class="property"> = [&lt;bacpypes.constructeddata.Element instance at 0x10586f0e0&gt;, &lt;bacpypes.constructeddata.Element instance at 0x10586f098&gt;, &lt;bacpypes.constructeddata.Element instance at 0x10586f050&gt;, &lt;bacpypes.constructeddata.Element instance at 0x10584bfc8&gt;, &lt;bacpypes.constructeddata.Element instance at 0x10584bf80&gt;]</em><a class="headerlink" href="#bacnet.object.primitivedata.COVSubscription.sequenceElements" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bacnet.object.primitivedata.ObjectPropertyReference">
+<em class="property">class </em><code class="descclassname">bacnet.object.primitivedata.</code><code class="descname">ObjectPropertyReference</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/object/primitivedata.html#ObjectPropertyReference"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.object.primitivedata.ObjectPropertyReference" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">bacpypes.constructeddata.Sequence</span></code></p>
+<p>This class has an extension to support instances without property identifier.</p>
+<dl class="attribute">
+<dt id="bacnet.object.primitivedata.ObjectPropertyReference.sequenceElements">
+<code class="descname">sequenceElements</code><em class="property"> = [&lt;bacpypes.constructeddata.Element instance at 0x10586f1b8&gt;, &lt;bacpypes.constructeddata.Element instance at 0x10586f170&gt;, &lt;bacpypes.constructeddata.Element instance at 0x10586f128&gt;]</em><a class="headerlink" href="#bacnet.object.primitivedata.ObjectPropertyReference.sequenceElements" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bacnet.object.primitivedata.Remaining">
+<em class="property">class </em><code class="descclassname">bacnet.object.primitivedata.</code><code class="descname">Remaining</code><span class="sig-paren">(</span><em>time</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/object/primitivedata.html#Remaining"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.object.primitivedata.Remaining" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">bacpypes.primitivedata.CharacterString</span></code></p>
+<p>This class is an extended version of Unsigned.</p>
+<dl class="method">
+<dt id="bacnet.object.primitivedata.Remaining.decode">
+<code class="descname">decode</code><span class="sig-paren">(</span><em>tag</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/object/primitivedata.html#Remaining.decode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.object.primitivedata.Remaining.decode" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function decodes the value from network transmission.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>tag</strong> &#8211; Tag</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.object.primitivedata.Remaining.encode">
+<code class="descname">encode</code><span class="sig-paren">(</span><em>tag</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/object/primitivedata.html#Remaining.encode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.object.primitivedata.Remaining.encode" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function encodes the value for network transmission.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>tag</strong> &#8211; Tag</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bacnet.object.primitivedata.Remaining.remaining_time">
+<code class="descname">remaining_time</code><a class="headerlink" href="#bacnet.object.primitivedata.Remaining.remaining_time" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function calculates the remaining time till defined datetime</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">remaining time in seconds</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bacnet.object.primitivedata.RingDict">
+<em class="property">class </em><code class="descclassname">bacnet.object.primitivedata.</code><code class="descname">RingDict</code><span class="sig-paren">(</span><em>size</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/object/primitivedata.html#RingDict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.object.primitivedata.RingDict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">collections.OrderedDict</span></code></p>
+<p>This class is a dictionary ring buffer without overriding protection.</p>
+<dl class="attribute">
+<dt id="bacnet.object.primitivedata.RingDict.size">
+<code class="descname">size</code><a class="headerlink" href="#bacnet.object.primitivedata.RingDict.size" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function returns the size of the ring buffer.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">buffer size</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bacnet.object.primitivedata.RingList">
+<em class="property">class </em><code class="descclassname">bacnet.object.primitivedata.</code><code class="descname">RingList</code><span class="sig-paren">(</span><em>size</em>, <em>seq=()</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/object/primitivedata.html#RingList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.object.primitivedata.RingList" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">list</span></code></p>
+<p>This class is a ring buffer without overriding protection.</p>
+<dl class="method">
+<dt id="bacnet.object.primitivedata.RingList.append">
+<code class="descname">append</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/object/primitivedata.html#RingList.append"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.object.primitivedata.RingList.append" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function adds data to ring buffer.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>data</strong> &#8211; data to be added</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.object.primitivedata.RingList.first_value">
+<code class="descname">first_value</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/object/primitivedata.html#RingList.first_value"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.object.primitivedata.RingList.first_value" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function returns the value last appended.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">last value</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.object.primitivedata.RingList.last_value">
+<code class="descname">last_value</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/object/primitivedata.html#RingList.last_value"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.object.primitivedata.RingList.last_value" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function returns the value last appended.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">last value</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bacnet.object.primitivedata.RingList.size">
+<code class="descname">size</code><a class="headerlink" href="#bacnet.object.primitivedata.RingList.size" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function returns the size of the ring buffer.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">buffer size</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bacnet.object.primitivedata.Unsigned">
+<em class="property">class </em><code class="descclassname">bacnet.object.primitivedata.</code><code class="descname">Unsigned</code><span class="sig-paren">(</span><em>*args</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/object/primitivedata.html#Unsigned"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.object.primitivedata.Unsigned" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">bacpypes.primitivedata.Unsigned</span></code>, <code class="xref py py-class docutils literal"><span class="pre">long</span></code></p>
+<p>This class has an integer extension to support builtin functions like div float.</p>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="module-bacnet.object.properties">
+<span id="bacnet-object-properties-module"></span><h2>bacnet.object.properties module<a class="headerlink" href="#module-bacnet.object.properties" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="object-properties-module">
+<h3>Object Properties Module<a class="headerlink" href="#object-properties-module" title="Permalink to this headline">¶</a></h3>
+<p>This module contains specific properties for the usage within objects.
+Especially it provides updated property COV functionality for bacpypes objects.</p>
+<dl class="class">
+<dt id="bacnet.object.properties.ActiveCovSubscriptionsProperty">
+<em class="property">class </em><code class="descclassname">bacnet.object.properties.</code><code class="descname">ActiveCovSubscriptionsProperty</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/object/properties.html#ActiveCovSubscriptionsProperty"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.object.properties.ActiveCovSubscriptionsProperty" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bacnet.object.properties.ReadableProperty" title="bacnet.object.properties.ReadableProperty"><code class="xref py py-class docutils literal"><span class="pre">bacnet.object.properties.ReadableProperty</span></code></a></p>
+<p>This class is an extension of the ReadableProperty class for active cov subscriptions.</p>
+<dl class="method">
+<dt id="bacnet.object.properties.ActiveCovSubscriptionsProperty.ReadProperty">
+<code class="descname">ReadProperty</code><span class="sig-paren">(</span><em>obj</em>, <em>arrayIndex=None</em>, <em>dictionary=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/object/properties.html#ActiveCovSubscriptionsProperty.ReadProperty"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.object.properties.ActiveCovSubscriptionsProperty.ReadProperty" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function handles reading.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>obj</strong> &#8211; property</li>
+<li><strong>arrayIndex</strong> &#8211; index</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">property value</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.object.properties.ActiveCovSubscriptionsProperty.WriteProperty">
+<code class="descname">WriteProperty</code><span class="sig-paren">(</span><em>obj</em>, <em>value</em>, <em>arrayIndex=None</em>, <em>priority=None</em>, <em>direct=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/object/properties.html#ActiveCovSubscriptionsProperty.WriteProperty"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.object.properties.ActiveCovSubscriptionsProperty.WriteProperty" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function handles writing.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>obj</strong> &#8211; property</li>
+<li><strong>value</strong> &#8211; property value</li>
+<li><strong>arrayIndex</strong> &#8211; index</li>
+<li><strong>priority</strong> &#8211; priority</li>
+<li><strong>direct</strong> &#8211; direct</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">property value</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bacnet.object.properties.CurrentDateProperty">
+<em class="property">class </em><code class="descclassname">bacnet.object.properties.</code><code class="descname">CurrentDateProperty</code><span class="sig-paren">(</span><em>identifier</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/object/properties.html#CurrentDateProperty"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.object.properties.CurrentDateProperty" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bacnet.object.properties.OptionalProperty" title="bacnet.object.properties.OptionalProperty"><code class="xref py py-class docutils literal"><span class="pre">bacnet.object.properties.OptionalProperty</span></code></a></p>
+<p>This class is an extension of the OptionalProperty class for current date.</p>
+<dl class="method">
+<dt id="bacnet.object.properties.CurrentDateProperty.ReadProperty">
+<code class="descname">ReadProperty</code><span class="sig-paren">(</span><em>obj</em>, <em>arrayIndex=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/object/properties.html#CurrentDateProperty.ReadProperty"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.object.properties.CurrentDateProperty.ReadProperty" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function handles reading.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>obj</strong> &#8211; property</li>
+<li><strong>arrayIndex</strong> &#8211; index</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">property value</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.object.properties.CurrentDateProperty.WriteProperty">
+<code class="descname">WriteProperty</code><span class="sig-paren">(</span><em>obj</em>, <em>value</em>, <em>arrayIndex=None</em>, <em>priority=None</em>, <em>direct=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/object/properties.html#CurrentDateProperty.WriteProperty"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.object.properties.CurrentDateProperty.WriteProperty" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function handles writing.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>obj</strong> &#8211; property</li>
+<li><strong>value</strong> &#8211; property value</li>
+<li><strong>arrayIndex</strong> &#8211; index</li>
+<li><strong>priority</strong> &#8211; priority</li>
+<li><strong>direct</strong> &#8211; direct</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">property value</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bacnet.object.properties.CurrentTimeProperty">
+<em class="property">class </em><code class="descclassname">bacnet.object.properties.</code><code class="descname">CurrentTimeProperty</code><span class="sig-paren">(</span><em>identifier</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/object/properties.html#CurrentTimeProperty"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.object.properties.CurrentTimeProperty" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bacnet.object.properties.OptionalProperty" title="bacnet.object.properties.OptionalProperty"><code class="xref py py-class docutils literal"><span class="pre">bacnet.object.properties.OptionalProperty</span></code></a></p>
+<p>This class is an extension of the OptionalProperty class for current time.</p>
+<dl class="method">
+<dt id="bacnet.object.properties.CurrentTimeProperty.ReadProperty">
+<code class="descname">ReadProperty</code><span class="sig-paren">(</span><em>obj</em>, <em>arrayIndex=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/object/properties.html#CurrentTimeProperty.ReadProperty"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.object.properties.CurrentTimeProperty.ReadProperty" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function handles reading.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>obj</strong> &#8211; property</li>
+<li><strong>arrayIndex</strong> &#8211; index</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">property value</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.object.properties.CurrentTimeProperty.WriteProperty">
+<code class="descname">WriteProperty</code><span class="sig-paren">(</span><em>obj</em>, <em>value</em>, <em>arrayIndex=None</em>, <em>priority=None</em>, <em>direct=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/object/properties.html#CurrentTimeProperty.WriteProperty"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.object.properties.CurrentTimeProperty.WriteProperty" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function handles writing.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>obj</strong> &#8211; property</li>
+<li><strong>value</strong> &#8211; property value</li>
+<li><strong>arrayIndex</strong> &#8211; index</li>
+<li><strong>priority</strong> &#8211; priority</li>
+<li><strong>direct</strong> &#8211; direct</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">property value</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bacnet.object.properties.HardwareAccessObject">
+<em class="property">class </em><code class="descclassname">bacnet.object.properties.</code><code class="descname">HardwareAccessObject</code><span class="sig-paren">(</span><em>hw_object</em>, <em>write=False</em>, <em>hysteresis=False</em>, <em>buffer_size=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/object/properties.html#HardwareAccessObject"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.object.properties.HardwareAccessObject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>This class is a wrapper for terra hardware objects.</p>
+<dl class="method">
+<dt id="bacnet.object.properties.HardwareAccessObject.get">
+<code class="descname">get</code><span class="sig-paren">(</span><em>index=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/object/properties.html#HardwareAccessObject.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.object.properties.HardwareAccessObject.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function is a wrapper for getting the actual hardware value</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>index</strong> &#8211; array index</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">value</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bacnet.object.properties.HardwareAccessObject.hardware">
+<code class="descname">hardware</code><em class="property"> = None</em><a class="headerlink" href="#bacnet.object.properties.HardwareAccessObject.hardware" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bacnet.object.properties.HardwareAccessObject.hysteresis">
+<code class="descname">hysteresis</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/object/properties.html#HardwareAccessObject.hysteresis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.object.properties.HardwareAccessObject.hysteresis" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function applies a user specific hysteresis to the value.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>value</strong> &#8211; hardware value</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">updated value</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.object.properties.HardwareAccessObject.set">
+<code class="descname">set</code><span class="sig-paren">(</span><em>value</em>, <em>data_type</em>, <em>index=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/object/properties.html#HardwareAccessObject.set"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.object.properties.HardwareAccessObject.set" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function converts the</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>value</strong> &#8211; value</li>
+<li><strong>data_type</strong> &#8211; data type</li>
+<li><strong>index</strong> &#8211; array index</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">value</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bacnet.object.properties.HardwareAccessObject.writable">
+<code class="descname">writable</code><em class="property"> = False</em><a class="headerlink" href="#bacnet.object.properties.HardwareAccessObject.writable" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bacnet.object.properties.ObjectIdentifierProperty">
+<em class="property">class </em><code class="descclassname">bacnet.object.properties.</code><code class="descname">ObjectIdentifierProperty</code><span class="sig-paren">(</span><em>identifier</em>, <em>datatype</em>, <em>default=None</em>, <em>optional=False</em>, <em>mutable=False</em>, <em>cov_support=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/object/properties.html#ObjectIdentifierProperty"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.object.properties.ObjectIdentifierProperty" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bacnet.object.properties.ReadableProperty" title="bacnet.object.properties.ReadableProperty"><code class="xref py py-class docutils literal"><span class="pre">bacnet.object.properties.ReadableProperty</span></code></a></p>
+<p>This class is an extension of the ReadableProperty class for object identifiers.</p>
+<dl class="method">
+<dt id="bacnet.object.properties.ObjectIdentifierProperty.WriteProperty">
+<code class="descname">WriteProperty</code><span class="sig-paren">(</span><em>obj</em>, <em>value</em>, <em>arrayIndex=None</em>, <em>priority=None</em>, <em>direct=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/object/properties.html#ObjectIdentifierProperty.WriteProperty"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.object.properties.ObjectIdentifierProperty.WriteProperty" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function handles writing.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>obj</strong> &#8211; property</li>
+<li><strong>value</strong> &#8211; property value</li>
+<li><strong>arrayIndex</strong> &#8211; index</li>
+<li><strong>priority</strong> &#8211; priority</li>
+<li><strong>direct</strong> &#8211; direct</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">property value</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bacnet.object.properties.OptionalProperty">
+<em class="property">class </em><code class="descclassname">bacnet.object.properties.</code><code class="descname">OptionalProperty</code><span class="sig-paren">(</span><em>identifier</em>, <em>datatype</em>, <em>default=None</em>, <em>optional=True</em>, <em>mutable=False</em>, <em>cov_support=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/object/properties.html#OptionalProperty"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.object.properties.OptionalProperty" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bacnet.object.properties.StandardProperty" title="bacnet.object.properties.StandardProperty"><code class="xref py py-class docutils literal"><span class="pre">bacnet.object.properties.StandardProperty</span></code></a></p>
+<p>This class is an extension of the bacpypes OptionalProperty class to support COV notifications.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="bacnet.object.properties.Property">
+<em class="property">class </em><code class="descclassname">bacnet.object.properties.</code><code class="descname">Property</code><span class="sig-paren">(</span><em>identifier</em>, <em>datatype</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/object/properties.html#Property"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.object.properties.Property" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>This class is an extension of the bacpypes Property class to support COV notifications.</p>
+<dl class="method">
+<dt id="bacnet.object.properties.Property.ReadProperty">
+<code class="descname">ReadProperty</code><span class="sig-paren">(</span><em>obj</em>, <em>arrayIndex=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/object/properties.html#Property.ReadProperty"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.object.properties.Property.ReadProperty" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function handles reading.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>obj</strong> &#8211; property</li>
+<li><strong>arrayIndex</strong> &#8211; index</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">property value</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.object.properties.Property.WriteProperty">
+<code class="descname">WriteProperty</code><span class="sig-paren">(</span><em>obj</em>, <em>value</em>, <em>arrayIndex=None</em>, <em>priority=None</em>, <em>direct=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/object/properties.html#Property.WriteProperty"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.object.properties.Property.WriteProperty" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function handles writing.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>obj</strong> &#8211; property</li>
+<li><strong>value</strong> &#8211; property value</li>
+<li><strong>arrayIndex</strong> &#8211; index</li>
+<li><strong>priority</strong> &#8211; priority</li>
+<li><strong>direct</strong> &#8211; direct</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">property value</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bacnet.object.properties.ReadableProperty">
+<em class="property">class </em><code class="descclassname">bacnet.object.properties.</code><code class="descname">ReadableProperty</code><span class="sig-paren">(</span><em>identifier</em>, <em>datatype</em>, <em>default=None</em>, <em>optional=False</em>, <em>mutable=False</em>, <em>cov_support=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/object/properties.html#ReadableProperty"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.object.properties.ReadableProperty" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bacnet.object.properties.StandardProperty" title="bacnet.object.properties.StandardProperty"><code class="xref py py-class docutils literal"><span class="pre">bacnet.object.properties.StandardProperty</span></code></a></p>
+<p>This class is an extension of the bacpypes ReadableProperty class to support COV notifications.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="bacnet.object.properties.StandardProperty">
+<em class="property">class </em><code class="descclassname">bacnet.object.properties.</code><code class="descname">StandardProperty</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/object/properties.html#StandardProperty"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.object.properties.StandardProperty" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bacnet.object.properties.Property" title="bacnet.object.properties.Property"><code class="xref py py-class docutils literal"><span class="pre">bacnet.object.properties.Property</span></code></a></p>
+<p>This class is an extension of the bacpypes StandardProperty class to support COV notifications.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="bacnet.object.properties.WritableProperty">
+<em class="property">class </em><code class="descclassname">bacnet.object.properties.</code><code class="descname">WritableProperty</code><span class="sig-paren">(</span><em>identifier</em>, <em>datatype</em>, <em>default=None</em>, <em>optional=False</em>, <em>mutable=True</em>, <em>cov_support=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/object/properties.html#WritableProperty"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.object.properties.WritableProperty" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bacnet.object.properties.StandardProperty" title="bacnet.object.properties.StandardProperty"><code class="xref py py-class docutils literal"><span class="pre">bacnet.object.properties.StandardProperty</span></code></a></p>
+<p>This class is an extension of the bacpypes WritableProperty class to support COV notifications.</p>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="module-bacnet.object">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-bacnet.object" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="objects-module">
+<h3>Objects Module<a class="headerlink" href="#objects-module" title="Permalink to this headline">¶</a></h3>
+<p>This module contains just a single function to collect all user specific bacpypes Objects.</p>
+<dl class="function">
+<dt id="bacnet.object.get_object_list">
+<code class="descclassname">bacnet.object.</code><code class="descname">get_object_list</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/object.html#get_object_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.object.get_object_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function collects all defined user specific and relevant builtin bacpypes Objects.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>examples</strong> &#8211; enable example objects</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">object_list</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">bacnet.object package</a><ul>
+<li><a class="reference internal" href="#subpackages">Subpackages</a></li>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-bacnet.object.define">bacnet.object.define module</a><ul>
+<li><a class="reference internal" href="#object-define-module">Object Define Module</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-bacnet.object.primitivedata">bacnet.object.primitivedata module</a><ul>
+<li><a class="reference internal" href="#primitive-data-module">Primitive Data Module</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-bacnet.object.properties">bacnet.object.properties module</a><ul>
+<li><a class="reference internal" href="#object-properties-module">Object Properties Module</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-bacnet.object">Module contents</a><ul>
+<li><a class="reference internal" href="#objects-module">Objects Module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="bacnet.debugging.html"
+                        title="previous chapter">bacnet.debugging package</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="bacnet.object.basic.html"
+                        title="next chapter">bacnet.object.basic package</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/bacnet.object.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Tobias Grosch.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.3</a>
+      
+      |
+      <a href="_sources/bacnet.object.txt"
+          rel="nofollow">Page source</a></li>
+    </div>
+
+    
+
+    
+  </body>
+</html>

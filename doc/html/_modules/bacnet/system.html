@@ -1,0 +1,571 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>bacnet.system &mdash; Masterarbeit Grosch 0.4c0 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.4c0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="Masterarbeit Grosch 0.4c0 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">Masterarbeit Grosch 0.4c0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for bacnet.system</h1><div class="highlight"><pre>
+<span class="c"># pylint: disable=</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">BACnet System Module</span>
+<span class="sd">--------------------</span>
+
+<span class="sd">This module contains the bacnet system class.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">inspect</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">signal</span>
+<span class="kn">import</span> <span class="nn">subprocess</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">threading</span> <span class="kn">import</span> <span class="n">Lock</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+<span class="kn">from</span> <span class="nn">bacnet.debugging</span> <span class="kn">import</span> <span class="n">ModuleLogger</span><span class="p">,</span> <span class="n">set_debug</span><span class="p">,</span> <span class="n">bacnet_debug</span><span class="p">,</span> <span class="n">get_loggers</span><span class="p">,</span> <span class="n">iso_now</span>
+
+<span class="kn">from</span> <span class="nn">bacnet.console</span> <span class="kn">import</span> <span class="n">create_console</span>
+<span class="kn">from</span> <span class="nn">bacnet.console.creator</span> <span class="kn">import</span> <span class="n">print_values</span>
+
+<span class="kn">from</span> <span class="nn">bacnet.app</span> <span class="kn">import</span> <span class="n">create_app</span>
+
+<span class="kn">from</span> <span class="nn">bacnet.object.hardware</span> <span class="kn">import</span> <span class="n">discover_hardware_objects</span>
+
+<span class="kn">from</span> <span class="nn">.config</span> <span class="kn">import</span> <span class="n">ConfigManager</span>
+<span class="kn">from</span> <span class="nn">.config.parser</span> <span class="kn">import</span> <span class="n">FullArgumentParser</span>
+<span class="kn">from</span> <span class="nn">.managing</span> <span class="kn">import</span> <span class="n">server_manager</span>
+<span class="kn">from</span> <span class="nn">.version</span> <span class="kn">import</span> <span class="n">__program__</span><span class="p">,</span> <span class="n">__version__</span>
+
+
+<span class="n">ModuleLogger</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="s">&#39;INFO&#39;</span><span class="p">)</span>
+
+
+<span class="nd">@bacnet_debug</span><span class="p">(</span><span class="n">formatter</span><span class="o">=</span><span class="s">&#39;</span><span class="si">%(levelname)s</span><span class="s">:system: </span><span class="si">%(message)s</span><span class="s">&#39;</span><span class="p">)</span>
+<div class="viewcode-block" id="BACnetSystem"><a class="viewcode-back" href="../../bacnet.system.html#bacnet.system.BACnetSystem">[docs]</a><span class="k">class</span> <span class="nc">BACnetSystem</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="c"># pylint: disable=unused-argument, no-self-use, broad-except, too-many-instance-attributes</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class handles the BACnet system.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">application</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">console</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">manager</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="n">stdin</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">stdout</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">stderr</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stdin</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stdin</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function initializes the bacnet system.</span>
+
+<span class="sd">        :param stdin: define stdin</span>
+<span class="sd">        :param stdout: define stdout</span>
+<span class="sd">        :param stderr: define stderr</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;__init__ </span><span class="si">%r</span><span class="s">, </span><span class="si">%r</span><span class="s">, </span><span class="si">%r</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">stdin</span><span class="p">,</span> <span class="n">stdout</span><span class="p">,</span> <span class="n">stderr</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">exit_code</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">exiting</span> <span class="o">=</span> <span class="n">Lock</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">pid</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getpid</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">console</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">webgui</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pid</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getpid</span><span class="p">()</span>
+
+        <span class="c"># set stdin</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stdin</span> <span class="o">=</span> <span class="n">stdin</span>
+
+        <span class="c"># set stdout</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span> <span class="o">=</span> <span class="n">stdout</span>
+
+        <span class="c"># set stderr</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stderr</span> <span class="o">=</span> <span class="n">stderr</span>
+
+        <span class="c"># collect allowed commands</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">commands</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
+            <span class="n">attribute</span><span class="p">[</span><span class="mi">3</span><span class="p">:]</span> <span class="k">for</span> <span class="n">attribute</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="k">if</span> <span class="n">attribute</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;do_&#39;</span><span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="c"># initialize logger</span>
+        <span class="n">ModuleLogger</span><span class="p">(</span><span class="n">inspect</span><span class="o">.</span><span class="n">stack</span><span class="p">()[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">f_globals</span><span class="p">)</span>
+
+        <span class="c"># assign interrupt methods</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">signal</span><span class="p">,</span> <span class="s">&#39;SIGTERM&#39;</span><span class="p">):</span>
+            <span class="n">signal</span><span class="o">.</span><span class="n">signal</span><span class="p">(</span><span class="n">signal</span><span class="o">.</span><span class="n">SIGTERM</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">shutdown</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">signal</span><span class="p">,</span> <span class="s">&#39;SIGINT&#39;</span><span class="p">):</span>
+            <span class="n">signal</span><span class="o">.</span><span class="n">signal</span><span class="p">(</span><span class="n">signal</span><span class="o">.</span><span class="n">SIGINT</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">console_interrupt</span><span class="p">)</span>
+
+        <span class="c"># print info message</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="p">(</span><span class="s">&#39;starting at </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">iso_now</span><span class="p">())</span>
+
+        <span class="c"># parse parameters and config file</span>
+        <span class="n">config_args</span> <span class="o">=</span> <span class="n">FullArgumentParser</span><span class="p">(</span>
+            <span class="n">commands</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">commands</span><span class="p">,</span>
+            <span class="n">description</span><span class="o">=</span><span class="n">__program__</span><span class="p">,</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+
+        <span class="c"># set initial logger config</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log_queue</span> <span class="o">=</span> <span class="n">set_debug</span><span class="p">(</span>
+            <span class="n">args</span><span class="o">=</span><span class="n">config_args</span><span class="o">.</span><span class="n">arg_object</span><span class="p">,</span>
+            <span class="n">stream</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">stderr</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c"># update parsed parameters</span>
+        <span class="n">config_args</span> <span class="o">=</span> <span class="n">config_args</span><span class="o">.</span><span class="n">update</span><span class="p">()</span>
+
+        <span class="c"># read execution command</span>
+        <span class="n">cmd</span> <span class="o">=</span> <span class="n">config_args</span><span class="o">.</span><span class="n">command</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;initialization&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;   - args: </span><span class="si">%r</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">config_args</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+
+            <span class="c"># execute command</span>
+            <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;do_</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">cmd</span><span class="p">)(</span><span class="n">config_args</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_exception</span><span class="p">(</span><span class="s">&#39;an error has occurred: </span><span class="si">%s</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">error</span><span class="p">)</span>
+
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;done&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
+
+<div class="viewcode-block" id="BACnetSystem.console_interrupt"><a class="viewcode-back" href="../../bacnet.system.html#bacnet.system.BACnetSystem.console_interrupt">[docs]</a>    <span class="k">def</span> <span class="nf">console_interrupt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function is the catch for interrupts.</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;console_interrupt </span><span class="si">%r</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">getpid</span><span class="p">()</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">pid</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;This is me: </span><span class="si">%i</span><span class="s">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
+            <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">console</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">console</span><span class="o">.</span><span class="n">is_alive</span><span class="p">())</span> <span class="ow">and</span> \
+                <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">webgui</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">webgui</span><span class="o">.</span><span class="n">is_alive</span><span class="p">()):</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">is_alive</span><span class="p">():</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="BACnetSystem.shutdown"><a class="viewcode-back" href="../../bacnet.system.html#bacnet.system.BACnetSystem.shutdown">[docs]</a>    <span class="k">def</span> <span class="nf">shutdown</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function shuts down the process.</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># exit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="BACnetSystem.exit"><a class="viewcode-back" href="../../bacnet.system.html#bacnet.system.BACnetSystem.exit">[docs]</a>    <span class="k">def</span> <span class="nf">exit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function exits the system.</span>
+
+<span class="sd">        :param code: exit code</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;initializing exit procedure&#39;</span><span class="p">)</span>
+
+        <span class="n">locked</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">exiting</span><span class="o">.</span><span class="n">acquire</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+
+        <span class="c"># check if already exiting</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">locked</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">pid</span> <span class="o">!=</span> <span class="n">os</span><span class="o">.</span><span class="n">getpid</span><span class="p">():</span>
+            <span class="c"># reset exit code</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">exit_code</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">code</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">exit_code</span> <span class="o">=</span> <span class="n">code</span>
+
+            <span class="c"># exit</span>
+            <span class="k">return</span>
+
+        <span class="c"># set exiting</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">exit_code</span> <span class="o">=</span> <span class="n">code</span>
+
+        <span class="c"># shutdown subprocesses</span>
+        <span class="k">for</span> <span class="n">process</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;application&#39;</span><span class="p">,</span> <span class="s">&#39;console&#39;</span><span class="p">,</span> <span class="s">&#39;webgui&#39;</span><span class="p">):</span>
+            <span class="c"># get process</span>
+            <span class="n">obj</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">process</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c"># check if process exists and is alive</span>
+                <span class="k">if</span> <span class="n">obj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">obj</span><span class="o">.</span><span class="n">is_alive</span><span class="p">():</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;stopping process: &quot;</span><span class="si">%s</span><span class="s">&quot;&#39;</span> <span class="o">%</span> <span class="n">process</span><span class="p">)</span>
+                    <span class="n">obj</span><span class="o">.</span><span class="n">terminate</span><span class="p">()</span>
+                    <span class="n">obj</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_exception</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
+
+        <span class="c"># print info message</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="p">(</span><span class="s">&#39;shutting down at </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">iso_now</span><span class="p">())</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">log_queue</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">exit_code</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="BACnetSystem.do_start"><a class="viewcode-back" href="../../bacnet.system.html#bacnet.system.BACnetSystem.do_start">[docs]</a>    <span class="k">def</span> <span class="nf">do_start</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config_args</span><span class="p">,</span> <span class="n">console</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">webgui</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="c"># pylint: disable=unused-variable</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function initiates the BACnet system start up as reactive application.</span>
+
+<span class="sd">        :param config_args: configuration arguments</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;running as </span><span class="si">%r</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">getpid</span><span class="p">())</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c"># check if console and webgui were set</span>
+            <span class="k">if</span> <span class="n">console</span> <span class="ow">and</span> <span class="n">webgui</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&#39;console and webgui are not allowed to run simultaneously&#39;</span><span class="p">)</span>
+
+            <span class="c"># specify device initials</span>
+            <span class="n">device_init</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s">&#39;applicationSoftwareVersion&#39;</span><span class="p">:</span> <span class="n">__version__</span><span class="p">,</span>
+                <span class="s">&#39;modelName&#39;</span><span class="p">:</span> <span class="n">__program__</span><span class="p">,</span>
+                <span class="s">&#39;description&#39;</span><span class="p">:</span> <span class="s">&#39;Masterarbeit Grosch&#39;</span><span class="p">,</span>
+            <span class="p">}</span>
+
+            <span class="c"># get manager and server</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">manager</span> <span class="o">=</span> <span class="n">server_manager</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">log_queue</span><span class="p">,</span>
+                <span class="n">config_args</span><span class="o">.</span><span class="n">ini</span><span class="o">.</span><span class="n">address</span><span class="p">,</span>
+                <span class="n">config_args</span><span class="o">.</span><span class="n">ini</span><span class="o">.</span><span class="n">port</span><span class="p">,</span>
+                <span class="n">console</span><span class="o">=</span><span class="n">console</span><span class="p">,</span>
+                <span class="n">webgui</span><span class="o">=</span><span class="n">webgui</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="c"># create project specific application</span>
+            <span class="n">device</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="o">=</span> <span class="n">create_app</span><span class="p">(</span>
+                <span class="n">config_args</span><span class="p">,</span>
+                <span class="n">device_init</span><span class="o">=</span><span class="n">device_init</span><span class="p">,</span>
+                <span class="n">stdout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="p">,</span>
+                <span class="n">single</span><span class="o">=</span><span class="ow">not</span> <span class="n">console</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">webgui</span><span class="p">,</span>
+                <span class="n">deactivate_hardware_poll</span><span class="o">=</span><span class="n">config_args</span><span class="o">.</span><span class="n">deactivate_hardware_poll</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="c"># check if shell is requested</span>
+            <span class="k">if</span> <span class="n">console</span><span class="p">:</span>
+                <span class="c"># create project specific console</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">console</span> <span class="o">=</span> <span class="n">create_console</span><span class="p">(</span>
+                    <span class="n">device</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="p">,</span>
+                    <span class="n">stdin</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">dup</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stdin</span><span class="o">.</span><span class="n">fileno</span><span class="p">()),</span>
+                    <span class="n">stdout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="p">,</span>
+                <span class="p">)</span>
+
+            <span class="c"># check if webgui is requested</span>
+            <span class="k">if</span> <span class="n">webgui</span><span class="p">:</span>
+                <span class="c"># import webgui process</span>
+                <span class="kn">from</span> <span class="nn">bacnet.webgui</span> <span class="kn">import</span> <span class="n">create_webgui</span>
+
+                <span class="c"># create webgui process</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">webgui</span> <span class="o">=</span> <span class="n">create_webgui</span><span class="p">(</span>
+                    <span class="n">address</span><span class="o">=</span><span class="n">config_args</span><span class="o">.</span><span class="n">ini</span><span class="o">.</span><span class="n">address</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;/&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;:&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
+                    <span class="n">port</span><span class="o">=</span><span class="n">config_args</span><span class="o">.</span><span class="n">ini</span><span class="o">.</span><span class="n">webport</span><span class="p">,</span>
+                <span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;running&#39;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">console</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">console</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">terminate</span><span class="p">()</span>
+
+            <span class="k">elif</span> <span class="n">webgui</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">webgui</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">terminate</span><span class="p">()</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_exception</span><span class="p">(</span><span class="s">&#39;an error has occurred: </span><span class="si">%s</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">error</span><span class="p">)</span>
+
+            <span class="c"># exit program</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="BACnetSystem.do_shell"><a class="viewcode-back" href="../../bacnet.system.html#bacnet.system.BACnetSystem.do_shell">[docs]</a>    <span class="k">def</span> <span class="nf">do_shell</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config_args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function initiates the BACnet system start up as shell.</span>
+
+<span class="sd">        :param config_args: configuration arguments</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># call start up function</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">do_start</span><span class="p">(</span><span class="n">config_args</span><span class="p">,</span> <span class="n">console</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="BACnetSystem.do_webgui"><a class="viewcode-back" href="../../bacnet.system.html#bacnet.system.BACnetSystem.do_webgui">[docs]</a>    <span class="k">def</span> <span class="nf">do_webgui</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config_args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function initiates the BACnet system start up as web gui.</span>
+
+<span class="sd">        :param config_args: configuration arguments</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># call start up function</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">do_start</span><span class="p">(</span><span class="n">config_args</span><span class="p">,</span> <span class="n">webgui</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="BACnetSystem.do_buggers"><a class="viewcode-back" href="../../bacnet.system.html#bacnet.system.BACnetSystem.do_buggers">[docs]</a>    <span class="k">def</span> <span class="nf">do_buggers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config_args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function lists all buggers.</span>
+
+<span class="sd">        :param config_args: configuration arguments</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># get all buggers</span>
+        <span class="n">loggers</span> <span class="o">=</span> <span class="n">get_loggers</span><span class="p">()</span>
+
+        <span class="n">values</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">(</span>
+                <span class="s">&#39;Name&#39;</span><span class="p">,</span>
+                <span class="s">&#39;Description&#39;</span><span class="p">,</span>
+            <span class="p">),</span>
+        <span class="p">]</span>
+
+        <span class="c"># get debuggers</span>
+        <span class="n">debuggers</span> <span class="o">=</span> <span class="n">config_args</span><span class="o">.</span><span class="n">debug</span>
+
+        <span class="k">for</span> <span class="n">logger</span> <span class="ow">in</span> <span class="n">loggers</span><span class="p">:</span>
+            <span class="c"># check if logger has correct prefix</span>
+            <span class="k">if</span> <span class="n">debuggers</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="ow">not</span> \
+                <span class="nb">any</span><span class="p">(</span><span class="n">logger</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">debugger</span><span class="p">)</span> <span class="k">for</span> <span class="n">debugger</span> <span class="ow">in</span> <span class="n">debuggers</span><span class="p">):</span>
+                <span class="c"># go to next logger</span>
+                <span class="k">continue</span>
+
+            <span class="n">module_name</span> <span class="o">=</span> <span class="n">logger</span><span class="o">.</span><span class="n">rpartition</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">obj_name</span> <span class="o">=</span> <span class="n">logger</span><span class="o">.</span><span class="n">rpartition</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">description</span> <span class="o">=</span> <span class="bp">None</span>
+
+            <span class="c"># get description</span>
+            <span class="k">if</span> <span class="n">logger</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">:</span>
+                <span class="n">description</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">[</span><span class="n">logger</span><span class="p">]</span><span class="o">.</span><span class="n">__doc__</span>
+
+            <span class="k">elif</span> <span class="n">module_name</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">[</span><span class="n">module_name</span><span class="p">],</span> <span class="n">obj_name</span><span class="p">):</span>
+                <span class="n">description</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">[</span><span class="n">module_name</span><span class="p">],</span> <span class="n">obj_name</span><span class="p">),</span> <span class="s">&#39;__doc__&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+
+            <span class="k">elif</span> <span class="n">logger</span> <span class="o">==</span> <span class="n">__name__</span><span class="p">:</span>
+                <span class="n">description</span> <span class="o">=</span> <span class="n">__doc__</span>
+
+            <span class="k">elif</span> <span class="n">module_name</span> <span class="o">==</span> <span class="n">__name__</span><span class="p">:</span>
+                <span class="n">description</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="nb">globals</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">obj_name</span><span class="p">),</span> <span class="s">&#39;__doc__&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">description</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">description</span> <span class="o">=</span> <span class="s">&#39;-&#39;</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="s">&#39;---</span><span class="se">\n</span><span class="s">&#39;</span> <span class="ow">in</span> <span class="n">description</span><span class="p">:</span>
+                    <span class="n">description</span> <span class="o">=</span> <span class="n">description</span><span class="o">.</span><span class="n">rpartition</span><span class="p">(</span><span class="s">&#39;---</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+                <span class="k">if</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span> <span class="ow">in</span> <span class="n">description</span><span class="p">:</span>
+                    <span class="n">description</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
+                        <span class="n">line</span><span class="o">.</span><span class="n">lstrip</span><span class="p">()</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">description</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="n">line</span> <span class="o">!=</span> <span class="s">&#39;&#39;</span>
+                    <span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+            <span class="c"># create value line</span>
+            <span class="n">value_line</span> <span class="o">=</span> <span class="p">(</span><span class="n">logger</span><span class="p">,</span> <span class="n">description</span><span class="p">)</span>
+
+            <span class="c"># add value line</span>
+            <span class="n">values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value_line</span><span class="p">)</span>
+
+        <span class="c"># print list</span>
+        <span class="n">print_values</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="BACnetSystem.do_hardware"><a class="viewcode-back" href="../../bacnet.system.html#bacnet.system.BACnetSystem.do_hardware">[docs]</a>    <span class="k">def</span> <span class="nf">do_hardware</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config_args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function lists all creatable hardware objects.</span>
+
+<span class="sd">        :param config_args: configuration arguments</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">values</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c"># get hardware dictionary</span>
+        <span class="n">hardware_dict</span> <span class="o">=</span> <span class="n">discover_hardware_objects</span><span class="p">()</span>
+
+        <span class="c"># list all hardware objects</span>
+        <span class="k">for</span> <span class="n">obj_id</span><span class="p">,</span> <span class="n">hw_dict</span> <span class="ow">in</span> <span class="n">hardware_dict</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+            <span class="c"># read object type</span>
+            <span class="n">obj_type</span> <span class="o">=</span> <span class="n">obj_id</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+            <span class="c"># get name</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">hw_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;name&#39;</span><span class="p">,</span> <span class="s">&#39;?&#39;</span><span class="p">)</span>
+
+            <span class="c"># read description</span>
+            <span class="n">description</span> <span class="o">=</span> <span class="n">hw_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;initials&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;description&#39;</span><span class="p">,</span> <span class="s">&#39;-&#39;</span><span class="p">)</span>
+
+            <span class="c"># add info to list</span>
+            <span class="n">values</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">name</span><span class="p">,</span> <span class="n">description</span><span class="p">,</span> <span class="n">obj_type</span><span class="p">))</span>
+
+        <span class="c"># sort values by description</span>
+        <span class="n">values</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+
+        <span class="c"># add headline</span>
+        <span class="n">values</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span>
+            <span class="mi">0</span><span class="p">,</span>
+            <span class="p">(</span>
+                <span class="s">&#39;Name&#39;</span><span class="p">,</span>
+                <span class="s">&#39;Description&#39;</span><span class="p">,</span>
+                <span class="s">&#39;Object Type&#39;</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="c"># print list</span>
+        <span class="n">print_values</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="BACnetSystem.do_config"><a class="viewcode-back" href="../../bacnet.system.html#bacnet.system.BACnetSystem.do_config">[docs]</a>    <span class="k">def</span> <span class="nf">do_config</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config_args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function sets configuration parameters.</span>
+
+<span class="sd">        :param config_args: configuration arguments</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="p">(</span><span class="s">&#39;Configuration Mode&#39;</span><span class="p">)</span>
+
+        <span class="c"># predefine defaults</span>
+        <span class="n">defaults</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c"># check if address was set</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">config_args</span><span class="o">.</span><span class="n">ini</span><span class="p">,</span> <span class="s">&#39;address&#39;</span><span class="p">):</span>
+            <span class="n">defaults</span><span class="p">[</span><span class="s">&#39;address&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">config_args</span><span class="o">.</span><span class="n">ini</span><span class="o">.</span><span class="n">address</span>
+
+        <span class="c"># check if port was set</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">config_args</span><span class="o">.</span><span class="n">ini</span><span class="p">,</span> <span class="s">&#39;port&#39;</span><span class="p">):</span>
+            <span class="n">defaults</span><span class="p">[</span><span class="s">&#39;port&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">config_args</span><span class="o">.</span><span class="n">ini</span><span class="o">.</span><span class="n">port</span>
+
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+
+            <span class="c"># start config manager</span>
+            <span class="n">config_manager</span> <span class="o">=</span> <span class="n">ConfigManager</span><span class="p">(</span>
+                <span class="n">stdin</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">stdin</span><span class="p">,</span>
+                <span class="n">stdout</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="p">,</span>
+                <span class="n">defaults</span><span class="o">=</span><span class="n">defaults</span><span class="p">,</span>
+                <span class="n">filename</span><span class="o">=</span><span class="n">config_args</span><span class="o">.</span><span class="n">ini</span><span class="o">.</span><span class="n">filename</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="c"># store new config</span>
+            <span class="n">config_manager</span><span class="o">.</span><span class="n">store</span><span class="p">()</span>
+
+        <span class="k">except</span> <span class="ne">KeyboardInterrupt</span><span class="p">:</span>
+            <span class="c"># append new line</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+
+            <span class="c"># exit program</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="BACnetSystem.do_set_tag"><a class="viewcode-back" href="../../bacnet.system.html#bacnet.system.BACnetSystem.do_set_tag">[docs]</a>    <span class="k">def</span> <span class="nf">do_set_tag</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config_args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function initiates the BACnet system start up as shell.</span>
+
+<span class="sd">        :param config_args: configuration arguments</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># get all version tags</span>
+        <span class="n">versions</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">check_output</span><span class="p">([</span><span class="s">&#39;git&#39;</span><span class="p">,</span> <span class="s">&#39;tag&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="n">x</span><span class="p">]</span>
+
+        <span class="c"># read current version tag</span>
+        <span class="n">version_tag</span> <span class="o">=</span> <span class="s">&#39;.&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">__version__</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">)[:</span><span class="mi">2</span><span class="p">])</span>
+
+        <span class="c"># check if version tag was set already</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">version_tag</span> <span class="ow">in</span> <span class="n">versions</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="p">(</span><span class="n">subprocess</span><span class="o">.</span><span class="n">check_output</span><span class="p">([</span><span class="s">&#39;git&#39;</span><span class="p">,</span> <span class="s">&#39;tag&#39;</span><span class="p">,</span> <span class="n">version_tag</span><span class="p">]))</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="p">(</span><span class="s">&#39;tag &quot;</span><span class="si">%s</span><span class="s">&quot; already set</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">version_tag</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Tobias Grosch.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.3</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

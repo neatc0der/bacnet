@@ -1,0 +1,906 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>bacnet.app.basic &mdash; Masterarbeit Grosch 0.4c0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.4c0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="Masterarbeit Grosch 0.4c0 documentation" href="../../../index.html" />
+    <link rel="up" title="bacnet.app" href="../app.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Masterarbeit Grosch 0.4c0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="../app.html" accesskey="U">bacnet.app</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for bacnet.app.basic</h1><div class="highlight"><pre>
+<span class="c"># pylint: disable=invalid-name, too-many-instance-attributes, broad-except</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Application Basic Module</span>
+<span class="sd">------------------------</span>
+
+<span class="sd">This module provides a basic BACpypes application object.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+
+<span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="kn">import</span> <span class="n">Process</span>
+<span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">import</span> <span class="nn">signal</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">threading</span> <span class="kn">import</span> <span class="n">Thread</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+<span class="kn">from</span> <span class="nn">bacpypes.appservice</span> <span class="kn">import</span> <span class="n">StateMachineAccessPoint</span><span class="p">,</span> <span class="n">ApplicationServiceAccessPoint</span>
+<span class="kn">from</span> <span class="nn">bacpypes.netservice</span> <span class="kn">import</span> <span class="n">NetworkServiceAccessPoint</span><span class="p">,</span> <span class="n">NetworkServiceElement</span>
+<span class="kn">from</span> <span class="nn">bacpypes.bvllservice</span> <span class="kn">import</span> <span class="n">BIPSimple</span><span class="p">,</span> <span class="n">AnnexJCodec</span><span class="p">,</span> <span class="n">UDPMultiplexer</span>
+
+<span class="kn">from</span> <span class="nn">bacpypes.comm</span> <span class="kn">import</span> <span class="n">bind</span>
+<span class="kn">from</span> <span class="nn">bacpypes.apdu</span> <span class="kn">import</span> <span class="n">AbortPDU</span><span class="p">,</span> <span class="n">Error</span><span class="p">,</span> <span class="n">ErrorPDU</span><span class="p">,</span> <span class="n">RejectPDU</span><span class="p">,</span> <span class="n">SimpleAckPDU</span><span class="p">,</span> <span class="n">ComplexAckPDU</span><span class="p">,</span> <span class="n">APDU</span><span class="p">,</span> \
+    <span class="n">SubscribeCOVRequest</span><span class="p">,</span> <span class="n">SubscribeCOVPropertyRequest</span><span class="p">,</span> <span class="n">WhoIsRequest</span><span class="p">,</span> <span class="n">WhoHasRequest</span><span class="p">,</span> <span class="n">IAmRequest</span><span class="p">,</span> \
+    <span class="n">IHaveRequest</span>
+<span class="kn">from</span> <span class="nn">bacpypes.pdu</span> <span class="kn">import</span> <span class="n">Address</span><span class="p">,</span> <span class="n">GlobalBroadcast</span>
+
+<span class="kn">from</span> <span class="nn">bacpypes</span> <span class="kn">import</span> <span class="n">core</span>
+<span class="kn">from</span> <span class="nn">bacpypes.task</span> <span class="kn">import</span> <span class="n">RecurringFunctionTask</span>
+
+<span class="kn">from</span> <span class="nn">bacnet.debugging</span> <span class="kn">import</span> <span class="n">ModuleLogger</span><span class="p">,</span> <span class="n">bacnet_debug</span>
+
+<span class="kn">from</span> <span class="nn">bacnet.system.managing</span> <span class="kn">import</span> <span class="n">client_manager</span>
+
+<span class="kn">from</span> <span class="nn">bacnet.console.creator</span> <span class="kn">import</span> <span class="n">request_creator</span>
+
+<span class="kn">from</span> <span class="nn">bacnet.object.hardware</span> <span class="kn">import</span> <span class="n">discover_hardware_objects</span>
+<span class="kn">from</span> <span class="nn">bacnet.object.primitivedata</span> <span class="kn">import</span> <span class="n">RingDict</span>
+
+<span class="kn">from</span> <span class="nn">.handler</span> <span class="kn">import</span> <span class="n">HandlerApplication</span><span class="p">,</span> <span class="n">restart_on_failure</span>
+
+
+<span class="c"># enabling logging</span>
+<span class="n">ModuleLogger</span><span class="p">()</span>
+
+
+<span class="c"># get all broadcast types</span>
+<span class="n">BROADCASTS</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">Address</span><span class="o">.</span><span class="n">globalBroadcastAddr</span><span class="p">,</span>
+    <span class="n">Address</span><span class="o">.</span><span class="n">localBroadcastAddr</span><span class="p">,</span>
+    <span class="n">Address</span><span class="o">.</span><span class="n">remoteBroadcastAddr</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<span class="nd">@bacnet_debug</span>
+<div class="viewcode-block" id="poll_hardware"><a class="viewcode-back" href="../../../bacnet.app.html#bacnet.app.basic.poll_hardware">[docs]</a><span class="k">def</span> <span class="nf">poll_hardware</span><span class="p">(</span><span class="n">application</span><span class="p">,</span> <span class="n">obj_tuple</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function polls hardware values.</span>
+
+<span class="sd">    :param application: application object</span>
+<span class="sd">    :param obj_tuple: object tuples</span>
+<span class="sd">    :return: None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="bp">self</span> <span class="o">=</span> <span class="n">poll_hardware</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c"># loop through hardware objects</span>
+        <span class="k">for</span> <span class="n">obj_id</span> <span class="ow">in</span> <span class="n">obj_tuple</span><span class="p">:</span>
+            <span class="c"># get object</span>
+            <span class="n">obj</span> <span class="o">=</span> <span class="n">application</span><span class="o">.</span><span class="n">objectIdentifier</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">obj_id</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+
+            <span class="c"># check if obj_id is defined</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s">&#39;poll_hardware&#39;</span><span class="p">):</span>
+                <span class="c"># update value</span>
+                <span class="n">obj</span><span class="o">.</span><span class="n">poll_hardware</span><span class="p">()</span>
+
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_exception</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="BasicApplication"><a class="viewcode-back" href="../../../bacnet.app.html#bacnet.app.basic.BasicApplication">[docs]</a><span class="k">class</span> <span class="nc">BasicApplication</span><span class="p">(</span><span class="n">HandlerApplication</span><span class="p">,</span> <span class="n">Process</span><span class="p">):</span>
+    <span class="c"># pylint: disable=broad-except, star-args, unused-argument, no-self-use, too-many-branches</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class describes a basic BACpypes application including simple functionality.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">stdout</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function initializes the application object.</span>
+
+<span class="sd">        :return: BasicApplication instance</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;__init__ </span><span class="si">%r</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span>
+
+        <span class="c"># set stdout</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&#39;stdout&#39;</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+
+        <span class="c"># deactivate hardware poll</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">deactivate_hardware_poll</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&#39;deactivate_hardware_poll&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span>
+
+        <span class="c"># set environmental variables</span>
+        <span class="n">single</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&#39;single&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">object_list</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&#39;object_list&#39;</span><span class="p">,</span> <span class="p">())</span>
+
+        <span class="c"># call constructor of predecessor class</span>
+        <span class="n">HandlerApplication</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">Process</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">&#39;app&#39;</span><span class="p">)</span>
+
+        <span class="c"># include an application decoder</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">asap</span> <span class="o">=</span> <span class="n">ApplicationServiceAccessPoint</span><span class="p">()</span>
+
+        <span class="c"># pass the device object to a state machine access point</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">smap</span> <span class="o">=</span> <span class="n">StateMachineAccessPoint</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+        <span class="c"># add a network service access point</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nsap</span> <span class="o">=</span> <span class="n">NetworkServiceAccessPoint</span><span class="p">()</span>
+
+        <span class="c"># give the NSAP a generic network layer service element</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nse</span> <span class="o">=</span> <span class="n">NetworkServiceElement</span><span class="p">()</span>
+        <span class="n">bind</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nse</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nsap</span><span class="p">)</span>
+
+        <span class="c"># bind the top layers</span>
+        <span class="n">bind</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">asap</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">smap</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">nsap</span><span class="p">)</span>
+
+        <span class="c"># create a generic BIP stack, bound to the Annex J server on the UDP multiplexer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bip</span> <span class="o">=</span> <span class="n">BIPSimple</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">annexj</span> <span class="o">=</span> <span class="n">AnnexJCodec</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mux</span> <span class="o">=</span> <span class="n">UDPMultiplexer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">localAddress</span><span class="p">)</span>
+
+        <span class="c"># bind the bottom layers</span>
+        <span class="n">bind</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bip</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">annexj</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mux</span><span class="o">.</span><span class="n">annexJ</span><span class="p">)</span>
+
+        <span class="c"># bind the BIP stack to the network, no network number</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nsap</span><span class="o">.</span><span class="n">bind</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bip</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">daemon</span> <span class="o">=</span> <span class="bp">True</span>
+
+        <span class="k">if</span> <span class="n">single</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">signal</span><span class="p">,</span> <span class="s">&#39;SIGINT&#39;</span><span class="p">):</span>
+            <span class="n">signal</span><span class="o">.</span><span class="n">signal</span><span class="p">(</span><span class="n">signal</span><span class="o">.</span><span class="n">SIGINT</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">console_interrupt</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">signal</span><span class="p">,</span> <span class="s">&#39;SIGTERM&#39;</span><span class="p">):</span>
+            <span class="n">signal</span><span class="o">.</span><span class="n">signal</span><span class="p">(</span><span class="n">signal</span><span class="o">.</span><span class="n">SIGTERM</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">shutdown</span><span class="p">)</span>
+
+        <span class="c"># get hardware</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">known_hardware</span> <span class="o">=</span> <span class="n">discover_hardware_objects</span><span class="p">()</span>
+
+        <span class="c"># duplicate check</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">request_dict</span> <span class="o">=</span> <span class="n">RingDict</span><span class="p">(</span><span class="mi">500</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">response_dict</span> <span class="o">=</span> <span class="n">RingDict</span><span class="p">(</span><span class="mi">500</span><span class="p">)</span>
+
+        <span class="c"># get manager</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_manager</span> <span class="o">=</span> <span class="n">client_manager</span><span class="p">()</span>
+
+        <span class="c"># get log queue</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_manager</span><span class="o">.</span><span class="n">log</span><span class="p">()</span>
+
+        <span class="c"># get required communication queues</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">indication_queue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_manager</span><span class="o">.</span><span class="n">Queue</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">requests</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_manager</span><span class="o">.</span><span class="n">app</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_manager</span><span class="o">.</span><span class="n">config</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">console</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_manager</span><span class="o">.</span><span class="n">console</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">webgui</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_manager</span><span class="o">.</span><span class="n">webgui</span><span class="p">()</span>
+
+        <span class="c"># predefine threads</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">comm_thread</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_thread</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">indication_thread</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="c"># set poll hardware dictionary</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">poll_hardware_dict</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c"># loop through hardware objects</span>
+        <span class="k">for</span> <span class="n">obj_id</span><span class="p">,</span> <span class="n">obj_dict</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">known_hardware</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+            <span class="c"># get poll</span>
+            <span class="n">poll</span> <span class="o">=</span> <span class="n">obj_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;poll&#39;</span><span class="p">)</span>
+
+            <span class="c"># check if poll was set</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">poll</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">))</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">poll</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+                <span class="c"># add object identifier to poll hardware dictionary</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">poll_hardware_dict</span><span class="p">[</span><span class="n">poll</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">poll_hardware_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">poll</span><span class="p">,</span> <span class="p">())</span> <span class="o">+</span> <span class="p">(</span><span class="n">obj_id</span><span class="p">,)</span>
+
+        <span class="c"># start process</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+    <span class="nd">@restart_on_failure</span>
+    <span class="k">def</span> <span class="nf">update_devices</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function initiates who is requests periodically.</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;running: device update thread&#39;</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c"># create whois request</span>
+            <span class="n">request</span> <span class="o">=</span> <span class="n">WhoIsRequest</span><span class="p">()</span>
+
+            <span class="c"># set destination to global broadcast</span>
+            <span class="n">request</span><span class="o">.</span><span class="n">pduDestination</span> <span class="o">=</span> <span class="n">GlobalBroadcast</span><span class="p">()</span>
+
+            <span class="c"># set max identifier: 2^22 - 1 = 4.194.303</span>
+            <span class="n">max_id</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">**</span> <span class="mi">22</span> <span class="o">-</span> <span class="mi">1</span>
+
+            <span class="c"># set device count, 4096 =&gt; 1024 rounds to go</span>
+            <span class="n">count</span> <span class="o">=</span> <span class="mi">4096</span>
+
+            <span class="c"># set wait time for each whois cycle, 5 secs</span>
+            <span class="n">wait_time</span> <span class="o">=</span> <span class="mi">5</span>
+
+            <span class="c"># start at a random offset</span>
+            <span class="n">offset</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">max_id</span> <span class="o">/</span> <span class="n">count</span><span class="p">)</span> <span class="o">*</span> <span class="n">count</span>
+
+            <span class="c"># subscription update cycle every 15 mins</span>
+            <span class="n">subscription_update</span> <span class="o">=</span> <span class="mi">15</span> <span class="o">*</span> <span class="nb">int</span><span class="p">(</span><span class="mf">60.0</span> <span class="o">/</span> <span class="n">wait_time</span><span class="p">)</span>
+
+            <span class="c"># wait for random startup time or next event</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">update_devices_now</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">()</span> <span class="o">*</span> <span class="mi">15</span><span class="p">)</span>
+
+            <span class="c"># loop variable</span>
+            <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span>
+
+            <span class="c"># do as long as the queue exists</span>
+            <span class="k">while</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">requests</span><span class="p">,</span> <span class="s">&#39;put&#39;</span><span class="p">):</span>
+                <span class="c"># set high limit</span>
+                <span class="n">high_limit</span> <span class="o">=</span> <span class="n">offset</span> <span class="o">+</span> <span class="n">count</span> <span class="o">-</span> <span class="mi">1</span>
+
+                <span class="c"># check if high limit is greater than max identifier</span>
+                <span class="k">if</span> <span class="n">high_limit</span> <span class="o">&gt;</span> <span class="n">max_id</span><span class="p">:</span>
+                    <span class="c"># set high limit to max identifier</span>
+                    <span class="n">high_limit</span> <span class="o">=</span> <span class="n">max_id</span>
+
+                <span class="c"># set instance limits</span>
+                <span class="n">request</span><span class="o">.</span><span class="n">deviceInstanceRangeLowLimit</span> <span class="o">=</span> <span class="n">offset</span>
+                <span class="n">request</span><span class="o">.</span><span class="n">deviceInstanceRangeHighLimit</span> <span class="o">=</span> <span class="n">high_limit</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;   - request: </span><span class="si">%s</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">request</span><span class="p">)</span>
+
+                <span class="c"># queue whois request</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">requests</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+
+                <span class="c"># check if subscriptions should be updated</span>
+                <span class="k">if</span> <span class="n">i</span> <span class="o">%</span> <span class="n">subscription_update</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="c"># loop through remote devices</span>
+                    <span class="k">for</span> <span class="n">subscriptions</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">remote_subscriptions</span><span class="o">.</span><span class="n">itervalues</span><span class="p">():</span>
+                        <span class="c"># loop through subscriptions</span>
+                        <span class="k">for</span> <span class="n">subscription</span> <span class="ow">in</span> <span class="n">subscriptions</span><span class="p">:</span>
+                            <span class="c"># check if subscription should be updated</span>
+                            <span class="k">if</span> <span class="n">subscription</span><span class="p">[</span><span class="s">&#39;remaining&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">remaining_time</span> <span class="o">&lt;</span> <span class="mi">1200</span><span class="p">:</span>
+                                <span class="c"># create subscribe cov request</span>
+                                <span class="n">cov_request</span> <span class="o">=</span> <span class="n">request_creator</span><span class="p">(</span>
+                                    <span class="s">&#39;subscribe </span><span class="si">%s</span><span class="s"> </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span>
+                                    <span class="p">(</span><span class="n">subscription</span><span class="p">[</span><span class="s">&#39;address&#39;</span><span class="p">],</span> <span class="n">subscription</span><span class="p">[</span><span class="s">&#39;renew&#39;</span><span class="p">])</span>
+                                <span class="p">)</span>
+
+                                <span class="c"># queue cov request</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">requests</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">cov_request</span><span class="p">)</span>
+
+                                <span class="c"># remove cov request from scope</span>
+                                <span class="k">del</span> <span class="n">cov_request</span>
+
+                <span class="c"># wait for 5 secs or next event =&gt; 1024 rounds * 5 secs = 85.33 mins</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">update_devices_now</span><span class="o">.</span><span class="n">wait</span><span class="p">(</span><span class="n">wait_time</span><span class="p">)</span>
+
+                <span class="c"># change offset</span>
+                <span class="n">offset</span> <span class="o">+=</span> <span class="n">count</span>
+
+                <span class="c"># update loop variable</span>
+                <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+
+                <span class="c"># check if offset must be reset</span>
+                <span class="k">if</span> <span class="n">offset</span> <span class="o">&gt;</span> <span class="n">max_id</span><span class="p">:</span>
+                    <span class="c"># reset offset</span>
+                    <span class="n">offset</span> <span class="o">=</span> <span class="mi">0</span>
+
+                    <span class="c"># reset loop variable</span>
+                    <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+
+                    <span class="c"># loop through known devices</span>
+                    <span class="k">for</span> <span class="n">address</span><span class="p">,</span> <span class="n">device</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">known_devices</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                        <span class="c"># check if device was last seen more than 90 mins ago</span>
+                        <span class="k">if</span> <span class="s">&#39;last_seen&#39;</span> <span class="ow">in</span> <span class="n">device</span> <span class="ow">and</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">device</span><span class="p">[</span><span class="s">&#39;last_seen&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">5400</span><span class="p">:</span>
+                            <span class="c"># remove device from known devices</span>
+                            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">known_devices</span><span class="p">[</span><span class="n">address</span><span class="p">]</span>
+
+                        <span class="c"># check if last seen was not set or system clock reset</span>
+                        <span class="k">elif</span> <span class="ow">not</span> <span class="s">&#39;last_seen&#39;</span> <span class="ow">in</span> <span class="n">device</span> <span class="ow">or</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">device</span><span class="p">[</span><span class="s">&#39;last_seen&#39;</span><span class="p">]:</span>
+                            <span class="c"># reset last seen</span>
+                            <span class="n">device</span><span class="p">[</span><span class="s">&#39;last_seen&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+
+            <span class="c"># signal finishing was desired</span>
+            <span class="k">return</span> <span class="bp">True</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_exception</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
+
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;finished: device update thread&#39;</span><span class="p">)</span>
+
+    <span class="nd">@restart_on_failure</span>
+    <span class="k">def</span> <span class="nf">check_queue</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c"># pylint: disable=too-many-statements</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function checks for queued outgoing requests.</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;running: comm thread&#39;</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c"># handle request queue</span>
+            <span class="k">while</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">requests</span><span class="p">,</span> <span class="s">&#39;get&#39;</span><span class="p">):</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="c"># wait for request</span>
+                    <span class="n">apdu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+
+                <span class="k">except</span> <span class="p">(</span><span class="ne">IOError</span><span class="p">,</span> <span class="ne">EOFError</span><span class="p">):</span>
+                    <span class="c"># broken pipe</span>
+                    <span class="k">continue</span>
+
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_exception</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
+
+                    <span class="k">continue</span>
+
+                <span class="c"># check if apdu is an apdu</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">apdu</span><span class="p">,</span> <span class="n">APDU</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_error</span><span class="p">(</span><span class="s">&#39;queued request is invalid: </span><span class="si">%r</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">apdu</span><span class="p">)</span>
+
+                    <span class="c"># go to next apdu</span>
+                    <span class="k">continue</span>
+
+                <span class="c"># no internal broadcast</span>
+                <span class="n">internal_broadcast</span> <span class="o">=</span> <span class="bp">False</span>
+
+                <span class="c"># check if apdu is supposed to be processed locally</span>
+                <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">apdu</span><span class="o">.</span><span class="n">pduDestination</span><span class="p">,</span> <span class="s">&#39;addrIP&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">apdu</span><span class="o">.</span><span class="n">pduDestination</span><span class="o">.</span><span class="n">addrIP</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="c"># get local address</span>
+                    <span class="n">local_address</span> <span class="o">=</span> <span class="n">apdu</span><span class="o">.</span><span class="n">pduDestination</span><span class="o">.</span><span class="n">addrTuple</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+                    <span class="c"># internal broadcast</span>
+                    <span class="k">if</span> <span class="n">local_address</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">internal_broadcast</span> <span class="o">=</span> <span class="bp">True</span>
+
+                    <span class="c"># for app</span>
+                    <span class="k">elif</span> <span class="n">local_address</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">indication</span><span class="p">(</span><span class="n">apdu</span><span class="p">)</span>
+
+                    <span class="c"># for config</span>
+                    <span class="k">elif</span> <span class="n">local_address</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">,</span> <span class="s">&#39;put&#39;</span><span class="p">):</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">apdu</span><span class="p">)</span>
+
+                    <span class="c"># for console</span>
+                    <span class="k">elif</span> <span class="n">local_address</span> <span class="o">==</span> <span class="mi">3</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">console</span><span class="p">,</span> <span class="s">&#39;put&#39;</span><span class="p">):</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">console</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">apdu</span><span class="p">)</span>
+
+                    <span class="c"># for webgui</span>
+                    <span class="k">elif</span> <span class="n">local_address</span> <span class="o">==</span> <span class="mi">4</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">webgui</span><span class="p">,</span> <span class="s">&#39;put&#39;</span><span class="p">):</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">webgui</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">apdu</span><span class="p">)</span>
+
+                    <span class="c"># for nobody</span>
+                    <span class="k">elif</span> <span class="n">local_address</span> <span class="o">==</span> <span class="mi">255</span><span class="p">:</span>
+                        <span class="k">continue</span>
+
+                    <span class="c"># destination unknown</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;unknown local destination: </span><span class="si">%r</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">apdu</span><span class="o">.</span><span class="n">pduDestination</span><span class="p">)</span>
+
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c"># check if message originated on this system</span>
+                    <span class="k">if</span> <span class="n">apdu</span><span class="o">.</span><span class="n">pduSource</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> \
+                        <span class="n">apdu</span><span class="o">.</span><span class="n">pduSource</span><span class="o">.</span><span class="n">addrAddr</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">localAddress</span><span class="o">.</span><span class="n">addrAddr</span> <span class="ow">or</span> \
+                        <span class="p">(</span><span class="nb">hasattr</span><span class="p">(</span><span class="n">apdu</span><span class="o">.</span><span class="n">pduSource</span><span class="p">,</span> <span class="s">&#39;addrIP&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">apdu</span><span class="o">.</span><span class="n">pduSource</span><span class="o">.</span><span class="n">addrIP</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+                        <span class="c"># internal broadcast</span>
+                        <span class="n">internal_broadcast</span> <span class="o">=</span> <span class="bp">True</span>
+
+                        <span class="c"># check if message is a response</span>
+                        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">apdu</span><span class="p">,</span> <span class="p">(</span><span class="n">AbortPDU</span><span class="p">,</span> <span class="n">RejectPDU</span><span class="p">,</span> <span class="n">ErrorPDU</span><span class="p">,</span> <span class="n">ComplexAckPDU</span><span class="p">,</span>
+                                             <span class="n">SimpleAckPDU</span><span class="p">)):</span>
+                            <span class="c"># transmit response</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="p">(</span><span class="n">apdu</span><span class="p">)</span>
+
+                            <span class="c"># create message id</span>
+                            <span class="n">message_id</span> <span class="o">=</span> <span class="p">(</span>
+                                <span class="nb">str</span><span class="p">(</span><span class="n">apdu</span><span class="o">.</span><span class="n">pduDestination</span><span class="p">),</span>
+                                <span class="bp">False</span><span class="p">,</span>
+                                <span class="n">apdu</span><span class="o">.</span><span class="n">apduService</span><span class="p">,</span>
+                                <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">smap</span><span class="o">.</span><span class="n">nextInvokeID</span> <span class="o">+</span> <span class="mi">255</span><span class="p">)</span> <span class="o">%</span> <span class="mi">256</span><span class="p">,</span>
+                            <span class="p">)</span>
+
+                            <span class="c"># check for duplicate</span>
+                            <span class="k">if</span> <span class="n">message_id</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">message_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">response_dict</span> <span class="ow">and</span> \
+                                <span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">response_dict</span><span class="p">[</span><span class="n">message_id</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">())</span> <span class="o">&lt;</span> <span class="mi">15</span><span class="p">:</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="p">(</span><span class="s">&#39;duplicate response found: </span><span class="si">%s</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">apdu</span><span class="p">)</span>
+
+                                <span class="c"># go to next apdu</span>
+                                <span class="k">continue</span>
+
+                            <span class="c"># append message id to response dict</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">response_dict</span><span class="p">[</span><span class="n">message_id</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">apdu</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">())</span>
+
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="c"># transmit request</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="n">apdu</span><span class="p">)</span>
+
+                            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">apdu</span><span class="p">,</span> <span class="p">(</span><span class="n">WhoIsRequest</span><span class="p">,</span> <span class="n">IAmRequest</span><span class="p">,</span> <span class="n">WhoHasRequest</span><span class="p">,</span>
+                                                     <span class="n">IHaveRequest</span><span class="p">)):</span>
+
+                                <span class="c"># create message id</span>
+                                <span class="n">message_id</span> <span class="o">=</span> <span class="p">(</span>
+                                    <span class="nb">str</span><span class="p">(</span><span class="n">apdu</span><span class="o">.</span><span class="n">pduDestination</span><span class="p">),</span>
+                                    <span class="bp">False</span><span class="p">,</span>
+                                    <span class="n">apdu</span><span class="o">.</span><span class="n">apduService</span><span class="p">,</span>
+                                    <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">smap</span><span class="o">.</span><span class="n">nextInvokeID</span> <span class="o">+</span> <span class="mi">255</span><span class="p">)</span> <span class="o">%</span> <span class="mi">256</span><span class="p">,</span>
+                                <span class="p">)</span>
+
+                                <span class="c"># check for duplicate</span>
+                                <span class="k">if</span> <span class="n">message_id</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> \
+                                    <span class="n">message_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">request_dict</span> <span class="ow">and</span> \
+                                    <span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request_dict</span><span class="p">[</span><span class="n">message_id</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">())</span> <span class="o">&lt;</span> <span class="mi">15</span><span class="p">:</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="p">(</span><span class="s">&#39;duplicate request found: </span><span class="si">%s</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">apdu</span><span class="p">)</span>
+
+                                    <span class="c"># go to next apdu</span>
+                                    <span class="k">continue</span>
+
+                                <span class="c"># append message id to request dict</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">request_dict</span><span class="p">[</span><span class="n">message_id</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">apdu</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">())</span>
+
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="c"># interpret request</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">indication_queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">apdu</span><span class="p">)</span>
+
+                <span class="c"># check if message is supposed to be broadcasted internally</span>
+                <span class="k">if</span> <span class="n">internal_broadcast</span><span class="p">:</span>
+                    <span class="c"># send to processes</span>
+                    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">,</span> <span class="s">&#39;put&#39;</span><span class="p">):</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">apdu</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">console</span><span class="p">,</span> <span class="s">&#39;put&#39;</span><span class="p">):</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">console</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">apdu</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">webgui</span><span class="p">,</span> <span class="s">&#39;put&#39;</span><span class="p">):</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">webgui</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">apdu</span><span class="p">)</span>
+
+            <span class="c"># signal finishing was desired</span>
+            <span class="k">return</span> <span class="bp">True</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_exception</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
+
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;finished: comm thread&#39;</span><span class="p">)</span>
+
+    <span class="nd">@restart_on_failure</span>
+    <span class="k">def</span> <span class="nf">check_indication_queue</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function checks for new packages to be indicated.</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;running: indication thread&#39;</span><span class="p">)</span>
+
+        <span class="c"># check if hardware was defined and poll was not deactivated</span>
+        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">poll_hardware_dict</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">deactivate_hardware_poll</span><span class="p">:</span>
+            <span class="c"># wait for core to initialize task manager</span>
+            <span class="k">while</span> <span class="n">core</span><span class="o">.</span><span class="n">taskManager</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="c"># sleep for 0.1 seconds</span>
+                <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+
+            <span class="c"># loop through hardware polls</span>
+            <span class="k">for</span> <span class="n">poll_time</span><span class="p">,</span> <span class="n">obj_tuple</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">poll_hardware_dict</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+                <span class="c"># create task</span>
+                <span class="n">poll_task</span> <span class="o">=</span> <span class="n">RecurringFunctionTask</span><span class="p">(</span><span class="n">poll_time</span><span class="p">,</span> <span class="n">poll_hardware</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">obj_tuple</span><span class="p">)</span>
+
+                <span class="c"># initialize hardware polling tasks</span>
+                <span class="n">core</span><span class="o">.</span><span class="n">taskManager</span><span class="o">.</span><span class="n">install_task</span><span class="p">(</span><span class="n">poll_task</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+
+            <span class="k">while</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">indication_queue</span><span class="p">,</span> <span class="s">&#39;get&#39;</span><span class="p">):</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="c"># wait for request</span>
+                    <span class="n">apdu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">indication_queue</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+
+                <span class="k">except</span> <span class="p">(</span><span class="ne">IOError</span><span class="p">,</span> <span class="ne">EOFError</span><span class="p">):</span>
+                    <span class="c"># broken pipe</span>
+                    <span class="k">continue</span>
+
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_exception</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
+
+                    <span class="k">continue</span>
+
+                <span class="c"># check if apdu is an apdu</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">apdu</span><span class="p">,</span> <span class="n">APDU</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_error</span><span class="p">(</span><span class="s">&#39;queued request is invalid: </span><span class="si">%r</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">apdu</span><span class="p">)</span>
+
+                    <span class="c"># go to next apdu</span>
+                    <span class="k">continue</span>
+
+                <span class="c"># check if apdu is supposed to be processed locally</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">apdu</span><span class="o">.</span><span class="n">pduDestination</span><span class="p">,</span> <span class="s">&#39;addrIP&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">apdu</span><span class="o">.</span><span class="n">pduDestination</span><span class="o">.</span><span class="n">addrIP</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="c"># send to processes</span>
+                    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">,</span> <span class="s">&#39;put&#39;</span><span class="p">):</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">apdu</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">console</span><span class="p">,</span> <span class="s">&#39;put&#39;</span><span class="p">):</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">console</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">apdu</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">webgui</span><span class="p">,</span> <span class="s">&#39;put&#39;</span><span class="p">):</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">webgui</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">apdu</span><span class="p">)</span>
+
+                    <span class="c"># check if message is a response</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">apdu</span><span class="p">,</span> <span class="p">(</span><span class="n">AbortPDU</span><span class="p">,</span> <span class="n">RejectPDU</span><span class="p">,</span> <span class="n">ErrorPDU</span><span class="p">,</span> <span class="n">ComplexAckPDU</span><span class="p">,</span>
+                                         <span class="n">SimpleAckPDU</span><span class="p">)):</span>
+                        <span class="c"># create message id</span>
+                        <span class="n">message_id</span> <span class="o">=</span> <span class="p">(</span>
+                            <span class="nb">str</span><span class="p">(</span><span class="n">apdu</span><span class="o">.</span><span class="n">pduSource</span><span class="p">),</span>
+                            <span class="bp">True</span><span class="p">,</span>
+                            <span class="n">apdu</span><span class="o">.</span><span class="n">apduService</span><span class="p">,</span>
+                            <span class="nb">getattr</span><span class="p">(</span><span class="n">apdu</span><span class="p">,</span> <span class="s">&#39;apduInvokeID&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
+                        <span class="p">)</span>
+
+                        <span class="c"># check for duplicate</span>
+                        <span class="k">if</span> <span class="n">message_id</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">message_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">response_dict</span> <span class="ow">and</span> \
+                            <span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">response_dict</span><span class="p">[</span><span class="n">message_id</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">())</span> <span class="o">&lt;</span> <span class="mi">15</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="p">(</span><span class="s">&#39;duplicate response found: </span><span class="si">%s</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">apdu</span><span class="p">)</span>
+
+                            <span class="c"># go to next apdu</span>
+                            <span class="k">continue</span>
+
+                        <span class="c"># append message id to response dict</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">response_dict</span><span class="p">[</span><span class="n">message_id</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">apdu</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">())</span>
+
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="c"># create message id</span>
+                        <span class="n">message_id</span> <span class="o">=</span> <span class="p">(</span>
+                            <span class="nb">str</span><span class="p">(</span><span class="n">apdu</span><span class="o">.</span><span class="n">pduSource</span><span class="p">),</span>
+                            <span class="bp">True</span><span class="p">,</span>
+                            <span class="n">apdu</span><span class="o">.</span><span class="n">apduService</span><span class="p">,</span>
+                            <span class="nb">getattr</span><span class="p">(</span><span class="n">apdu</span><span class="p">,</span> <span class="s">&#39;apduInvokeID&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
+                        <span class="p">)</span>
+
+                        <span class="c"># check for duplicate</span>
+                        <span class="k">if</span> <span class="n">message_id</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">message_id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">request_dict</span> <span class="ow">and</span> \
+                            <span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">request_dict</span><span class="p">[</span><span class="n">message_id</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">())</span> <span class="o">&lt;</span> <span class="mi">15</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="p">(</span><span class="s">&#39;duplicate request found: </span><span class="si">%s</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">apdu</span><span class="p">)</span>
+
+                            <span class="c"># go to next apdu</span>
+                            <span class="k">continue</span>
+
+                        <span class="c"># append message id to request dict</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">request_dict</span><span class="p">[</span><span class="n">message_id</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">apdu</span><span class="p">,</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">())</span>
+
+                <span class="c"># do indication</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">do_indication</span><span class="p">(</span><span class="n">apdu</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_exception</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
+
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;finished: indication thread&#39;</span><span class="p">)</span>
+
+    <span class="nd">@restart_on_failure</span>
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function initiates processing.</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;running as </span><span class="si">%r</span><span class="s">&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
+
+        <span class="c"># populate application</span>
+        <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">object_list</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_object</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+
+        <span class="c"># remove object list from application</span>
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">object_list</span>
+
+        <span class="c"># start communication thread</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">comm_thread</span> <span class="o">=</span> <span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">check_queue</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">comm_thread</span><span class="o">.</span><span class="n">setDaemon</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">comm_thread</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+        <span class="c"># start update device thread</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_thread</span> <span class="o">=</span> <span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">update_devices</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_thread</span><span class="o">.</span><span class="n">setDaemon</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_thread</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+        <span class="c"># start update device thread</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">indication_thread</span> <span class="o">=</span> <span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">check_indication_queue</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">indication_thread</span><span class="o">.</span><span class="n">setDaemon</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">indication_thread</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c"># run BACpypes core</span>
+            <span class="n">core</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+
+            <span class="c"># signal finishing was desired</span>
+            <span class="k">return</span> <span class="bp">True</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_exception</span><span class="p">(</span><span class="s">&#39;exception: </span><span class="si">%r</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">error</span><span class="p">)</span>
+
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;finished&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="BasicApplication.terminate"><a class="viewcode-back" href="../../../bacnet.app.html#bacnet.app.basic.BasicApplication.terminate">[docs]</a>    <span class="k">def</span> <span class="nf">terminate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function terminates processing.</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;terminate&#39;</span><span class="p">)</span>
+
+        <span class="c"># terminate process</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_popen</span><span class="o">.</span><span class="n">terminate</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="BasicApplication.console_interrupt"><a class="viewcode-back" href="../../../bacnet.app.html#bacnet.app.basic.BasicApplication.console_interrupt">[docs]</a>    <span class="k">def</span> <span class="nf">console_interrupt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function is the catch for interrupts.</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># check if this the forked process</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_popen</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;console_interrupt </span><span class="si">%r</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;keyboard interrupt</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+
+            <span class="c"># print info</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">terminate</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="BasicApplication.shutdown"><a class="viewcode-back" href="../../../bacnet.app.html#bacnet.app.basic.BasicApplication.shutdown">[docs]</a>    <span class="k">def</span> <span class="nf">shutdown</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function shuts down the process.</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;shutdown&#39;</span><span class="p">)</span>
+
+        <span class="c"># stop BACpypes core</span>
+        <span class="n">core</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+
+        <span class="c"># safe object deletion</span>
+        <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">objectIdentifier</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="c"># check if object has safe deletion procedure</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s">&#39;safe_delete&#39;</span><span class="p">):</span>
+                <span class="c"># safe delete object</span>
+                <span class="n">obj</span><span class="o">.</span><span class="n">safe_delete</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="BasicApplication.add_object"><a class="viewcode-back" href="../../../bacnet.app.html#bacnet.app.basic.BasicApplication.add_object">[docs]</a>    <span class="k">def</span> <span class="nf">add_object</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This functions adds an object to the collection.</span>
+
+<span class="sd">        :param obj: object</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;add_object </span><span class="si">%r</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">obj</span><span class="p">)</span>
+
+        <span class="c"># read object name</span>
+        <span class="n">object_name</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">objectName</span><span class="p">,</span> <span class="s">&#39;value&#39;</span><span class="p">,</span> <span class="n">obj</span><span class="o">.</span><span class="n">objectName</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">object_name</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&#39;object name required&#39;</span><span class="p">)</span>
+
+        <span class="c"># read object id</span>
+        <span class="n">object_identifier</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">objectIdentifier</span><span class="p">,</span> <span class="s">&#39;value&#39;</span><span class="p">,</span> <span class="n">obj</span><span class="o">.</span><span class="n">objectIdentifier</span><span class="p">)</span>
+
+        <span class="c"># check if object id exists</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">object_identifier</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&#39;object identifier required&#39;</span><span class="p">)</span>
+
+        <span class="c"># check if object name already exists in collection</span>
+        <span class="k">if</span> <span class="n">object_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">objectName</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&#39;already an object with name &quot;</span><span class="si">%s</span><span class="s">&quot;&#39;</span> <span class="o">%</span> <span class="n">object_name</span><span class="p">)</span>
+
+        <span class="c"># check if object id already exists in collection</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">objectIdentifier</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">object_identifier</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&#39;already an object with identifier </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">object_identifier</span><span class="p">)</span>
+
+        <span class="c"># add object name and id to directories</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">objectName</span><span class="p">[</span><span class="n">object_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">obj</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">objectIdentifier</span><span class="p">[</span><span class="n">object_identifier</span><span class="p">]</span> <span class="o">=</span> <span class="n">obj</span>
+
+        <span class="c"># check if object allowes application setting</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s">&#39;set_application&#39;</span><span class="p">):</span>
+            <span class="c"># set application</span>
+            <span class="n">obj</span><span class="o">.</span><span class="n">set_application</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="c"># get hardware dict</span>
+        <span class="n">hardware</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">known_hardware</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">object_identifier</span><span class="p">,</span> <span class="p">{})</span>
+
+        <span class="c"># set hardware object</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">_hardware</span> <span class="o">=</span> <span class="n">hardware</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;hardware&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+
+        <span class="c"># check if hardware was defined</span>
+        <span class="k">if</span> <span class="n">obj</span><span class="o">.</span><span class="n">_hardware</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="c"># loop through initials</span>
+            <span class="k">for</span> <span class="n">prop_id</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">hardware</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;initials&#39;</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+                <span class="c"># check if property was set already</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">obj</span><span class="o">.</span><span class="n">ReadProperty</span><span class="p">(</span><span class="n">prop_id</span><span class="p">):</span>
+                    <span class="c"># set new value</span>
+                    <span class="n">obj</span><span class="o">.</span><span class="n">WriteProperty</span><span class="p">(</span><span class="n">prop_id</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">direct</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+            <span class="c"># initialize present value</span>
+            <span class="n">obj</span><span class="o">.</span><span class="n">poll_hardware</span><span class="p">()</span>
+
+        <span class="c"># add object to collection</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">localDevice</span><span class="o">.</span><span class="n">objectList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">object_identifier</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="BasicApplication.delete_object"><a class="viewcode-back" href="../../../bacnet.app.html#bacnet.app.basic.BasicApplication.delete_object">[docs]</a>    <span class="k">def</span> <span class="nf">delete_object</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function removes object from collection.</span>
+
+<span class="sd">        :param obj: object</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;delete_object </span><span class="si">%r</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">obj</span><span class="p">)</span>
+
+        <span class="c"># read object name and id</span>
+        <span class="n">object_name</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">objectName</span>
+        <span class="n">object_identifier</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">objectIdentifier</span>
+
+        <span class="c"># remove object from directories</span>
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">objectName</span><span class="p">[</span><span class="n">object_name</span><span class="p">]</span>
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">objectIdentifier</span><span class="p">[</span><span class="n">object_identifier</span><span class="p">]</span>
+
+        <span class="c"># remove object from collection</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">localDevice</span><span class="o">.</span><span class="n">objectList</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">object_identifier</span><span class="p">)</span>
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">localDevice</span><span class="o">.</span><span class="n">objectList</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+</div>
+<div class="viewcode-block" id="BasicApplication.iter_objects"><a class="viewcode-back" href="../../../bacnet.app.html#bacnet.app.basic.BasicApplication.iter_objects">[docs]</a>    <span class="k">def</span> <span class="nf">iter_objects</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function returns an iterator of the object collection.</span>
+
+<span class="sd">        :return: object iterator</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># return iterator</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">objectIdentifier</span><span class="o">.</span><span class="n">itervalues</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="BasicApplication.indication"><a class="viewcode-back" href="../../../bacnet.app.html#bacnet.app.basic.BasicApplication.indication">[docs]</a>    <span class="k">def</span> <span class="nf">indication</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">apdu</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function queues received requests.</span>
+
+<span class="sd">        :param apdu: incoming message</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># queue request</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">indication_queue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">apdu</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="BasicApplication.request"><a class="viewcode-back" href="../../../bacnet.app.html#bacnet.app.basic.BasicApplication.request">[docs]</a>    <span class="k">def</span> <span class="nf">request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function handles outgoing messages.</span>
+
+<span class="sd">        :param apdu: outgoing message</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># read apdu</span>
+        <span class="n">apdu</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;request </span><span class="si">%r</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">apdu</span><span class="p">)</span>
+
+        <span class="c"># check if apdu is subscribe cov request</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">apdu</span><span class="p">,</span> <span class="p">(</span><span class="n">SubscribeCOVRequest</span><span class="p">,</span> <span class="n">SubscribeCOVPropertyRequest</span><span class="p">)):</span>
+            <span class="c"># register subscription</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">handle_remote_subscription</span><span class="p">(</span><span class="n">apdu</span><span class="p">)</span>
+
+        <span class="c"># forward the request</span>
+        <span class="n">HandlerApplication</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="BasicApplication.response"><a class="viewcode-back" href="../../../bacnet.app.html#bacnet.app.basic.BasicApplication.response">[docs]</a>    <span class="k">def</span> <span class="nf">response</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function handles outgoing messages as response to a request.</span>
+
+<span class="sd">        :param apdu: outgoing message</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c"># call predecessor</span>
+            <span class="n">HandlerApplication</span><span class="o">.</span><span class="n">response</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_exception</span><span class="p">(</span><span class="s">&#39;exception: </span><span class="si">%r</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">error</span><span class="p">)</span>
+
+            <span class="c"># return the error to the sender</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">(</span><span class="n">SimpleAckPDU</span><span class="p">,</span> <span class="n">ComplexAckPDU</span><span class="p">)):</span>
+                <span class="n">resp</span> <span class="o">=</span> <span class="n">Error</span><span class="p">(</span><span class="n">errorClass</span><span class="o">=</span><span class="s">&#39;device&#39;</span><span class="p">,</span> <span class="n">errorCode</span><span class="o">=</span><span class="s">&#39;operationalProblem&#39;</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+                <span class="c"># transmit error</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="p">(</span><span class="n">resp</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="BasicApplication.confirmation"><a class="viewcode-back" href="../../../bacnet.app.html#bacnet.app.basic.BasicApplication.confirmation">[docs]</a>    <span class="k">def</span> <span class="nf">confirmation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function queues incoming messages.</span>
+
+<span class="sd">        :param apdu: incoming message</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># queue message</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">requests</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Tobias Grosch.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.3</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,147 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>bacnet.system.config.helper &mdash; Masterarbeit Grosch 0.4c0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.4c0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="Masterarbeit Grosch 0.4c0 documentation" href="../../../../index.html" />
+    <link rel="up" title="bacnet.system.config" href="../config.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">Masterarbeit Grosch 0.4c0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="../../system.html" >bacnet.system</a> &raquo;</li>
+          <li class="nav-item nav-item-3"><a href="../config.html" accesskey="U">bacnet.system.config</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for bacnet.system.config.helper</h1><div class="highlight"><pre>
+<span class="c">#pylint: disable=no-name-in-module, bare-except</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Handler Helper Module</span>
+<span class="sd">-------------------------</span>
+
+<span class="sd">This module provides access to local interface addresses.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+
+<span class="kn">from</span> <span class="nn">netifaces</span> <span class="kn">import</span> <span class="n">interfaces</span><span class="p">,</span> <span class="n">ifaddresses</span><span class="p">,</span> <span class="n">AF_INET</span>
+
+
+<span class="k">def</span> <span class="nf">__netmask_to_bits</span><span class="p">(</span><span class="n">netmask</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function converts a ip_address netmask to its related bit count.</span>
+
+<span class="sd">    :param netmask: ip_address netmask</span>
+<span class="sd">    :return: bit_count</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">bit_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="s">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">bin</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">))[</span><span class="mi">2</span><span class="p">:]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">netmask</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">)])</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;0&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="c"># returns bit_count</span>
+    <span class="k">return</span> <span class="n">bit_count</span>
+
+
+<div class="viewcode-block" id="get_local_ip"><a class="viewcode-back" href="../../../../bacnet.system.config.html#bacnet.system.config.helper.get_local_ip">[docs]</a><span class="k">def</span> <span class="nf">get_local_ip</span><span class="p">(</span><span class="n">interface</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function retrieves an IP address from the defined interface.</span>
+
+<span class="sd">    :param interface: network interface for IP address retrieval</span>
+<span class="sd">    :return: ip_address</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ip_address</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c"># check if interface exists</span>
+        <span class="k">if</span> <span class="n">interface</span> <span class="ow">in</span> <span class="n">interfaces</span><span class="p">():</span>
+            <span class="n">idata</span> <span class="o">=</span> <span class="n">ifaddresses</span><span class="p">(</span><span class="n">interface</span><span class="p">)</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">AF_INET</span><span class="p">,</span> <span class="p">[])[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">ip_address</span> <span class="o">=</span> <span class="n">idata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;addr&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+            <span class="n">netmask</span> <span class="o">=</span> <span class="n">idata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;netmask&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">ip_address</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="c"># no ip_address was retrieved</span>
+    <span class="k">if</span> <span class="n">ip_address</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="n">netmask</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">None</span>
+
+    <span class="n">netmask</span> <span class="o">=</span> <span class="n">__netmask_to_bits</span><span class="p">(</span><span class="n">netmask</span><span class="p">)</span>
+
+    <span class="c"># return IP address including netmask</span>
+    <span class="k">return</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">/</span><span class="si">%i</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ip_address</span><span class="p">,</span> <span class="n">netmask</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Tobias Grosch.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.3</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

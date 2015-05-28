@@ -1,0 +1,37 @@
+bacnet.webgui.webgui package
+============================
+
+Subpackages
+-----------
+
+.. toctree::
+
+    bacnet.webgui.webgui.settings
+
+Submodules
+----------
+
+bacnet.webgui.webgui.urls module
+--------------------------------
+
+.. automodule:: bacnet.webgui.webgui.urls
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+bacnet.webgui.webgui.wsgi module
+--------------------------------
+
+.. automodule:: bacnet.webgui.webgui.wsgi
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: bacnet.webgui.webgui
+    :members:
+    :undoc-members:
+    :show-inheritance:

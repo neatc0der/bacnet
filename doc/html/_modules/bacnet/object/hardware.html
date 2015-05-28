@@ -1,0 +1,257 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>bacnet.object.hardware &mdash; Masterarbeit Grosch 0.4c0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.4c0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="Masterarbeit Grosch 0.4c0 documentation" href="../../../index.html" />
+    <link rel="up" title="bacnet.object" href="../object.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Masterarbeit Grosch 0.4c0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="../object.html" accesskey="U">bacnet.object</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for bacnet.object.hardware</h1><div class="highlight"><pre>
+<span class="c"># pylint: disable=broad-except, star-args, too-many-locals, undefined-loop-variable, invalid-name</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Objects Hardware Module</span>
+<span class="sd">-----------------------</span>
+
+<span class="sd">This module collects objects and classes with hardware specific properties.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">Iterable</span>
+<span class="kn">import</span> <span class="nn">pkgutil</span>
+
+<span class="kn">from</span> <span class="nn">bacnet.debugging</span> <span class="kn">import</span> <span class="n">bacnet_debug</span><span class="p">,</span> <span class="n">ModuleLogger</span>
+
+
+<span class="c"># enabling logging</span>
+<span class="n">ModuleLogger</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="s">&#39;INFO&#39;</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">__create_id_overview</span><span class="p">(</span><span class="n">object_dict</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function creates a list of available ids depending on the object type.</span>
+
+<span class="sd">    :param object_dict: object dictionary</span>
+<span class="sd">    :return: object id overview</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">object_ids</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="c"># loop through all entries</span>
+    <span class="k">for</span> <span class="n">obj_type</span><span class="p">,</span> <span class="n">obj_inst</span> <span class="ow">in</span> <span class="n">object_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="c"># check if object instance is greater than the one previously found</span>
+        <span class="k">if</span> <span class="n">obj_inst</span> <span class="o">&gt;=</span> <span class="n">object_ids</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">obj_type</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="c"># store new instance</span>
+            <span class="n">object_ids</span><span class="p">[</span><span class="n">obj_type</span><span class="p">]</span> <span class="o">=</span> <span class="n">obj_inst</span> <span class="o">+</span> <span class="mi">1</span>
+
+    <span class="c"># return object id overview</span>
+    <span class="k">return</span> <span class="n">object_ids</span>
+
+
+<span class="k">def</span> <span class="nf">__create_object_dict</span><span class="p">(</span><span class="n">object_dict</span><span class="p">,</span> <span class="n">hardware_list</span><span class="p">,</span> <span class="n">module_name</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function populates the object dictionary with new hardware.</span>
+
+<span class="sd">    :param object_dict: existing object dictionary</span>
+<span class="sd">    :param hardware_list: new hardware list</span>
+<span class="sd">    :param module_name: module name of new hardware</span>
+<span class="sd">    :return: updated object dictionary</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># create id overview</span>
+    <span class="n">object_ids</span> <span class="o">=</span> <span class="n">__create_id_overview</span><span class="p">(</span><span class="n">object_dict</span><span class="p">)</span>
+
+    <span class="c"># loop through hardware objects</span>
+    <span class="k">for</span> <span class="n">hw_dict</span> <span class="ow">in</span> <span class="n">hardware_list</span><span class="p">:</span>
+        <span class="c"># read hardware list</span>
+        <span class="n">hardware_list</span> <span class="o">=</span> <span class="n">hw_dict</span><span class="p">[</span><span class="s">&#39;hardware&#39;</span><span class="p">]</span>
+
+        <span class="c"># read name</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">hw_dict</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">]</span>
+
+        <span class="c"># check if hardware is iterable</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">hardware_list</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">):</span>
+            <span class="n">hardware_list</span> <span class="o">=</span> <span class="p">(</span><span class="n">hardware_list</span><span class="p">,)</span>
+
+        <span class="c"># loop through hardware</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">hardware_list</span><span class="p">)):</span>
+            <span class="c"># read hardware</span>
+            <span class="n">hardware</span> <span class="o">=</span> <span class="n">hardware_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+            <span class="c"># create information</span>
+            <span class="n">info</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s">&#39;module&#39;</span><span class="p">:</span> <span class="n">module_name</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span>
+                <span class="s">&#39;Module&#39;</span><span class="p">:</span> <span class="n">module_name</span><span class="o">.</span><span class="n">title</span><span class="p">(),</span>
+                <span class="s">&#39;index&#39;</span><span class="p">:</span> <span class="n">i</span><span class="p">,</span>
+                <span class="s">&#39;index1&#39;</span><span class="p">:</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="p">}</span>
+
+            <span class="c"># create new initials</span>
+            <span class="n">initials</span> <span class="o">=</span> <span class="n">hw_dict</span><span class="p">[</span><span class="s">&#39;initials&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+            <span class="c"># update initial contents</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">initials</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+                <span class="n">initials</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">**</span><span class="n">info</span><span class="p">)</span>
+
+            <span class="c"># get object type</span>
+            <span class="n">obj_type</span> <span class="o">=</span> <span class="n">hw_dict</span><span class="p">[</span><span class="s">&#39;objectType&#39;</span><span class="p">]</span>
+
+            <span class="c"># set vendor id</span>
+            <span class="n">vendor_id</span> <span class="o">=</span> <span class="mi">0</span>
+
+            <span class="c"># check if vendor id was included</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj_type</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">obj_type</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="n">vendor_id</span> <span class="o">=</span> <span class="n">obj_type</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="n">obj_type</span> <span class="o">=</span> <span class="n">obj_type</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+            <span class="c"># get free object id</span>
+            <span class="n">obj_inst</span> <span class="o">=</span> <span class="n">object_ids</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">obj_type</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+            <span class="c"># update object ids</span>
+            <span class="n">object_ids</span><span class="p">[</span><span class="n">obj_type</span><span class="p">]</span> <span class="o">=</span> <span class="n">obj_inst</span> <span class="o">+</span> <span class="mi">1</span>
+
+            <span class="c"># create new object dictionary entry</span>
+            <span class="n">object_dict</span><span class="p">[(</span><span class="n">obj_type</span><span class="p">,</span> <span class="n">obj_inst</span><span class="p">)]</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="n">name</span><span class="p">,</span>
+                <span class="s">&#39;vendor&#39;</span><span class="p">:</span> <span class="n">vendor_id</span><span class="p">,</span>
+                <span class="s">&#39;hardware&#39;</span><span class="p">:</span> <span class="n">hardware</span><span class="p">,</span>
+                <span class="s">&#39;initials&#39;</span><span class="p">:</span> <span class="n">initials</span><span class="p">,</span>
+                <span class="s">&#39;poll&#39;</span><span class="p">:</span> <span class="n">hw_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;poll&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">),</span>
+            <span class="p">}</span>
+
+    <span class="c"># return updated object dictionary</span>
+    <span class="k">return</span> <span class="n">object_dict</span>
+
+
+<span class="nd">@bacnet_debug</span><span class="p">(</span><span class="n">formatter</span><span class="o">=</span><span class="s">&#39;</span><span class="si">%(levelname)s</span><span class="s">:hardware: </span><span class="si">%(message)s</span><span class="s">&#39;</span><span class="p">)</span>
+<div class="viewcode-block" id="discover_hardware_objects"><a class="viewcode-back" href="../../../bacnet.object.hardware.html#bacnet.object.hardware.discover_hardware_objects">[docs]</a><span class="k">def</span> <span class="nf">discover_hardware_objects</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function registers all defined objects in all hardware  modules.</span>
+
+<span class="sd">    :return: object dictionary</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="bp">self</span> <span class="o">=</span> <span class="n">discover_hardware_objects</span>
+
+    <span class="n">object_dict</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="c"># loop through all submodules</span>
+    <span class="k">for</span> <span class="n">loader</span><span class="p">,</span> <span class="n">module_name</span><span class="p">,</span> <span class="n">is_pkg</span> <span class="ow">in</span> <span class="n">pkgutil</span><span class="o">.</span><span class="n">walk_packages</span><span class="p">(</span><span class="n">__path__</span><span class="p">):</span>
+
+        <span class="c"># check if module is package</span>
+        <span class="k">if</span> <span class="n">is_pkg</span><span class="p">:</span>
+
+            <span class="c"># set name</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">.</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">__name__</span><span class="p">,</span> <span class="n">module_name</span><span class="p">)</span>
+
+            <span class="c"># load module</span>
+            <span class="n">module</span> <span class="o">=</span> <span class="n">loader</span><span class="o">.</span><span class="n">find_module</span><span class="p">(</span><span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">load_module</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+
+            <span class="c"># check if objects exist</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="s">&#39;HARDWARE_LIST&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">list</span><span class="p">)):</span>
+
+                <span class="c"># check if module name contains an underscore</span>
+                <span class="k">if</span> <span class="s">&#39;_&#39;</span> <span class="ow">in</span> <span class="n">module_name</span><span class="p">:</span>
+                    <span class="c"># print error message</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_warning</span><span class="p">(</span>
+                        <span class="s">&#39;hardware module &quot;</span><span class="si">%s</span><span class="s">&quot; has invalid module name &#39;</span>
+                        <span class="s">&#39;(underscore is not allowed)&#39;</span> <span class="o">%</span> <span class="n">module_name</span>
+                    <span class="p">)</span>
+
+                    <span class="c"># continue</span>
+                    <span class="k">continue</span>
+
+                <span class="c"># log info</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span>
+                    <span class="s">&#39;found module &quot;</span><span class="si">%s</span><span class="s">&quot; to import hardware objects&#39;</span> <span class="o">%</span> <span class="n">module_name</span>
+                <span class="p">)</span>
+
+                <span class="c"># create and register classes</span>
+                <span class="n">object_dict</span> <span class="o">=</span> <span class="n">__create_object_dict</span><span class="p">(</span><span class="n">object_dict</span><span class="p">,</span> <span class="n">module</span><span class="o">.</span><span class="n">HARDWARE_LIST</span><span class="p">,</span> <span class="n">module_name</span><span class="p">)</span>
+
+    <span class="c"># return object dictionary</span>
+    <span class="k">return</span> <span class="n">object_dict</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Tobias Grosch.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.3</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

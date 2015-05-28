@@ -1,0 +1,1615 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>bacnet.object.basic package &mdash; Masterarbeit Grosch 0.4c0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.4c0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Masterarbeit Grosch 0.4c0 documentation" href="index.html" />
+    <link rel="up" title="bacnet.object package" href="bacnet.object.html" />
+    <link rel="next" title="bacnet.object.hardware package" href="bacnet.object.hardware.html" />
+    <link rel="prev" title="bacnet.object package" href="bacnet.object.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="bacnet.object.hardware.html" title="bacnet.object.hardware package"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="bacnet.object.html" title="bacnet.object package"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Masterarbeit Grosch 0.4c0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="bacnet.html" >bacnet package</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="bacnet.object.html" accesskey="U">bacnet.object package</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="bacnet-object-basic-package">
+<h1>bacnet.object.basic package<a class="headerlink" href="#bacnet-object-basic-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-bacnet.object.basic.cov_support">
+<span id="bacnet-object-basic-cov-support-module"></span><h2>bacnet.object.basic.cov_support module<a class="headerlink" href="#module-bacnet.object.basic.cov_support" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="cov-support-module">
+<h3>COV Support Module<a class="headerlink" href="#cov-support-module" title="Permalink to this headline">¶</a></h3>
+<p>This module contains a list of all objects and properties supporting COV events.</p>
+</div>
+</div>
+<div class="section" id="module-bacnet.object.basic.device">
+<span id="bacnet-object-basic-device-module"></span><h2>bacnet.object.basic.device module<a class="headerlink" href="#module-bacnet.object.basic.device" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="object-basic-module">
+<h3>Object Basic Module<a class="headerlink" href="#object-basic-module" title="Permalink to this headline">¶</a></h3>
+<p>This module contains basic definitions of BACpypes Object.</p>
+<dl class="class">
+<dt id="bacnet.object.basic.device.LocalDeviceObject">
+<em class="property">class </em><code class="descclassname">bacnet.object.basic.device.</code><code class="descname">LocalDeviceObject</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/object/basic/device.html#LocalDeviceObject"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.object.basic.device.LocalDeviceObject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bacnet.object.basic.general.DeviceObject" title="bacnet.object.basic.general.DeviceObject"><code class="xref py py-class docutils literal"><span class="pre">bacnet.object.basic.general.DeviceObject</span></code></a></p>
+<p>This class provides additional functionality for device objects.</p>
+<dl class="attribute">
+<dt id="bacnet.object.basic.device.LocalDeviceObject.defaultProperties">
+<code class="descname">defaultProperties</code><em class="property"> = {'numberOfApduRetries': 3, 'maxApduLengthAccepted': 1024, 'apduTimeout': 3000, 'apduSegmentTimeout': 20000, 'segmentationSupported': 'segmentedBoth', 'maxSegmentsAccepted': 16}</em><a class="headerlink" href="#bacnet.object.basic.device.LocalDeviceObject.defaultProperties" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bacnet.object.basic.device.LocalDeviceObject.properties">
+<code class="descname">properties</code><em class="property"> = [&lt;bacnet.object.properties.CurrentTimeProperty 'localTime'&gt;, &lt;bacnet.object.properties.CurrentDateProperty 'localDate'&gt;]</em><a class="headerlink" href="#bacnet.object.basic.device.LocalDeviceObject.properties" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="module-bacnet.object.basic.fileaccess">
+<span id="bacnet-object-basic-fileaccess-module"></span><h2>bacnet.object.basic.fileaccess module<a class="headerlink" href="#module-bacnet.object.basic.fileaccess" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="file-access-object-module">
+<h3>File Access Object Module<a class="headerlink" href="#file-access-object-module" title="Permalink to this headline">¶</a></h3>
+<p>This module contains File Access Objects.</p>
+<dl class="class">
+<dt id="bacnet.object.basic.fileaccess.RecordAccessFileObject">
+<em class="property">class </em><code class="descclassname">bacnet.object.basic.fileaccess.</code><code class="descname">RecordAccessFileObject</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/object/basic/fileaccess.html#RecordAccessFileObject"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.object.basic.fileaccess.RecordAccessFileObject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bacnet.object.basic.general.FileObject" title="bacnet.object.basic.general.FileObject"><code class="xref py py-class docutils literal"><span class="pre">bacnet.object.basic.general.FileObject</span></code></a></p>
+<p>This class provides read/write access to file records.</p>
+<dl class="method">
+<dt id="bacnet.object.basic.fileaccess.RecordAccessFileObject.ReadFile">
+<code class="descname">ReadFile</code><span class="sig-paren">(</span><em>start</em>, <em>count</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/object/basic/fileaccess.html#RecordAccessFileObject.ReadFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.object.basic.fileaccess.RecordAccessFileObject.ReadFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function provides read access.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>start</strong> &#8211; start record</li>
+<li><strong>count</strong> &#8211; record count</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">record data</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.object.basic.fileaccess.RecordAccessFileObject.WriteFile">
+<code class="descname">WriteFile</code><span class="sig-paren">(</span><em>start</em>, <em>count</em>, <em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/object/basic/fileaccess.html#RecordAccessFileObject.WriteFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.object.basic.fileaccess.RecordAccessFileObject.WriteFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function provides write access.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>start</strong> &#8211; start record</li>
+<li><strong>count</strong> &#8211; record count</li>
+<li><strong>data</strong> &#8211; record data</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">start record</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bacnet.object.basic.fileaccess.StreamAccessFileObject">
+<em class="property">class </em><code class="descclassname">bacnet.object.basic.fileaccess.</code><code class="descname">StreamAccessFileObject</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/object/basic/fileaccess.html#StreamAccessFileObject"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.object.basic.fileaccess.StreamAccessFileObject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bacnet.object.basic.general.FileObject" title="bacnet.object.basic.general.FileObject"><code class="xref py py-class docutils literal"><span class="pre">bacnet.object.basic.general.FileObject</span></code></a></p>
+<p>This class provides read/write access to file streams.</p>
+<dl class="method">
+<dt id="bacnet.object.basic.fileaccess.StreamAccessFileObject.ReadFile">
+<code class="descname">ReadFile</code><span class="sig-paren">(</span><em>start</em>, <em>count</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/object/basic/fileaccess.html#StreamAccessFileObject.ReadFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.object.basic.fileaccess.StreamAccessFileObject.ReadFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function provides read access.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>start</strong> &#8211; start position</li>
+<li><strong>count</strong> &#8211; letter count</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">record data</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.object.basic.fileaccess.StreamAccessFileObject.WriteFile">
+<code class="descname">WriteFile</code><span class="sig-paren">(</span><em>start</em>, <em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/object/basic/fileaccess.html#StreamAccessFileObject.WriteFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.object.basic.fileaccess.StreamAccessFileObject.WriteFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function provides write access.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>start</strong> &#8211; start position</li>
+<li><strong>data</strong> &#8211; data</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">start position</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.object.basic.fileaccess.StreamAccessFileObject.get_filename">
+<code class="descname">get_filename</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/object/basic/fileaccess.html#StreamAccessFileObject.get_filename"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.object.basic.fileaccess.StreamAccessFileObject.get_filename" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function returns the absolute path and file name.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">file name</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.object.basic.fileaccess.StreamAccessFileObject.lock_file">
+<code class="descname">lock_file</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/object/basic/fileaccess.html#StreamAccessFileObject.lock_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.object.basic.fileaccess.StreamAccessFileObject.lock_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function locks the file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.object.basic.fileaccess.StreamAccessFileObject.unlock_file">
+<code class="descname">unlock_file</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/object/basic/fileaccess.html#StreamAccessFileObject.unlock_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.object.basic.fileaccess.StreamAccessFileObject.unlock_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function unlocks the file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="module-bacnet.object.basic.general">
+<span id="bacnet-object-basic-general-module"></span><h2>bacnet.object.basic.general module<a class="headerlink" href="#module-bacnet.object.basic.general" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id1">
+<h3>Object Basic Module<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<p>This module contains basic definitions of BACpypes Object.</p>
+<dl class="class">
+<dt id="bacnet.object.basic.general.AccessCredentialObject">
+<em class="property">class </em><code class="descclassname">bacnet.object.basic.general.</code><code class="descname">AccessCredentialObject</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#bacnet.object.basic.general.AccessCredentialObject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bacnet.object.basic.general.Object" title="bacnet.object.basic.general.Object"><code class="xref py py-class docutils literal"><span class="pre">bacnet.object.basic.general.Object</span></code></a></p>
+<p>This class is an cov extended version of bacpypes AccessCredentialObject.</p>
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.AccessCredentialObject.objectType">
+<code class="descname">objectType</code><em class="property"> = 'accessCredential'</em><a class="headerlink" href="#bacnet.object.basic.general.AccessCredentialObject.objectType" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.AccessCredentialObject.properties">
+<code class="descname">properties</code><em class="property"> = [&lt;bacnet.object.properties.ObjectIdentifierProperty 'objectIdentifier'&gt;, &lt;bacnet.object.properties.ReadableProperty 'objectName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'description'&gt;, &lt;bacnet.object.properties.OptionalProperty 'profileName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'propertyList'&gt;, &lt;bacnet.object.properties.WritableProperty 'globalIdentifier'&gt;, &lt;bacnet.object.properties.ReadableProperty 'statusFlags'&gt;, &lt;bacnet.object.properties.ReadableProperty 'reliability'&gt;, &lt;bacnet.object.properties.ReadableProperty 'credentialStatus'&gt;, &lt;bacnet.object.properties.ReadableProperty 'reasonForDisable'&gt;, &lt;bacnet.object.properties.ReadableProperty 'authenticationFactors'&gt;, &lt;bacnet.object.properties.ReadableProperty 'activationTime'&gt;, &lt;bacnet.object.properties.ReadableProperty 'expiryTime'&gt;, &lt;bacnet.object.properties.ReadableProperty 'credentialDisable'&gt;, &lt;bacnet.object.properties.OptionalProperty 'daysRemaining'&gt;, &lt;bacnet.object.properties.OptionalProperty 'usesRemaining'&gt;, &lt;bacnet.object.properties.OptionalProperty 'absenteeLimit'&gt;, &lt;bacnet.object.properties.OptionalProperty 'belongsTo'&gt;, &lt;bacnet.object.properties.ReadableProperty 'assignedAccessRights'&gt;, &lt;bacnet.object.properties.OptionalProperty 'lastAccessPoint'&gt;, &lt;bacnet.object.properties.OptionalProperty 'lastAccessEvent'&gt;, &lt;bacnet.object.properties.OptionalProperty 'lastUseTime'&gt;, &lt;bacnet.object.properties.OptionalProperty 'traceFlag'&gt;, &lt;bacnet.object.properties.OptionalProperty 'threatAuthority'&gt;, &lt;bacnet.object.properties.OptionalProperty 'extendedTimeEnable'&gt;, &lt;bacnet.object.properties.OptionalProperty 'masterExemption'&gt;, &lt;bacnet.object.properties.OptionalProperty 'passbackExemption'&gt;, &lt;bacnet.object.properties.OptionalProperty 'occupancyExemption'&gt;]</em><a class="headerlink" href="#bacnet.object.basic.general.AccessCredentialObject.properties" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bacnet.object.basic.general.AccessDoorObject">
+<em class="property">class </em><code class="descclassname">bacnet.object.basic.general.</code><code class="descname">AccessDoorObject</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#bacnet.object.basic.general.AccessDoorObject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bacnet.object.basic.general.Object" title="bacnet.object.basic.general.Object"><code class="xref py py-class docutils literal"><span class="pre">bacnet.object.basic.general.Object</span></code></a></p>
+<p>This class is an cov extended version of bacpypes AccessDoorObject.</p>
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.AccessDoorObject.objectType">
+<code class="descname">objectType</code><em class="property"> = 'accessDoor'</em><a class="headerlink" href="#bacnet.object.basic.general.AccessDoorObject.objectType" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.AccessDoorObject.properties">
+<code class="descname">properties</code><em class="property"> = [&lt;bacnet.object.properties.ObjectIdentifierProperty 'objectIdentifier'&gt;, &lt;bacnet.object.properties.ReadableProperty 'objectName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'description'&gt;, &lt;bacnet.object.properties.OptionalProperty 'profileName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'propertyList'&gt;, &lt;bacnet.object.properties.WritableProperty 'presentValue'&gt;, &lt;bacnet.object.properties.ReadableProperty 'statusFlags'&gt;, &lt;bacnet.object.properties.ReadableProperty 'eventState'&gt;, &lt;bacnet.object.properties.ReadableProperty 'reliability'&gt;, &lt;bacnet.object.properties.ReadableProperty 'outOfService'&gt;, &lt;bacnet.object.properties.ReadableProperty 'priorityArray'&gt;, &lt;bacnet.object.properties.ReadableProperty 'relinquishDefault'&gt;, &lt;bacnet.object.properties.OptionalProperty 'doorStatus'&gt;, &lt;bacnet.object.properties.OptionalProperty 'lockStatus'&gt;, &lt;bacnet.object.properties.OptionalProperty 'securedStatus'&gt;, &lt;bacnet.object.properties.OptionalProperty 'doorMembers'&gt;, &lt;bacnet.object.properties.ReadableProperty 'doorPulseTime'&gt;, &lt;bacnet.object.properties.ReadableProperty 'doorExtendedPulseTime'&gt;, &lt;bacnet.object.properties.OptionalProperty 'doorUnlockDelayTime'&gt;, &lt;bacnet.object.properties.ReadableProperty 'doorOpenTooLongTime'&gt;, &lt;bacnet.object.properties.OptionalProperty 'doorAlarmState'&gt;, &lt;bacnet.object.properties.OptionalProperty 'maskedAlarmValues'&gt;, &lt;bacnet.object.properties.OptionalProperty 'maintenanceRequired'&gt;, &lt;bacnet.object.properties.OptionalProperty 'timeDelay'&gt;, &lt;bacnet.object.properties.OptionalProperty 'notificationClass'&gt;, &lt;bacnet.object.properties.OptionalProperty 'alarmValues'&gt;, &lt;bacnet.object.properties.OptionalProperty 'faultValues'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventEnable'&gt;, &lt;bacnet.object.properties.OptionalProperty 'ackedTransitions'&gt;, &lt;bacnet.object.properties.OptionalProperty 'notifyType'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventTimeStamps'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventMessageTexts'&gt;]</em><a class="headerlink" href="#bacnet.object.basic.general.AccessDoorObject.properties" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bacnet.object.basic.general.AccessPointObject">
+<em class="property">class </em><code class="descclassname">bacnet.object.basic.general.</code><code class="descname">AccessPointObject</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#bacnet.object.basic.general.AccessPointObject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bacnet.object.basic.general.Object" title="bacnet.object.basic.general.Object"><code class="xref py py-class docutils literal"><span class="pre">bacnet.object.basic.general.Object</span></code></a></p>
+<p>This class is an cov extended version of bacpypes AccessPointObject.</p>
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.AccessPointObject.objectType">
+<code class="descname">objectType</code><em class="property"> = 'accessPoint'</em><a class="headerlink" href="#bacnet.object.basic.general.AccessPointObject.objectType" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.AccessPointObject.properties">
+<code class="descname">properties</code><em class="property"> = [&lt;bacnet.object.properties.ObjectIdentifierProperty 'objectIdentifier'&gt;, &lt;bacnet.object.properties.ReadableProperty 'objectName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'description'&gt;, &lt;bacnet.object.properties.OptionalProperty 'profileName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'propertyList'&gt;, &lt;bacnet.object.properties.ReadableProperty 'statusFlags'&gt;, &lt;bacnet.object.properties.ReadableProperty 'eventState'&gt;, &lt;bacnet.object.properties.ReadableProperty 'reliability'&gt;, &lt;bacnet.object.properties.ReadableProperty 'outOfService'&gt;, &lt;bacnet.object.properties.ReadableProperty 'authenticationStatus'&gt;, &lt;bacnet.object.properties.ReadableProperty 'activeAuthenticationPolicy'&gt;, &lt;bacnet.object.properties.ReadableProperty 'numberOfAuthenticationPolicies'&gt;, &lt;bacnet.object.properties.OptionalProperty 'authenticationPolicyList'&gt;, &lt;bacnet.object.properties.OptionalProperty 'authenticationPolicyNames'&gt;, &lt;bacnet.object.properties.ReadableProperty 'authorizationMode'&gt;, &lt;bacnet.object.properties.OptionalProperty 'verificationTime'&gt;, &lt;bacnet.object.properties.OptionalProperty 'lockout'&gt;, &lt;bacnet.object.properties.OptionalProperty 'lockoutRelinquishTime'&gt;, &lt;bacnet.object.properties.OptionalProperty 'failedAttempts'&gt;, &lt;bacnet.object.properties.OptionalProperty 'failedAttemptEvents'&gt;, &lt;bacnet.object.properties.OptionalProperty 'maxFailedAttempts'&gt;, &lt;bacnet.object.properties.OptionalProperty 'failedAttemptsTime'&gt;, &lt;bacnet.object.properties.OptionalProperty 'threatLevel'&gt;, &lt;bacnet.object.properties.OptionalProperty 'occupancyUpperLimitEnforced'&gt;, &lt;bacnet.object.properties.OptionalProperty 'occupancyLowerLimitEnforced'&gt;, &lt;bacnet.object.properties.OptionalProperty 'occupancyCountAdjust'&gt;, &lt;bacnet.object.properties.OptionalProperty 'accompanimentTime'&gt;, &lt;bacnet.object.properties.ReadableProperty 'accessEvent'&gt;, &lt;bacnet.object.properties.ReadableProperty 'accessEventTag'&gt;, &lt;bacnet.object.properties.ReadableProperty 'accessEventTime'&gt;, &lt;bacnet.object.properties.ReadableProperty 'accessEventCredential'&gt;, &lt;bacnet.object.properties.OptionalProperty 'accessEventAuthenticationFactor'&gt;, &lt;bacnet.object.properties.ReadableProperty 'accessDoors'&gt;, &lt;bacnet.object.properties.ReadableProperty 'priorityForWriting'&gt;, &lt;bacnet.object.properties.OptionalProperty 'musterPoint'&gt;, &lt;bacnet.object.properties.OptionalProperty 'zoneTo'&gt;, &lt;bacnet.object.properties.OptionalProperty 'zoneFrom'&gt;, &lt;bacnet.object.properties.OptionalProperty 'notificationClass'&gt;, &lt;bacnet.object.properties.OptionalProperty 'transactionNotificationClass'&gt;, &lt;bacnet.object.properties.OptionalProperty 'accessAlarmEvents'&gt;, &lt;bacnet.object.properties.OptionalProperty 'accessTransactionEvents'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventEnable'&gt;, &lt;bacnet.object.properties.OptionalProperty 'ackedTransitions'&gt;, &lt;bacnet.object.properties.OptionalProperty 'notifyType'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventTimeStamps'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventMessageTexts'&gt;]</em><a class="headerlink" href="#bacnet.object.basic.general.AccessPointObject.properties" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bacnet.object.basic.general.AccessRightsObject">
+<em class="property">class </em><code class="descclassname">bacnet.object.basic.general.</code><code class="descname">AccessRightsObject</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#bacnet.object.basic.general.AccessRightsObject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bacnet.object.basic.general.Object" title="bacnet.object.basic.general.Object"><code class="xref py py-class docutils literal"><span class="pre">bacnet.object.basic.general.Object</span></code></a></p>
+<p>This class is an cov extended version of bacpypes AccessRightsObject.</p>
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.AccessRightsObject.objectType">
+<code class="descname">objectType</code><em class="property"> = 'accessRights'</em><a class="headerlink" href="#bacnet.object.basic.general.AccessRightsObject.objectType" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.AccessRightsObject.properties">
+<code class="descname">properties</code><em class="property"> = [&lt;bacnet.object.properties.ObjectIdentifierProperty 'objectIdentifier'&gt;, &lt;bacnet.object.properties.ReadableProperty 'objectName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'description'&gt;, &lt;bacnet.object.properties.OptionalProperty 'profileName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'propertyList'&gt;, &lt;bacnet.object.properties.WritableProperty 'globalIdentifier'&gt;, &lt;bacnet.object.properties.ReadableProperty 'statusFlags'&gt;, &lt;bacnet.object.properties.ReadableProperty 'reliability'&gt;, &lt;bacnet.object.properties.ReadableProperty 'enable'&gt;, &lt;bacnet.object.properties.ReadableProperty 'negativeAccessRules'&gt;, &lt;bacnet.object.properties.ReadableProperty 'positiveAccessRules'&gt;, &lt;bacnet.object.properties.OptionalProperty 'accompaniment'&gt;]</em><a class="headerlink" href="#bacnet.object.basic.general.AccessRightsObject.properties" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bacnet.object.basic.general.AccessUserObject">
+<em class="property">class </em><code class="descclassname">bacnet.object.basic.general.</code><code class="descname">AccessUserObject</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#bacnet.object.basic.general.AccessUserObject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bacnet.object.basic.general.Object" title="bacnet.object.basic.general.Object"><code class="xref py py-class docutils literal"><span class="pre">bacnet.object.basic.general.Object</span></code></a></p>
+<p>This class is an cov extended version of bacpypes AccessUserObject.</p>
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.AccessUserObject.objectType">
+<code class="descname">objectType</code><em class="property"> = 'accessUser'</em><a class="headerlink" href="#bacnet.object.basic.general.AccessUserObject.objectType" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.AccessUserObject.properties">
+<code class="descname">properties</code><em class="property"> = [&lt;bacnet.object.properties.ObjectIdentifierProperty 'objectIdentifier'&gt;, &lt;bacnet.object.properties.ReadableProperty 'objectName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'description'&gt;, &lt;bacnet.object.properties.OptionalProperty 'profileName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'propertyList'&gt;, &lt;bacnet.object.properties.WritableProperty 'globalIdentifier'&gt;, &lt;bacnet.object.properties.ReadableProperty 'statusFlags'&gt;, &lt;bacnet.object.properties.ReadableProperty 'reliability'&gt;, &lt;bacnet.object.properties.ReadableProperty 'userType'&gt;, &lt;bacnet.object.properties.OptionalProperty 'userName'&gt;, &lt;bacnet.object.properties.OptionalProperty 'userExternalIdentifier'&gt;, &lt;bacnet.object.properties.OptionalProperty 'userInformationReference'&gt;, &lt;bacnet.object.properties.OptionalProperty 'members'&gt;, &lt;bacnet.object.properties.OptionalProperty 'memberOf'&gt;, &lt;bacnet.object.properties.ReadableProperty 'credentials'&gt;]</em><a class="headerlink" href="#bacnet.object.basic.general.AccessUserObject.properties" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bacnet.object.basic.general.AccessZoneObject">
+<em class="property">class </em><code class="descclassname">bacnet.object.basic.general.</code><code class="descname">AccessZoneObject</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#bacnet.object.basic.general.AccessZoneObject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bacnet.object.basic.general.Object" title="bacnet.object.basic.general.Object"><code class="xref py py-class docutils literal"><span class="pre">bacnet.object.basic.general.Object</span></code></a></p>
+<p>This class is an cov extended version of bacpypes AccessZoneObject.</p>
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.AccessZoneObject.objectType">
+<code class="descname">objectType</code><em class="property"> = 'accessZone'</em><a class="headerlink" href="#bacnet.object.basic.general.AccessZoneObject.objectType" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.AccessZoneObject.properties">
+<code class="descname">properties</code><em class="property"> = [&lt;bacnet.object.properties.ObjectIdentifierProperty 'objectIdentifier'&gt;, &lt;bacnet.object.properties.ReadableProperty 'objectName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'description'&gt;, &lt;bacnet.object.properties.OptionalProperty 'profileName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'propertyList'&gt;, &lt;bacnet.object.properties.WritableProperty 'globalIdentifier'&gt;, &lt;bacnet.object.properties.ReadableProperty 'occupancyState'&gt;, &lt;bacnet.object.properties.ReadableProperty 'statusFlags'&gt;, &lt;bacnet.object.properties.ReadableProperty 'eventState'&gt;, &lt;bacnet.object.properties.ReadableProperty 'reliability'&gt;, &lt;bacnet.object.properties.ReadableProperty 'outOfService'&gt;, &lt;bacnet.object.properties.OptionalProperty 'occupancyCount'&gt;, &lt;bacnet.object.properties.OptionalProperty 'occupancyCountEnable'&gt;, &lt;bacnet.object.properties.OptionalProperty 'adjustValue'&gt;, &lt;bacnet.object.properties.OptionalProperty 'occupancyUpperLimit'&gt;, &lt;bacnet.object.properties.OptionalProperty 'occupancyLowerLimit'&gt;, &lt;bacnet.object.properties.OptionalProperty 'credentialsInZone'&gt;, &lt;bacnet.object.properties.OptionalProperty 'lastCredentialAdded'&gt;, &lt;bacnet.object.properties.OptionalProperty 'lastCredentialAddedTime'&gt;, &lt;bacnet.object.properties.OptionalProperty 'lastCredentialRemoved'&gt;, &lt;bacnet.object.properties.OptionalProperty 'lastCredentialRemovedTime'&gt;, &lt;bacnet.object.properties.OptionalProperty 'passbackMode'&gt;, &lt;bacnet.object.properties.OptionalProperty 'passbackTimeout'&gt;, &lt;bacnet.object.properties.ReadableProperty 'entryPoints'&gt;, &lt;bacnet.object.properties.ReadableProperty 'exitPoints'&gt;, &lt;bacnet.object.properties.OptionalProperty 'timeDelay'&gt;, &lt;bacnet.object.properties.OptionalProperty 'notificationClass'&gt;, &lt;bacnet.object.properties.OptionalProperty 'alarmValues'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventEnable'&gt;, &lt;bacnet.object.properties.OptionalProperty 'ackedTransitions'&gt;, &lt;bacnet.object.properties.OptionalProperty 'notifyType'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventTimeStamps'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventMessageTexts'&gt;]</em><a class="headerlink" href="#bacnet.object.basic.general.AccessZoneObject.properties" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bacnet.object.basic.general.AccumulatorObject">
+<em class="property">class </em><code class="descclassname">bacnet.object.basic.general.</code><code class="descname">AccumulatorObject</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#bacnet.object.basic.general.AccumulatorObject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bacnet.object.basic.general.Object" title="bacnet.object.basic.general.Object"><code class="xref py py-class docutils literal"><span class="pre">bacnet.object.basic.general.Object</span></code></a></p>
+<p>This class is an cov extended version of bacpypes AccumulatorObject.</p>
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.AccumulatorObject.objectType">
+<code class="descname">objectType</code><em class="property"> = 'accumulator'</em><a class="headerlink" href="#bacnet.object.basic.general.AccumulatorObject.objectType" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.AccumulatorObject.properties">
+<code class="descname">properties</code><em class="property"> = [&lt;bacnet.object.properties.ObjectIdentifierProperty 'objectIdentifier'&gt;, &lt;bacnet.object.properties.ReadableProperty 'objectName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'description'&gt;, &lt;bacnet.object.properties.OptionalProperty 'profileName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'propertyList'&gt;, &lt;bacnet.object.properties.ReadableProperty 'presentValue'&gt;, &lt;bacnet.object.properties.OptionalProperty 'deviceType'&gt;, &lt;bacnet.object.properties.ReadableProperty 'statusFlags'&gt;, &lt;bacnet.object.properties.ReadableProperty 'eventState'&gt;, &lt;bacnet.object.properties.OptionalProperty 'reliability'&gt;, &lt;bacnet.object.properties.ReadableProperty 'outOfService'&gt;, &lt;bacnet.object.properties.ReadableProperty 'scale'&gt;, &lt;bacnet.object.properties.ReadableProperty 'units'&gt;, &lt;bacnet.object.properties.OptionalProperty 'prescale'&gt;, &lt;bacnet.object.properties.ReadableProperty 'maxPresValue'&gt;, &lt;bacnet.object.properties.OptionalProperty 'valueChangeTime'&gt;, &lt;bacnet.object.properties.OptionalProperty 'valueBeforeChange'&gt;, &lt;bacnet.object.properties.OptionalProperty 'valueSet'&gt;, &lt;bacnet.object.properties.OptionalProperty 'loggingRecord'&gt;, &lt;bacnet.object.properties.OptionalProperty 'loggingObject'&gt;, &lt;bacnet.object.properties.OptionalProperty 'pulseRate'&gt;, &lt;bacnet.object.properties.OptionalProperty 'highLimit'&gt;, &lt;bacnet.object.properties.OptionalProperty 'lowLimit'&gt;, &lt;bacnet.object.properties.OptionalProperty 'limitMonitoringInterval'&gt;, &lt;bacnet.object.properties.OptionalProperty 'notificationClass'&gt;, &lt;bacnet.object.properties.OptionalProperty 'timeDelay'&gt;, &lt;bacnet.object.properties.OptionalProperty 'limitEnable'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventEnable'&gt;, &lt;bacnet.object.properties.OptionalProperty 'ackedTransitions'&gt;, &lt;bacnet.object.properties.OptionalProperty 'notifyType'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventTimeStamps'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventMessageTexts'&gt;]</em><a class="headerlink" href="#bacnet.object.basic.general.AccumulatorObject.properties" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bacnet.object.basic.general.AnalogInputObject">
+<em class="property">class </em><code class="descclassname">bacnet.object.basic.general.</code><code class="descname">AnalogInputObject</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#bacnet.object.basic.general.AnalogInputObject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bacnet.object.basic.general.Object" title="bacnet.object.basic.general.Object"><code class="xref py py-class docutils literal"><span class="pre">bacnet.object.basic.general.Object</span></code></a></p>
+<p>This class is an cov extended version of bacpypes AnalogInputObject.</p>
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.AnalogInputObject.objectType">
+<code class="descname">objectType</code><em class="property"> = 'analogInput'</em><a class="headerlink" href="#bacnet.object.basic.general.AnalogInputObject.objectType" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.AnalogInputObject.properties">
+<code class="descname">properties</code><em class="property"> = [&lt;bacnet.object.properties.ObjectIdentifierProperty 'objectIdentifier'&gt;, &lt;bacnet.object.properties.ReadableProperty 'objectName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'description'&gt;, &lt;bacnet.object.properties.OptionalProperty 'profileName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'propertyList'&gt;, &lt;bacnet.object.properties.ReadableProperty 'presentValue'&gt;, &lt;bacnet.object.properties.OptionalProperty 'deviceType'&gt;, &lt;bacnet.object.properties.ReadableProperty 'statusFlags'&gt;, &lt;bacnet.object.properties.ReadableProperty 'eventState'&gt;, &lt;bacnet.object.properties.OptionalProperty 'reliability'&gt;, &lt;bacnet.object.properties.ReadableProperty 'outOfService'&gt;, &lt;bacnet.object.properties.OptionalProperty 'updateInterval'&gt;, &lt;bacnet.object.properties.ReadableProperty 'units'&gt;, &lt;bacnet.object.properties.OptionalProperty 'minPresValue'&gt;, &lt;bacnet.object.properties.OptionalProperty 'maxPresValue'&gt;, &lt;bacnet.object.properties.OptionalProperty 'resolution'&gt;, &lt;bacnet.object.properties.OptionalProperty 'covIncrement'&gt;, &lt;bacnet.object.properties.OptionalProperty 'timeDelay'&gt;, &lt;bacnet.object.properties.OptionalProperty 'notificationClass'&gt;, &lt;bacnet.object.properties.OptionalProperty 'highLimit'&gt;, &lt;bacnet.object.properties.OptionalProperty 'lowLimit'&gt;, &lt;bacnet.object.properties.OptionalProperty 'deadband'&gt;, &lt;bacnet.object.properties.OptionalProperty 'limitEnable'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventEnable'&gt;, &lt;bacnet.object.properties.OptionalProperty 'ackedTransitions'&gt;, &lt;bacnet.object.properties.OptionalProperty 'notifyType'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventTimeStamps'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventMessageTexts'&gt;]</em><a class="headerlink" href="#bacnet.object.basic.general.AnalogInputObject.properties" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bacnet.object.basic.general.AnalogOutputObject">
+<em class="property">class </em><code class="descclassname">bacnet.object.basic.general.</code><code class="descname">AnalogOutputObject</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#bacnet.object.basic.general.AnalogOutputObject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bacnet.object.basic.general.Object" title="bacnet.object.basic.general.Object"><code class="xref py py-class docutils literal"><span class="pre">bacnet.object.basic.general.Object</span></code></a></p>
+<p>This class is an cov extended version of bacpypes AnalogOutputObject.</p>
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.AnalogOutputObject.objectType">
+<code class="descname">objectType</code><em class="property"> = 'analogOutput'</em><a class="headerlink" href="#bacnet.object.basic.general.AnalogOutputObject.objectType" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.AnalogOutputObject.properties">
+<code class="descname">properties</code><em class="property"> = [&lt;bacnet.object.properties.ObjectIdentifierProperty 'objectIdentifier'&gt;, &lt;bacnet.object.properties.ReadableProperty 'objectName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'description'&gt;, &lt;bacnet.object.properties.OptionalProperty 'profileName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'propertyList'&gt;, &lt;bacnet.object.properties.WritableProperty 'presentValue'&gt;, &lt;bacnet.object.properties.OptionalProperty 'deviceType'&gt;, &lt;bacnet.object.properties.ReadableProperty 'statusFlags'&gt;, &lt;bacnet.object.properties.ReadableProperty 'eventState'&gt;, &lt;bacnet.object.properties.OptionalProperty 'reliability'&gt;, &lt;bacnet.object.properties.ReadableProperty 'outOfService'&gt;, &lt;bacnet.object.properties.ReadableProperty 'units'&gt;, &lt;bacnet.object.properties.OptionalProperty 'minPresValue'&gt;, &lt;bacnet.object.properties.OptionalProperty 'maxPresValue'&gt;, &lt;bacnet.object.properties.OptionalProperty 'resolution'&gt;, &lt;bacnet.object.properties.ReadableProperty 'priorityArray'&gt;, &lt;bacnet.object.properties.ReadableProperty 'relinquishDefault'&gt;, &lt;bacnet.object.properties.OptionalProperty 'covIncrement'&gt;, &lt;bacnet.object.properties.OptionalProperty 'timeDelay'&gt;, &lt;bacnet.object.properties.OptionalProperty 'notificationClass'&gt;, &lt;bacnet.object.properties.OptionalProperty 'highLimit'&gt;, &lt;bacnet.object.properties.OptionalProperty 'lowLimit'&gt;, &lt;bacnet.object.properties.OptionalProperty 'deadband'&gt;, &lt;bacnet.object.properties.OptionalProperty 'limitEnable'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventEnable'&gt;, &lt;bacnet.object.properties.OptionalProperty 'ackedTransitions'&gt;, &lt;bacnet.object.properties.OptionalProperty 'notifyType'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventTimeStamps'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventMessageTexts'&gt;]</em><a class="headerlink" href="#bacnet.object.basic.general.AnalogOutputObject.properties" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bacnet.object.basic.general.AnalogValueObject">
+<em class="property">class </em><code class="descclassname">bacnet.object.basic.general.</code><code class="descname">AnalogValueObject</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#bacnet.object.basic.general.AnalogValueObject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bacnet.object.basic.general.Object" title="bacnet.object.basic.general.Object"><code class="xref py py-class docutils literal"><span class="pre">bacnet.object.basic.general.Object</span></code></a></p>
+<p>This class is an cov extended version of bacpypes AnalogValueObject.</p>
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.AnalogValueObject.objectType">
+<code class="descname">objectType</code><em class="property"> = 'analogValue'</em><a class="headerlink" href="#bacnet.object.basic.general.AnalogValueObject.objectType" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.AnalogValueObject.properties">
+<code class="descname">properties</code><em class="property"> = [&lt;bacnet.object.properties.ObjectIdentifierProperty 'objectIdentifier'&gt;, &lt;bacnet.object.properties.ReadableProperty 'objectName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'description'&gt;, &lt;bacnet.object.properties.OptionalProperty 'profileName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'propertyList'&gt;, &lt;bacnet.object.properties.ReadableProperty 'presentValue'&gt;, &lt;bacnet.object.properties.ReadableProperty 'statusFlags'&gt;, &lt;bacnet.object.properties.ReadableProperty 'eventState'&gt;, &lt;bacnet.object.properties.OptionalProperty 'reliability'&gt;, &lt;bacnet.object.properties.ReadableProperty 'outOfService'&gt;, &lt;bacnet.object.properties.ReadableProperty 'units'&gt;, &lt;bacnet.object.properties.OptionalProperty 'minPresValue'&gt;, &lt;bacnet.object.properties.OptionalProperty 'maxPresValue'&gt;, &lt;bacnet.object.properties.OptionalProperty 'resolution'&gt;, &lt;bacnet.object.properties.OptionalProperty 'priorityArray'&gt;, &lt;bacnet.object.properties.OptionalProperty 'relinquishDefault'&gt;, &lt;bacnet.object.properties.OptionalProperty 'covIncrement'&gt;, &lt;bacnet.object.properties.OptionalProperty 'timeDelay'&gt;, &lt;bacnet.object.properties.OptionalProperty 'notificationClass'&gt;, &lt;bacnet.object.properties.OptionalProperty 'highLimit'&gt;, &lt;bacnet.object.properties.OptionalProperty 'lowLimit'&gt;, &lt;bacnet.object.properties.OptionalProperty 'deadband'&gt;, &lt;bacnet.object.properties.OptionalProperty 'limitEnable'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventEnable'&gt;, &lt;bacnet.object.properties.OptionalProperty 'ackedTransitions'&gt;, &lt;bacnet.object.properties.OptionalProperty 'notifyType'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventTimeStamps'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventMessageTexts'&gt;]</em><a class="headerlink" href="#bacnet.object.basic.general.AnalogValueObject.properties" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bacnet.object.basic.general.AveragingObject">
+<em class="property">class </em><code class="descclassname">bacnet.object.basic.general.</code><code class="descname">AveragingObject</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#bacnet.object.basic.general.AveragingObject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bacnet.object.basic.general.Object" title="bacnet.object.basic.general.Object"><code class="xref py py-class docutils literal"><span class="pre">bacnet.object.basic.general.Object</span></code></a></p>
+<p>This class is an cov extended version of bacpypes AveragingObject.</p>
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.AveragingObject.objectType">
+<code class="descname">objectType</code><em class="property"> = 'averaging'</em><a class="headerlink" href="#bacnet.object.basic.general.AveragingObject.objectType" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.AveragingObject.properties">
+<code class="descname">properties</code><em class="property"> = [&lt;bacnet.object.properties.ObjectIdentifierProperty 'objectIdentifier'&gt;, &lt;bacnet.object.properties.ReadableProperty 'objectName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'description'&gt;, &lt;bacnet.object.properties.OptionalProperty 'profileName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'propertyList'&gt;, &lt;bacnet.object.properties.ReadableProperty 'minimumValue'&gt;, &lt;bacnet.object.properties.OptionalProperty 'minimumValueTimestamp'&gt;, &lt;bacnet.object.properties.ReadableProperty 'averageValue'&gt;, &lt;bacnet.object.properties.OptionalProperty 'varianceValue'&gt;, &lt;bacnet.object.properties.ReadableProperty 'maximumValue'&gt;, &lt;bacnet.object.properties.OptionalProperty 'maximumValueTimestamp'&gt;, &lt;bacnet.object.properties.WritableProperty 'attemptedSamples'&gt;, &lt;bacnet.object.properties.ReadableProperty 'validSamples'&gt;, &lt;bacnet.object.properties.ReadableProperty 'objectPropertyReference'&gt;, &lt;bacnet.object.properties.WritableProperty 'windowInterval'&gt;, &lt;bacnet.object.properties.WritableProperty 'windowSamples'&gt;]</em><a class="headerlink" href="#bacnet.object.basic.general.AveragingObject.properties" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bacnet.object.basic.general.BinaryInputObject">
+<em class="property">class </em><code class="descclassname">bacnet.object.basic.general.</code><code class="descname">BinaryInputObject</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#bacnet.object.basic.general.BinaryInputObject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bacnet.object.basic.general.Object" title="bacnet.object.basic.general.Object"><code class="xref py py-class docutils literal"><span class="pre">bacnet.object.basic.general.Object</span></code></a></p>
+<p>This class is an cov extended version of bacpypes BinaryInputObject.</p>
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.BinaryInputObject.objectType">
+<code class="descname">objectType</code><em class="property"> = 'binaryInput'</em><a class="headerlink" href="#bacnet.object.basic.general.BinaryInputObject.objectType" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.BinaryInputObject.properties">
+<code class="descname">properties</code><em class="property"> = [&lt;bacnet.object.properties.ObjectIdentifierProperty 'objectIdentifier'&gt;, &lt;bacnet.object.properties.ReadableProperty 'objectName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'description'&gt;, &lt;bacnet.object.properties.OptionalProperty 'profileName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'propertyList'&gt;, &lt;bacnet.object.properties.ReadableProperty 'presentValue'&gt;, &lt;bacnet.object.properties.OptionalProperty 'deviceType'&gt;, &lt;bacnet.object.properties.ReadableProperty 'statusFlags'&gt;, &lt;bacnet.object.properties.ReadableProperty 'eventState'&gt;, &lt;bacnet.object.properties.OptionalProperty 'reliability'&gt;, &lt;bacnet.object.properties.ReadableProperty 'outOfService'&gt;, &lt;bacnet.object.properties.ReadableProperty 'polarity'&gt;, &lt;bacnet.object.properties.OptionalProperty 'inactiveText'&gt;, &lt;bacnet.object.properties.OptionalProperty 'activeText'&gt;, &lt;bacnet.object.properties.OptionalProperty 'changeOfStateTime'&gt;, &lt;bacnet.object.properties.OptionalProperty 'changeOfStateCount'&gt;, &lt;bacnet.object.properties.OptionalProperty 'timeOfStateCountReset'&gt;, &lt;bacnet.object.properties.OptionalProperty 'elapsedActiveTime'&gt;, &lt;bacnet.object.properties.OptionalProperty 'timeOfActiveTimeReset'&gt;, &lt;bacnet.object.properties.OptionalProperty 'timeDelay'&gt;, &lt;bacnet.object.properties.OptionalProperty 'notificationClass'&gt;, &lt;bacnet.object.properties.OptionalProperty 'alarmValue'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventEnable'&gt;, &lt;bacnet.object.properties.OptionalProperty 'ackedTransitions'&gt;, &lt;bacnet.object.properties.OptionalProperty 'notifyType'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventTimeStamps'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventMessageTexts'&gt;]</em><a class="headerlink" href="#bacnet.object.basic.general.BinaryInputObject.properties" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bacnet.object.basic.general.BinaryOutputObject">
+<em class="property">class </em><code class="descclassname">bacnet.object.basic.general.</code><code class="descname">BinaryOutputObject</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#bacnet.object.basic.general.BinaryOutputObject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bacnet.object.basic.general.Object" title="bacnet.object.basic.general.Object"><code class="xref py py-class docutils literal"><span class="pre">bacnet.object.basic.general.Object</span></code></a></p>
+<p>This class is an cov extended version of bacpypes BinaryOutputObject.</p>
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.BinaryOutputObject.objectType">
+<code class="descname">objectType</code><em class="property"> = 'binaryOutput'</em><a class="headerlink" href="#bacnet.object.basic.general.BinaryOutputObject.objectType" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.BinaryOutputObject.properties">
+<code class="descname">properties</code><em class="property"> = [&lt;bacnet.object.properties.ObjectIdentifierProperty 'objectIdentifier'&gt;, &lt;bacnet.object.properties.ReadableProperty 'objectName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'description'&gt;, &lt;bacnet.object.properties.OptionalProperty 'profileName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'propertyList'&gt;, &lt;bacnet.object.properties.WritableProperty 'presentValue'&gt;, &lt;bacnet.object.properties.OptionalProperty 'deviceType'&gt;, &lt;bacnet.object.properties.ReadableProperty 'statusFlags'&gt;, &lt;bacnet.object.properties.ReadableProperty 'eventState'&gt;, &lt;bacnet.object.properties.OptionalProperty 'reliability'&gt;, &lt;bacnet.object.properties.ReadableProperty 'outOfService'&gt;, &lt;bacnet.object.properties.ReadableProperty 'polarity'&gt;, &lt;bacnet.object.properties.OptionalProperty 'inactiveText'&gt;, &lt;bacnet.object.properties.OptionalProperty 'activeText'&gt;, &lt;bacnet.object.properties.OptionalProperty 'changeOfStateTime'&gt;, &lt;bacnet.object.properties.OptionalProperty 'changeOfStateCount'&gt;, &lt;bacnet.object.properties.OptionalProperty 'timeOfStateCountReset'&gt;, &lt;bacnet.object.properties.OptionalProperty 'elapsedActiveTime'&gt;, &lt;bacnet.object.properties.OptionalProperty 'timeOfActiveTimeReset'&gt;, &lt;bacnet.object.properties.OptionalProperty 'minimumOffTime'&gt;, &lt;bacnet.object.properties.OptionalProperty 'minimumOnTime'&gt;, &lt;bacnet.object.properties.ReadableProperty 'priorityArray'&gt;, &lt;bacnet.object.properties.ReadableProperty 'relinquishDefault'&gt;, &lt;bacnet.object.properties.OptionalProperty 'timeDelay'&gt;, &lt;bacnet.object.properties.OptionalProperty 'notificationClass'&gt;, &lt;bacnet.object.properties.OptionalProperty 'feedbackValue'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventEnable'&gt;, &lt;bacnet.object.properties.OptionalProperty 'ackedTransitions'&gt;, &lt;bacnet.object.properties.OptionalProperty 'notifyType'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventTimeStamps'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventMessageTexts'&gt;]</em><a class="headerlink" href="#bacnet.object.basic.general.BinaryOutputObject.properties" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bacnet.object.basic.general.BinaryValueObject">
+<em class="property">class </em><code class="descclassname">bacnet.object.basic.general.</code><code class="descname">BinaryValueObject</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#bacnet.object.basic.general.BinaryValueObject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bacnet.object.basic.general.Object" title="bacnet.object.basic.general.Object"><code class="xref py py-class docutils literal"><span class="pre">bacnet.object.basic.general.Object</span></code></a></p>
+<p>This class is an cov extended version of bacpypes BinaryValueObject.</p>
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.BinaryValueObject.objectType">
+<code class="descname">objectType</code><em class="property"> = 'binaryValue'</em><a class="headerlink" href="#bacnet.object.basic.general.BinaryValueObject.objectType" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.BinaryValueObject.properties">
+<code class="descname">properties</code><em class="property"> = [&lt;bacnet.object.properties.ObjectIdentifierProperty 'objectIdentifier'&gt;, &lt;bacnet.object.properties.ReadableProperty 'objectName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'description'&gt;, &lt;bacnet.object.properties.OptionalProperty 'profileName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'propertyList'&gt;, &lt;bacnet.object.properties.WritableProperty 'presentValue'&gt;, &lt;bacnet.object.properties.ReadableProperty 'statusFlags'&gt;, &lt;bacnet.object.properties.ReadableProperty 'eventState'&gt;, &lt;bacnet.object.properties.OptionalProperty 'reliability'&gt;, &lt;bacnet.object.properties.ReadableProperty 'outOfService'&gt;, &lt;bacnet.object.properties.OptionalProperty 'inactiveText'&gt;, &lt;bacnet.object.properties.OptionalProperty 'activeText'&gt;, &lt;bacnet.object.properties.OptionalProperty 'changeOfStateTime'&gt;, &lt;bacnet.object.properties.OptionalProperty 'changeOfStateCount'&gt;, &lt;bacnet.object.properties.OptionalProperty 'timeOfStateCountReset'&gt;, &lt;bacnet.object.properties.OptionalProperty 'elapsedActiveTime'&gt;, &lt;bacnet.object.properties.OptionalProperty 'timeOfActiveTimeReset'&gt;, &lt;bacnet.object.properties.OptionalProperty 'minimumOffTime'&gt;, &lt;bacnet.object.properties.OptionalProperty 'minimumOnTime'&gt;, &lt;bacnet.object.properties.OptionalProperty 'priorityArray'&gt;, &lt;bacnet.object.properties.OptionalProperty 'relinquishDefault'&gt;, &lt;bacnet.object.properties.OptionalProperty 'timeDelay'&gt;, &lt;bacnet.object.properties.OptionalProperty 'notificationClass'&gt;, &lt;bacnet.object.properties.OptionalProperty 'alarmValue'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventEnable'&gt;, &lt;bacnet.object.properties.OptionalProperty 'ackedTransitions'&gt;, &lt;bacnet.object.properties.OptionalProperty 'notifyType'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventTimeStamps'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventMessageTexts'&gt;]</em><a class="headerlink" href="#bacnet.object.basic.general.BinaryValueObject.properties" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bacnet.object.basic.general.BitStringValueObject">
+<em class="property">class </em><code class="descclassname">bacnet.object.basic.general.</code><code class="descname">BitStringValueObject</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#bacnet.object.basic.general.BitStringValueObject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bacnet.object.basic.general.Object" title="bacnet.object.basic.general.Object"><code class="xref py py-class docutils literal"><span class="pre">bacnet.object.basic.general.Object</span></code></a></p>
+<p>This class is an cov extended version of bacpypes BitStringValueObject.</p>
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.BitStringValueObject.objectType">
+<code class="descname">objectType</code><em class="property"> = 'bitstringValue'</em><a class="headerlink" href="#bacnet.object.basic.general.BitStringValueObject.objectType" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.BitStringValueObject.properties">
+<code class="descname">properties</code><em class="property"> = [&lt;bacnet.object.properties.ObjectIdentifierProperty 'objectIdentifier'&gt;, &lt;bacnet.object.properties.ReadableProperty 'objectName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'description'&gt;, &lt;bacnet.object.properties.OptionalProperty 'profileName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'propertyList'&gt;, &lt;bacnet.object.properties.ReadableProperty 'presentValue'&gt;, &lt;bacnet.object.properties.OptionalProperty 'bitText'&gt;, &lt;bacnet.object.properties.ReadableProperty 'statusFlags'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventState'&gt;, &lt;bacnet.object.properties.OptionalProperty 'reliability'&gt;, &lt;bacnet.object.properties.OptionalProperty 'outOfService'&gt;, &lt;bacnet.object.properties.OptionalProperty 'priorityArray'&gt;, &lt;bacnet.object.properties.OptionalProperty 'relinquishDefault'&gt;, &lt;bacnet.object.properties.OptionalProperty 'timeDelay'&gt;, &lt;bacnet.object.properties.OptionalProperty 'notificationClass'&gt;, &lt;bacnet.object.properties.OptionalProperty 'alarmValues'&gt;, &lt;bacnet.object.properties.OptionalProperty 'bitMask'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventEnable'&gt;, &lt;bacnet.object.properties.OptionalProperty 'ackedTransitions'&gt;, &lt;bacnet.object.properties.OptionalProperty 'notifyType'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventTimeStamps'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventMessageTexts'&gt;]</em><a class="headerlink" href="#bacnet.object.basic.general.BitStringValueObject.properties" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bacnet.object.basic.general.CalendarObject">
+<em class="property">class </em><code class="descclassname">bacnet.object.basic.general.</code><code class="descname">CalendarObject</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#bacnet.object.basic.general.CalendarObject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bacnet.object.basic.general.Object" title="bacnet.object.basic.general.Object"><code class="xref py py-class docutils literal"><span class="pre">bacnet.object.basic.general.Object</span></code></a></p>
+<p>This class is an cov extended version of bacpypes CalendarObject.</p>
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.CalendarObject.objectType">
+<code class="descname">objectType</code><em class="property"> = 'calendar'</em><a class="headerlink" href="#bacnet.object.basic.general.CalendarObject.objectType" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.CalendarObject.properties">
+<code class="descname">properties</code><em class="property"> = [&lt;bacnet.object.properties.ObjectIdentifierProperty 'objectIdentifier'&gt;, &lt;bacnet.object.properties.ReadableProperty 'objectName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'description'&gt;, &lt;bacnet.object.properties.OptionalProperty 'profileName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'propertyList'&gt;, &lt;bacnet.object.properties.ReadableProperty 'presentValue'&gt;, &lt;bacnet.object.properties.ReadableProperty 'dateList'&gt;]</em><a class="headerlink" href="#bacnet.object.basic.general.CalendarObject.properties" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bacnet.object.basic.general.CharacterStringValueObject">
+<em class="property">class </em><code class="descclassname">bacnet.object.basic.general.</code><code class="descname">CharacterStringValueObject</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#bacnet.object.basic.general.CharacterStringValueObject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bacnet.object.basic.general.Object" title="bacnet.object.basic.general.Object"><code class="xref py py-class docutils literal"><span class="pre">bacnet.object.basic.general.Object</span></code></a></p>
+<p>This class is an cov extended version of bacpypes CharacterStringValueObject.</p>
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.CharacterStringValueObject.objectType">
+<code class="descname">objectType</code><em class="property"> = 'characterstringValue'</em><a class="headerlink" href="#bacnet.object.basic.general.CharacterStringValueObject.objectType" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.CharacterStringValueObject.properties">
+<code class="descname">properties</code><em class="property"> = [&lt;bacnet.object.properties.ObjectIdentifierProperty 'objectIdentifier'&gt;, &lt;bacnet.object.properties.ReadableProperty 'objectName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'description'&gt;, &lt;bacnet.object.properties.OptionalProperty 'profileName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'propertyList'&gt;, &lt;bacnet.object.properties.WritableProperty 'presentValue'&gt;, &lt;bacnet.object.properties.ReadableProperty 'statusFlags'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventState'&gt;, &lt;bacnet.object.properties.OptionalProperty 'reliability'&gt;, &lt;bacnet.object.properties.OptionalProperty 'outOfService'&gt;, &lt;bacnet.object.properties.OptionalProperty 'priorityArray'&gt;, &lt;bacnet.object.properties.OptionalProperty 'relinquishDefault'&gt;, &lt;bacnet.object.properties.OptionalProperty 'timeDelay'&gt;, &lt;bacnet.object.properties.OptionalProperty 'notificationClass'&gt;, &lt;bacnet.object.properties.OptionalProperty 'alarmValues'&gt;, &lt;bacnet.object.properties.OptionalProperty 'faultValues'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventEnable'&gt;, &lt;bacnet.object.properties.OptionalProperty 'ackedTransitions'&gt;, &lt;bacnet.object.properties.OptionalProperty 'notifyType'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventTimeStamps'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventMessageTexts'&gt;]</em><a class="headerlink" href="#bacnet.object.basic.general.CharacterStringValueObject.properties" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bacnet.object.basic.general.CommandObject">
+<em class="property">class </em><code class="descclassname">bacnet.object.basic.general.</code><code class="descname">CommandObject</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#bacnet.object.basic.general.CommandObject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bacnet.object.basic.general.Object" title="bacnet.object.basic.general.Object"><code class="xref py py-class docutils literal"><span class="pre">bacnet.object.basic.general.Object</span></code></a></p>
+<p>This class is an cov extended version of bacpypes CommandObject.</p>
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.CommandObject.objectType">
+<code class="descname">objectType</code><em class="property"> = 'command'</em><a class="headerlink" href="#bacnet.object.basic.general.CommandObject.objectType" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.CommandObject.properties">
+<code class="descname">properties</code><em class="property"> = [&lt;bacnet.object.properties.ObjectIdentifierProperty 'objectIdentifier'&gt;, &lt;bacnet.object.properties.ReadableProperty 'objectName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'description'&gt;, &lt;bacnet.object.properties.OptionalProperty 'profileName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'propertyList'&gt;, &lt;bacnet.object.properties.WritableProperty 'presentValue'&gt;, &lt;bacnet.object.properties.ReadableProperty 'inProcess'&gt;, &lt;bacnet.object.properties.ReadableProperty 'allWritesSuccessful'&gt;, &lt;bacnet.object.properties.ReadableProperty 'action'&gt;, &lt;bacnet.object.properties.OptionalProperty 'actionText'&gt;]</em><a class="headerlink" href="#bacnet.object.basic.general.CommandObject.properties" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bacnet.object.basic.general.CredentialDataInputObject">
+<em class="property">class </em><code class="descclassname">bacnet.object.basic.general.</code><code class="descname">CredentialDataInputObject</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#bacnet.object.basic.general.CredentialDataInputObject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bacnet.object.basic.general.Object" title="bacnet.object.basic.general.Object"><code class="xref py py-class docutils literal"><span class="pre">bacnet.object.basic.general.Object</span></code></a></p>
+<p>This class is an cov extended version of bacpypes CredentialDataInputObject.</p>
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.CredentialDataInputObject.objectType">
+<code class="descname">objectType</code><em class="property"> = 'credentialDataInput'</em><a class="headerlink" href="#bacnet.object.basic.general.CredentialDataInputObject.objectType" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.CredentialDataInputObject.properties">
+<code class="descname">properties</code><em class="property"> = [&lt;bacnet.object.properties.ObjectIdentifierProperty 'objectIdentifier'&gt;, &lt;bacnet.object.properties.ReadableProperty 'objectName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'description'&gt;, &lt;bacnet.object.properties.OptionalProperty 'profileName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'propertyList'&gt;, &lt;bacnet.object.properties.ReadableProperty 'presentValue'&gt;, &lt;bacnet.object.properties.ReadableProperty 'statusFlags'&gt;, &lt;bacnet.object.properties.OptionalProperty 'reliability'&gt;, &lt;bacnet.object.properties.ReadableProperty 'outOfService'&gt;, &lt;bacnet.object.properties.ReadableProperty 'supportedFormats'&gt;, &lt;bacnet.object.properties.ReadableProperty 'supportedFormatClasses'&gt;]</em><a class="headerlink" href="#bacnet.object.basic.general.CredentialDataInputObject.properties" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bacnet.object.basic.general.DatePatternValueObject">
+<em class="property">class </em><code class="descclassname">bacnet.object.basic.general.</code><code class="descname">DatePatternValueObject</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#bacnet.object.basic.general.DatePatternValueObject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bacnet.object.basic.general.Object" title="bacnet.object.basic.general.Object"><code class="xref py py-class docutils literal"><span class="pre">bacnet.object.basic.general.Object</span></code></a></p>
+<p>This class is an cov extended version of bacpypes DatePatternValueObject.</p>
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.DatePatternValueObject.objectType">
+<code class="descname">objectType</code><em class="property"> = 'datePatternValue'</em><a class="headerlink" href="#bacnet.object.basic.general.DatePatternValueObject.objectType" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.DatePatternValueObject.properties">
+<code class="descname">properties</code><em class="property"> = [&lt;bacnet.object.properties.ObjectIdentifierProperty 'objectIdentifier'&gt;, &lt;bacnet.object.properties.ReadableProperty 'objectName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'description'&gt;, &lt;bacnet.object.properties.OptionalProperty 'profileName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'propertyList'&gt;, &lt;bacnet.object.properties.ReadableProperty 'presentValue'&gt;, &lt;bacnet.object.properties.ReadableProperty 'statusFlags'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventState'&gt;, &lt;bacnet.object.properties.OptionalProperty 'reliability'&gt;, &lt;bacnet.object.properties.OptionalProperty 'outOfService'&gt;, &lt;bacnet.object.properties.OptionalProperty 'priorityArray'&gt;, &lt;bacnet.object.properties.OptionalProperty 'relinquishDefault'&gt;]</em><a class="headerlink" href="#bacnet.object.basic.general.DatePatternValueObject.properties" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bacnet.object.basic.general.DateTimePatternValueObject">
+<em class="property">class </em><code class="descclassname">bacnet.object.basic.general.</code><code class="descname">DateTimePatternValueObject</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#bacnet.object.basic.general.DateTimePatternValueObject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bacnet.object.basic.general.Object" title="bacnet.object.basic.general.Object"><code class="xref py py-class docutils literal"><span class="pre">bacnet.object.basic.general.Object</span></code></a></p>
+<p>This class is an cov extended version of bacpypes DateTimePatternValueObject.</p>
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.DateTimePatternValueObject.objectType">
+<code class="descname">objectType</code><em class="property"> = 'datetimePatternValue'</em><a class="headerlink" href="#bacnet.object.basic.general.DateTimePatternValueObject.objectType" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.DateTimePatternValueObject.properties">
+<code class="descname">properties</code><em class="property"> = [&lt;bacnet.object.properties.ObjectIdentifierProperty 'objectIdentifier'&gt;, &lt;bacnet.object.properties.ReadableProperty 'objectName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'description'&gt;, &lt;bacnet.object.properties.OptionalProperty 'profileName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'propertyList'&gt;, &lt;bacnet.object.properties.ReadableProperty 'presentValue'&gt;, &lt;bacnet.object.properties.ReadableProperty 'statusFlags'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventState'&gt;, &lt;bacnet.object.properties.OptionalProperty 'reliability'&gt;, &lt;bacnet.object.properties.OptionalProperty 'outOfService'&gt;, &lt;bacnet.object.properties.OptionalProperty 'priorityArray'&gt;, &lt;bacnet.object.properties.OptionalProperty 'relinquishDefault'&gt;, &lt;bacnet.object.properties.OptionalProperty 'isUtc'&gt;]</em><a class="headerlink" href="#bacnet.object.basic.general.DateTimePatternValueObject.properties" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bacnet.object.basic.general.DateTimeValueObject">
+<em class="property">class </em><code class="descclassname">bacnet.object.basic.general.</code><code class="descname">DateTimeValueObject</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#bacnet.object.basic.general.DateTimeValueObject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bacnet.object.basic.general.Object" title="bacnet.object.basic.general.Object"><code class="xref py py-class docutils literal"><span class="pre">bacnet.object.basic.general.Object</span></code></a></p>
+<p>This class is an cov extended version of bacpypes DateTimeValueObject.</p>
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.DateTimeValueObject.objectType">
+<code class="descname">objectType</code><em class="property"> = 'datetimeValue'</em><a class="headerlink" href="#bacnet.object.basic.general.DateTimeValueObject.objectType" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.DateTimeValueObject.properties">
+<code class="descname">properties</code><em class="property"> = [&lt;bacnet.object.properties.ObjectIdentifierProperty 'objectIdentifier'&gt;, &lt;bacnet.object.properties.ReadableProperty 'objectName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'description'&gt;, &lt;bacnet.object.properties.OptionalProperty 'profileName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'propertyList'&gt;, &lt;bacnet.object.properties.ReadableProperty 'presentValue'&gt;, &lt;bacnet.object.properties.ReadableProperty 'statusFlags'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventState'&gt;, &lt;bacnet.object.properties.OptionalProperty 'reliability'&gt;, &lt;bacnet.object.properties.OptionalProperty 'outOfService'&gt;, &lt;bacnet.object.properties.OptionalProperty 'priorityArray'&gt;, &lt;bacnet.object.properties.OptionalProperty 'relinquishDefault'&gt;, &lt;bacnet.object.properties.OptionalProperty 'isUtc'&gt;]</em><a class="headerlink" href="#bacnet.object.basic.general.DateTimeValueObject.properties" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bacnet.object.basic.general.DateValueObject">
+<em class="property">class </em><code class="descclassname">bacnet.object.basic.general.</code><code class="descname">DateValueObject</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#bacnet.object.basic.general.DateValueObject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bacnet.object.basic.general.Object" title="bacnet.object.basic.general.Object"><code class="xref py py-class docutils literal"><span class="pre">bacnet.object.basic.general.Object</span></code></a></p>
+<p>This class is an cov extended version of bacpypes DateValueObject.</p>
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.DateValueObject.objectType">
+<code class="descname">objectType</code><em class="property"> = 'dateValue'</em><a class="headerlink" href="#bacnet.object.basic.general.DateValueObject.objectType" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.DateValueObject.properties">
+<code class="descname">properties</code><em class="property"> = [&lt;bacnet.object.properties.ObjectIdentifierProperty 'objectIdentifier'&gt;, &lt;bacnet.object.properties.ReadableProperty 'objectName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'description'&gt;, &lt;bacnet.object.properties.OptionalProperty 'profileName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'propertyList'&gt;, &lt;bacnet.object.properties.ReadableProperty 'presentValue'&gt;, &lt;bacnet.object.properties.ReadableProperty 'statusFlags'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventState'&gt;, &lt;bacnet.object.properties.OptionalProperty 'reliability'&gt;, &lt;bacnet.object.properties.OptionalProperty 'outOfService'&gt;, &lt;bacnet.object.properties.OptionalProperty 'priorityArray'&gt;, &lt;bacnet.object.properties.OptionalProperty 'relinquishDefault'&gt;]</em><a class="headerlink" href="#bacnet.object.basic.general.DateValueObject.properties" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bacnet.object.basic.general.DeviceObject">
+<em class="property">class </em><code class="descclassname">bacnet.object.basic.general.</code><code class="descname">DeviceObject</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#bacnet.object.basic.general.DeviceObject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bacnet.object.basic.general.Object" title="bacnet.object.basic.general.Object"><code class="xref py py-class docutils literal"><span class="pre">bacnet.object.basic.general.Object</span></code></a></p>
+<p>This class is an cov extended version of bacpypes DeviceObject.</p>
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.DeviceObject.objectType">
+<code class="descname">objectType</code><em class="property"> = 'device'</em><a class="headerlink" href="#bacnet.object.basic.general.DeviceObject.objectType" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.DeviceObject.properties">
+<code class="descname">properties</code><em class="property"> = [&lt;bacnet.object.properties.ObjectIdentifierProperty 'objectIdentifier'&gt;, &lt;bacnet.object.properties.ReadableProperty 'objectName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'description'&gt;, &lt;bacnet.object.properties.OptionalProperty 'profileName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'propertyList'&gt;, &lt;bacnet.object.properties.ReadableProperty 'systemStatus'&gt;, &lt;bacnet.object.properties.ReadableProperty 'vendorName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'vendorIdentifier'&gt;, &lt;bacnet.object.properties.ReadableProperty 'modelName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'firmwareRevision'&gt;, &lt;bacnet.object.properties.ReadableProperty 'applicationSoftwareVersion'&gt;, &lt;bacnet.object.properties.OptionalProperty 'location'&gt;, &lt;bacnet.object.properties.ReadableProperty 'protocolVersion'&gt;, &lt;bacnet.object.properties.ReadableProperty 'protocolRevision'&gt;, &lt;bacnet.object.properties.ReadableProperty 'protocolServicesSupported'&gt;, &lt;bacnet.object.properties.ReadableProperty 'protocolObjectTypesSupported'&gt;, &lt;bacnet.object.properties.ReadableProperty 'objectList'&gt;, &lt;bacnet.object.properties.OptionalProperty 'structuredObjectList'&gt;, &lt;bacnet.object.properties.ReadableProperty 'maxApduLengthAccepted'&gt;, &lt;bacnet.object.properties.ReadableProperty 'segmentationSupported'&gt;, &lt;bacnet.object.properties.OptionalProperty 'vtClassesSupported'&gt;, &lt;bacnet.object.properties.OptionalProperty 'activeVtSessions'&gt;, &lt;bacnet.object.properties.OptionalProperty 'localTime'&gt;, &lt;bacnet.object.properties.OptionalProperty 'localDate'&gt;, &lt;bacnet.object.properties.OptionalProperty 'utcOffset'&gt;, &lt;bacnet.object.properties.OptionalProperty 'daylightSavingsStatus'&gt;, &lt;bacnet.object.properties.OptionalProperty 'apduSegmentTimeout'&gt;, &lt;bacnet.object.properties.ReadableProperty 'apduTimeout'&gt;, &lt;bacnet.object.properties.ReadableProperty 'numberOfApduRetries'&gt;, &lt;bacnet.object.properties.OptionalProperty 'timeSynchronizationRecipients'&gt;, &lt;bacnet.object.properties.OptionalProperty 'maxMaster'&gt;, &lt;bacnet.object.properties.OptionalProperty 'maxInfoFrames'&gt;, &lt;bacnet.object.properties.ReadableProperty 'deviceAddressBinding'&gt;, &lt;bacnet.object.properties.ReadableProperty 'databaseRevision'&gt;, &lt;bacnet.object.properties.OptionalProperty 'configurationFiles'&gt;, &lt;bacnet.object.properties.OptionalProperty 'lastRestoreTime'&gt;, &lt;bacnet.object.properties.OptionalProperty 'backupFailureTimeout'&gt;, &lt;bacnet.object.properties.OptionalProperty 'backupPreparationTime'&gt;, &lt;bacnet.object.properties.OptionalProperty 'restorePreparationTime'&gt;, &lt;bacnet.object.properties.OptionalProperty 'restoreCompletionTime'&gt;, &lt;bacnet.object.properties.OptionalProperty 'backupAndRestoreState'&gt;, &lt;bacnet.object.properties.ActiveCovSubscriptionsProperty 'activeCovSubscriptions'&gt;, &lt;bacnet.object.properties.OptionalProperty 'maxSegmentsAccepted'&gt;, &lt;bacnet.object.properties.OptionalProperty 'slaveProxyEnable'&gt;, &lt;bacnet.object.properties.OptionalProperty 'autoSlaveDiscovery'&gt;, &lt;bacnet.object.properties.OptionalProperty 'slaveAddressBinding'&gt;, &lt;bacnet.object.properties.OptionalProperty 'manualSlaveAddressBinding'&gt;, &lt;bacnet.object.properties.OptionalProperty 'lastRestartReason'&gt;, &lt;bacnet.object.properties.OptionalProperty 'timeOfDeviceRestart'&gt;, &lt;bacnet.object.properties.OptionalProperty 'restartNotificationRecipients'&gt;, &lt;bacnet.object.properties.OptionalProperty 'utcTimeSynchronizationRecipients'&gt;, &lt;bacnet.object.properties.OptionalProperty 'timeSynchronizationInterval'&gt;, &lt;bacnet.object.properties.OptionalProperty 'alignIntervals'&gt;, &lt;bacnet.object.properties.OptionalProperty 'intervalOffset'&gt;]</em><a class="headerlink" href="#bacnet.object.basic.general.DeviceObject.properties" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bacnet.object.basic.general.EventEnrollmentObject">
+<em class="property">class </em><code class="descclassname">bacnet.object.basic.general.</code><code class="descname">EventEnrollmentObject</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#bacnet.object.basic.general.EventEnrollmentObject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bacnet.object.basic.general.Object" title="bacnet.object.basic.general.Object"><code class="xref py py-class docutils literal"><span class="pre">bacnet.object.basic.general.Object</span></code></a></p>
+<p>This class is an cov extended version of bacpypes EventEnrollmentObject.</p>
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.EventEnrollmentObject.objectType">
+<code class="descname">objectType</code><em class="property"> = 'eventEnrollment'</em><a class="headerlink" href="#bacnet.object.basic.general.EventEnrollmentObject.objectType" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.EventEnrollmentObject.properties">
+<code class="descname">properties</code><em class="property"> = [&lt;bacnet.object.properties.ObjectIdentifierProperty 'objectIdentifier'&gt;, &lt;bacnet.object.properties.ReadableProperty 'objectName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'description'&gt;, &lt;bacnet.object.properties.OptionalProperty 'profileName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'propertyList'&gt;, &lt;bacnet.object.properties.ReadableProperty 'eventType'&gt;, &lt;bacnet.object.properties.ReadableProperty 'notifyType'&gt;, &lt;bacnet.object.properties.ReadableProperty 'eventParameters'&gt;, &lt;bacnet.object.properties.ReadableProperty 'objectPropertyReference'&gt;, &lt;bacnet.object.properties.ReadableProperty 'eventState'&gt;, &lt;bacnet.object.properties.ReadableProperty 'eventEnable'&gt;, &lt;bacnet.object.properties.ReadableProperty 'ackedTransitions'&gt;, &lt;bacnet.object.properties.ReadableProperty 'notificationClass'&gt;, &lt;bacnet.object.properties.ReadableProperty 'eventTimeStamps'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventMessageTexts'&gt;]</em><a class="headerlink" href="#bacnet.object.basic.general.EventEnrollmentObject.properties" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bacnet.object.basic.general.EventLogObject">
+<em class="property">class </em><code class="descclassname">bacnet.object.basic.general.</code><code class="descname">EventLogObject</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#bacnet.object.basic.general.EventLogObject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bacnet.object.basic.general.Object" title="bacnet.object.basic.general.Object"><code class="xref py py-class docutils literal"><span class="pre">bacnet.object.basic.general.Object</span></code></a></p>
+<p>This class is an cov extended version of bacpypes EventLogObject.</p>
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.EventLogObject.objectType">
+<code class="descname">objectType</code><em class="property"> = 'eventLog'</em><a class="headerlink" href="#bacnet.object.basic.general.EventLogObject.objectType" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.EventLogObject.properties">
+<code class="descname">properties</code><em class="property"> = [&lt;bacnet.object.properties.ObjectIdentifierProperty 'objectIdentifier'&gt;, &lt;bacnet.object.properties.ReadableProperty 'objectName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'description'&gt;, &lt;bacnet.object.properties.OptionalProperty 'profileName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'propertyList'&gt;, &lt;bacnet.object.properties.ReadableProperty 'statusFlags'&gt;, &lt;bacnet.object.properties.ReadableProperty 'eventState'&gt;, &lt;bacnet.object.properties.OptionalProperty 'reliability'&gt;, &lt;bacnet.object.properties.WritableProperty 'enable'&gt;, &lt;bacnet.object.properties.OptionalProperty 'startTime'&gt;, &lt;bacnet.object.properties.OptionalProperty 'stopTime'&gt;, &lt;bacnet.object.properties.ReadableProperty 'stopWhenFull'&gt;, &lt;bacnet.object.properties.ReadableProperty 'bufferSize'&gt;, &lt;bacnet.object.properties.ReadableProperty 'logBuffer'&gt;, &lt;bacnet.object.properties.WritableProperty 'recordCount'&gt;, &lt;bacnet.object.properties.ReadableProperty 'totalRecordCount'&gt;, &lt;bacnet.object.properties.OptionalProperty 'notificationThreshold'&gt;, &lt;bacnet.object.properties.OptionalProperty 'recordsSinceNotification'&gt;, &lt;bacnet.object.properties.OptionalProperty 'lastNotifyRecord'&gt;, &lt;bacnet.object.properties.OptionalProperty 'notificationClass'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventEnable'&gt;, &lt;bacnet.object.properties.OptionalProperty 'ackedTransitions'&gt;, &lt;bacnet.object.properties.OptionalProperty 'notifyType'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventTimeStamps'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventMessageTexts'&gt;]</em><a class="headerlink" href="#bacnet.object.basic.general.EventLogObject.properties" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bacnet.object.basic.general.FileObject">
+<em class="property">class </em><code class="descclassname">bacnet.object.basic.general.</code><code class="descname">FileObject</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#bacnet.object.basic.general.FileObject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bacnet.object.basic.general.Object" title="bacnet.object.basic.general.Object"><code class="xref py py-class docutils literal"><span class="pre">bacnet.object.basic.general.Object</span></code></a></p>
+<p>This class is an cov extended version of bacpypes FileObject.</p>
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.FileObject.objectType">
+<code class="descname">objectType</code><em class="property"> = 'file'</em><a class="headerlink" href="#bacnet.object.basic.general.FileObject.objectType" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.FileObject.properties">
+<code class="descname">properties</code><em class="property"> = [&lt;bacnet.object.properties.ObjectIdentifierProperty 'objectIdentifier'&gt;, &lt;bacnet.object.properties.ReadableProperty 'objectName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'description'&gt;, &lt;bacnet.object.properties.OptionalProperty 'profileName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'propertyList'&gt;, &lt;bacnet.object.properties.ReadableProperty 'fileType'&gt;, &lt;bacnet.object.properties.ReadableProperty 'fileSize'&gt;, &lt;bacnet.object.properties.ReadableProperty 'modificationDate'&gt;, &lt;bacnet.object.properties.WritableProperty 'archive'&gt;, &lt;bacnet.object.properties.ReadableProperty 'readOnly'&gt;, &lt;bacnet.object.properties.ReadableProperty 'fileAccessMethod'&gt;, &lt;bacnet.object.properties.OptionalProperty 'recordCount'&gt;]</em><a class="headerlink" href="#bacnet.object.basic.general.FileObject.properties" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bacnet.object.basic.general.GlobalGroupObject">
+<em class="property">class </em><code class="descclassname">bacnet.object.basic.general.</code><code class="descname">GlobalGroupObject</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#bacnet.object.basic.general.GlobalGroupObject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bacnet.object.basic.general.Object" title="bacnet.object.basic.general.Object"><code class="xref py py-class docutils literal"><span class="pre">bacnet.object.basic.general.Object</span></code></a></p>
+<p>This class is an cov extended version of bacpypes GlobalGroupObject.</p>
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.GlobalGroupObject.objectType">
+<code class="descname">objectType</code><em class="property"> = 'globalGroup'</em><a class="headerlink" href="#bacnet.object.basic.general.GlobalGroupObject.objectType" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.GlobalGroupObject.properties">
+<code class="descname">properties</code><em class="property"> = [&lt;bacnet.object.properties.ObjectIdentifierProperty 'objectIdentifier'&gt;, &lt;bacnet.object.properties.ReadableProperty 'objectName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'description'&gt;, &lt;bacnet.object.properties.OptionalProperty 'profileName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'propertyList'&gt;, &lt;bacnet.object.properties.ReadableProperty 'groupMembers'&gt;, &lt;bacnet.object.properties.OptionalProperty 'groupMemberNames'&gt;, &lt;bacnet.object.properties.ReadableProperty 'presentValue'&gt;, &lt;bacnet.object.properties.ReadableProperty 'statusFlags'&gt;, &lt;bacnet.object.properties.ReadableProperty 'eventState'&gt;, &lt;bacnet.object.properties.ReadableProperty 'memberStatusFlags'&gt;, &lt;bacnet.object.properties.OptionalProperty 'reliability'&gt;, &lt;bacnet.object.properties.ReadableProperty 'outOfService'&gt;, &lt;bacnet.object.properties.OptionalProperty 'updateInterval'&gt;, &lt;bacnet.object.properties.OptionalProperty 'requestedUpdateInterval'&gt;, &lt;bacnet.object.properties.OptionalProperty 'covResubscriptionInterval'&gt;, &lt;bacnet.object.properties.OptionalProperty 'clientCovIncrement'&gt;, &lt;bacnet.object.properties.OptionalProperty 'timeDelay'&gt;, &lt;bacnet.object.properties.OptionalProperty 'notificationClass'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventEnable'&gt;, &lt;bacnet.object.properties.OptionalProperty 'ackedTransitions'&gt;, &lt;bacnet.object.properties.OptionalProperty 'notifyType'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventTimeStamps'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventMessageTexts'&gt;, &lt;bacnet.object.properties.OptionalProperty 'covuPeriod'&gt;, &lt;bacnet.object.properties.OptionalProperty 'covuRecipients'&gt;]</em><a class="headerlink" href="#bacnet.object.basic.general.GlobalGroupObject.properties" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bacnet.object.basic.general.GroupObject">
+<em class="property">class </em><code class="descclassname">bacnet.object.basic.general.</code><code class="descname">GroupObject</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#bacnet.object.basic.general.GroupObject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bacnet.object.basic.general.Object" title="bacnet.object.basic.general.Object"><code class="xref py py-class docutils literal"><span class="pre">bacnet.object.basic.general.Object</span></code></a></p>
+<p>This class is an cov extended version of bacpypes GroupObject.</p>
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.GroupObject.objectType">
+<code class="descname">objectType</code><em class="property"> = 'group'</em><a class="headerlink" href="#bacnet.object.basic.general.GroupObject.objectType" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.GroupObject.properties">
+<code class="descname">properties</code><em class="property"> = [&lt;bacnet.object.properties.ObjectIdentifierProperty 'objectIdentifier'&gt;, &lt;bacnet.object.properties.ReadableProperty 'objectName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'description'&gt;, &lt;bacnet.object.properties.OptionalProperty 'profileName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'propertyList'&gt;, &lt;bacnet.object.properties.ReadableProperty 'listOfGroupMembers'&gt;, &lt;bacnet.object.properties.ReadableProperty 'presentValue'&gt;]</em><a class="headerlink" href="#bacnet.object.basic.general.GroupObject.properties" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bacnet.object.basic.general.IntegerValueObject">
+<em class="property">class </em><code class="descclassname">bacnet.object.basic.general.</code><code class="descname">IntegerValueObject</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#bacnet.object.basic.general.IntegerValueObject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bacnet.object.basic.general.Object" title="bacnet.object.basic.general.Object"><code class="xref py py-class docutils literal"><span class="pre">bacnet.object.basic.general.Object</span></code></a></p>
+<p>This class is an cov extended version of bacpypes IntegerValueObject.</p>
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.IntegerValueObject.objectType">
+<code class="descname">objectType</code><em class="property"> = 'integerValue'</em><a class="headerlink" href="#bacnet.object.basic.general.IntegerValueObject.objectType" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.IntegerValueObject.properties">
+<code class="descname">properties</code><em class="property"> = [&lt;bacnet.object.properties.ObjectIdentifierProperty 'objectIdentifier'&gt;, &lt;bacnet.object.properties.ReadableProperty 'objectName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'description'&gt;, &lt;bacnet.object.properties.OptionalProperty 'profileName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'propertyList'&gt;, &lt;bacnet.object.properties.ReadableProperty 'presentValue'&gt;, &lt;bacnet.object.properties.ReadableProperty 'statusFlags'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventState'&gt;, &lt;bacnet.object.properties.OptionalProperty 'reliability'&gt;, &lt;bacnet.object.properties.OptionalProperty 'outOfService'&gt;, &lt;bacnet.object.properties.ReadableProperty 'units'&gt;, &lt;bacnet.object.properties.OptionalProperty 'priorityArray'&gt;, &lt;bacnet.object.properties.OptionalProperty 'relinquishDefault'&gt;, &lt;bacnet.object.properties.OptionalProperty 'covIncrement'&gt;, &lt;bacnet.object.properties.OptionalProperty 'timeDelay'&gt;, &lt;bacnet.object.properties.OptionalProperty 'notificationClass'&gt;, &lt;bacnet.object.properties.OptionalProperty 'highLimit'&gt;, &lt;bacnet.object.properties.OptionalProperty 'lowLimit'&gt;, &lt;bacnet.object.properties.OptionalProperty 'deadband'&gt;, &lt;bacnet.object.properties.OptionalProperty 'limitEnable'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventEnable'&gt;, &lt;bacnet.object.properties.OptionalProperty 'ackedTransitions'&gt;, &lt;bacnet.object.properties.OptionalProperty 'notifyType'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventTimeStamps'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventMessageTexts'&gt;]</em><a class="headerlink" href="#bacnet.object.basic.general.IntegerValueObject.properties" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bacnet.object.basic.general.LargeAnalogValueObject">
+<em class="property">class </em><code class="descclassname">bacnet.object.basic.general.</code><code class="descname">LargeAnalogValueObject</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#bacnet.object.basic.general.LargeAnalogValueObject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bacnet.object.basic.general.Object" title="bacnet.object.basic.general.Object"><code class="xref py py-class docutils literal"><span class="pre">bacnet.object.basic.general.Object</span></code></a></p>
+<p>This class is an cov extended version of bacpypes LargeAnalogValueObject.</p>
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.LargeAnalogValueObject.objectType">
+<code class="descname">objectType</code><em class="property"> = 'largeAnalogValue'</em><a class="headerlink" href="#bacnet.object.basic.general.LargeAnalogValueObject.objectType" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.LargeAnalogValueObject.properties">
+<code class="descname">properties</code><em class="property"> = [&lt;bacnet.object.properties.ObjectIdentifierProperty 'objectIdentifier'&gt;, &lt;bacnet.object.properties.ReadableProperty 'objectName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'description'&gt;, &lt;bacnet.object.properties.OptionalProperty 'profileName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'propertyList'&gt;, &lt;bacnet.object.properties.ReadableProperty 'presentValue'&gt;, &lt;bacnet.object.properties.ReadableProperty 'statusFlags'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventState'&gt;, &lt;bacnet.object.properties.OptionalProperty 'reliability'&gt;, &lt;bacnet.object.properties.OptionalProperty 'outOfService'&gt;, &lt;bacnet.object.properties.ReadableProperty 'units'&gt;, &lt;bacnet.object.properties.OptionalProperty 'priorityArray'&gt;, &lt;bacnet.object.properties.OptionalProperty 'relinquishDefault'&gt;, &lt;bacnet.object.properties.OptionalProperty 'covIncrement'&gt;, &lt;bacnet.object.properties.OptionalProperty 'timeDelay'&gt;, &lt;bacnet.object.properties.OptionalProperty 'notificationClass'&gt;, &lt;bacnet.object.properties.OptionalProperty 'highLimit'&gt;, &lt;bacnet.object.properties.OptionalProperty 'lowLimit'&gt;, &lt;bacnet.object.properties.OptionalProperty 'deadband'&gt;, &lt;bacnet.object.properties.OptionalProperty 'limitEnable'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventEnable'&gt;, &lt;bacnet.object.properties.OptionalProperty 'ackedTransitions'&gt;, &lt;bacnet.object.properties.OptionalProperty 'notifyType'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventTimeStamps'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventMessageTexts'&gt;]</em><a class="headerlink" href="#bacnet.object.basic.general.LargeAnalogValueObject.properties" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bacnet.object.basic.general.LifeSafetyPointObject">
+<em class="property">class </em><code class="descclassname">bacnet.object.basic.general.</code><code class="descname">LifeSafetyPointObject</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#bacnet.object.basic.general.LifeSafetyPointObject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bacnet.object.basic.general.Object" title="bacnet.object.basic.general.Object"><code class="xref py py-class docutils literal"><span class="pre">bacnet.object.basic.general.Object</span></code></a></p>
+<p>This class is an cov extended version of bacpypes LifeSafetyPointObject.</p>
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.LifeSafetyPointObject.objectType">
+<code class="descname">objectType</code><em class="property"> = 'lifeSafetyPoint'</em><a class="headerlink" href="#bacnet.object.basic.general.LifeSafetyPointObject.objectType" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.LifeSafetyPointObject.properties">
+<code class="descname">properties</code><em class="property"> = [&lt;bacnet.object.properties.ObjectIdentifierProperty 'objectIdentifier'&gt;, &lt;bacnet.object.properties.ReadableProperty 'objectName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'description'&gt;, &lt;bacnet.object.properties.OptionalProperty 'profileName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'propertyList'&gt;, &lt;bacnet.object.properties.ReadableProperty 'presentValue'&gt;, &lt;bacnet.object.properties.ReadableProperty 'trackingValue'&gt;, &lt;bacnet.object.properties.OptionalProperty 'deviceType'&gt;, &lt;bacnet.object.properties.ReadableProperty 'statusFlags'&gt;, &lt;bacnet.object.properties.ReadableProperty 'eventState'&gt;, &lt;bacnet.object.properties.ReadableProperty 'reliability'&gt;, &lt;bacnet.object.properties.ReadableProperty 'outOfService'&gt;, &lt;bacnet.object.properties.WritableProperty 'mode'&gt;, &lt;bacnet.object.properties.ReadableProperty 'acceptedModes'&gt;, &lt;bacnet.object.properties.OptionalProperty 'timeDelay'&gt;, &lt;bacnet.object.properties.OptionalProperty 'notificationClass'&gt;, &lt;bacnet.object.properties.OptionalProperty 'lifeSafetyAlarmValues'&gt;, &lt;bacnet.object.properties.OptionalProperty 'alarmValues'&gt;, &lt;bacnet.object.properties.OptionalProperty 'faultValues'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventEnable'&gt;, &lt;bacnet.object.properties.OptionalProperty 'ackedTransitions'&gt;, &lt;bacnet.object.properties.OptionalProperty 'notifyType'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventTimeStamps'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventMessageTexts'&gt;, &lt;bacnet.object.properties.ReadableProperty 'silenced'&gt;, &lt;bacnet.object.properties.ReadableProperty 'operationExpected'&gt;, &lt;bacnet.object.properties.OptionalProperty 'maintenanceRequired'&gt;, &lt;bacnet.object.properties.OptionalProperty 'setting'&gt;, &lt;bacnet.object.properties.OptionalProperty 'directReading'&gt;, &lt;bacnet.object.properties.OptionalProperty 'units'&gt;, &lt;bacnet.object.properties.OptionalProperty 'memberOf'&gt;]</em><a class="headerlink" href="#bacnet.object.basic.general.LifeSafetyPointObject.properties" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bacnet.object.basic.general.LifeSafetyZoneObject">
+<em class="property">class </em><code class="descclassname">bacnet.object.basic.general.</code><code class="descname">LifeSafetyZoneObject</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#bacnet.object.basic.general.LifeSafetyZoneObject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bacnet.object.basic.general.Object" title="bacnet.object.basic.general.Object"><code class="xref py py-class docutils literal"><span class="pre">bacnet.object.basic.general.Object</span></code></a></p>
+<p>This class is an cov extended version of bacpypes LifeSafetyZoneObject.</p>
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.LifeSafetyZoneObject.objectType">
+<code class="descname">objectType</code><em class="property"> = 'lifeSafetyZone'</em><a class="headerlink" href="#bacnet.object.basic.general.LifeSafetyZoneObject.objectType" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.LifeSafetyZoneObject.properties">
+<code class="descname">properties</code><em class="property"> = [&lt;bacnet.object.properties.ObjectIdentifierProperty 'objectIdentifier'&gt;, &lt;bacnet.object.properties.ReadableProperty 'objectName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'description'&gt;, &lt;bacnet.object.properties.OptionalProperty 'profileName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'propertyList'&gt;, &lt;bacnet.object.properties.ReadableProperty 'presentValue'&gt;, &lt;bacnet.object.properties.ReadableProperty 'trackingValue'&gt;, &lt;bacnet.object.properties.OptionalProperty 'deviceType'&gt;, &lt;bacnet.object.properties.ReadableProperty 'statusFlags'&gt;, &lt;bacnet.object.properties.ReadableProperty 'eventState'&gt;, &lt;bacnet.object.properties.ReadableProperty 'reliability'&gt;, &lt;bacnet.object.properties.ReadableProperty 'outOfService'&gt;, &lt;bacnet.object.properties.WritableProperty 'mode'&gt;, &lt;bacnet.object.properties.ReadableProperty 'acceptedModes'&gt;, &lt;bacnet.object.properties.OptionalProperty 'timeDelay'&gt;, &lt;bacnet.object.properties.OptionalProperty 'notificationClass'&gt;, &lt;bacnet.object.properties.OptionalProperty 'lifeSafetyAlarmValues'&gt;, &lt;bacnet.object.properties.OptionalProperty 'alarmValues'&gt;, &lt;bacnet.object.properties.OptionalProperty 'faultValues'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventEnable'&gt;, &lt;bacnet.object.properties.OptionalProperty 'ackedTransitions'&gt;, &lt;bacnet.object.properties.OptionalProperty 'notifyType'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventTimeStamps'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventMessageTexts'&gt;, &lt;bacnet.object.properties.ReadableProperty 'silenced'&gt;, &lt;bacnet.object.properties.ReadableProperty 'operationExpected'&gt;, &lt;bacnet.object.properties.OptionalProperty 'maintenanceRequired'&gt;, &lt;bacnet.object.properties.ReadableProperty 'zoneMembers'&gt;, &lt;bacnet.object.properties.OptionalProperty 'memberOf'&gt;]</em><a class="headerlink" href="#bacnet.object.basic.general.LifeSafetyZoneObject.properties" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bacnet.object.basic.general.LoadControlObject">
+<em class="property">class </em><code class="descclassname">bacnet.object.basic.general.</code><code class="descname">LoadControlObject</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#bacnet.object.basic.general.LoadControlObject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bacnet.object.basic.general.Object" title="bacnet.object.basic.general.Object"><code class="xref py py-class docutils literal"><span class="pre">bacnet.object.basic.general.Object</span></code></a></p>
+<p>This class is an cov extended version of bacpypes LoadControlObject.</p>
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.LoadControlObject.objectType">
+<code class="descname">objectType</code><em class="property"> = 'loadControl'</em><a class="headerlink" href="#bacnet.object.basic.general.LoadControlObject.objectType" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.LoadControlObject.properties">
+<code class="descname">properties</code><em class="property"> = [&lt;bacnet.object.properties.ObjectIdentifierProperty 'objectIdentifier'&gt;, &lt;bacnet.object.properties.ReadableProperty 'objectName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'description'&gt;, &lt;bacnet.object.properties.OptionalProperty 'profileName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'propertyList'&gt;, &lt;bacnet.object.properties.ReadableProperty 'presentValue'&gt;, &lt;bacnet.object.properties.OptionalProperty 'stateDescription'&gt;, &lt;bacnet.object.properties.ReadableProperty 'statusFlags'&gt;, &lt;bacnet.object.properties.ReadableProperty 'eventState'&gt;, &lt;bacnet.object.properties.OptionalProperty 'reliability'&gt;, &lt;bacnet.object.properties.WritableProperty 'requestedShedLevel'&gt;, &lt;bacnet.object.properties.WritableProperty 'startTime'&gt;, &lt;bacnet.object.properties.WritableProperty 'shedDuration'&gt;, &lt;bacnet.object.properties.WritableProperty 'dutyWindow'&gt;, &lt;bacnet.object.properties.WritableProperty 'enable'&gt;, &lt;bacnet.object.properties.OptionalProperty 'fullDutyBaseline'&gt;, &lt;bacnet.object.properties.ReadableProperty 'expectedShedLevel'&gt;, &lt;bacnet.object.properties.ReadableProperty 'actualShedLevel'&gt;, &lt;bacnet.object.properties.WritableProperty 'shedLevels'&gt;, &lt;bacnet.object.properties.ReadableProperty 'shedLevelDescriptions'&gt;, &lt;bacnet.object.properties.OptionalProperty 'notificationClass'&gt;, &lt;bacnet.object.properties.OptionalProperty 'timeDelay'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventEnable'&gt;, &lt;bacnet.object.properties.OptionalProperty 'ackedTransitions'&gt;, &lt;bacnet.object.properties.OptionalProperty 'notifyType'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventTimeStamps'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventMessageTexts'&gt;]</em><a class="headerlink" href="#bacnet.object.basic.general.LoadControlObject.properties" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bacnet.object.basic.general.LoopObject">
+<em class="property">class </em><code class="descclassname">bacnet.object.basic.general.</code><code class="descname">LoopObject</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#bacnet.object.basic.general.LoopObject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bacnet.object.basic.general.Object" title="bacnet.object.basic.general.Object"><code class="xref py py-class docutils literal"><span class="pre">bacnet.object.basic.general.Object</span></code></a></p>
+<p>This class is an cov extended version of bacpypes LoopObject.</p>
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.LoopObject.objectType">
+<code class="descname">objectType</code><em class="property"> = 'loop'</em><a class="headerlink" href="#bacnet.object.basic.general.LoopObject.objectType" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.LoopObject.properties">
+<code class="descname">properties</code><em class="property"> = [&lt;bacnet.object.properties.ObjectIdentifierProperty 'objectIdentifier'&gt;, &lt;bacnet.object.properties.ReadableProperty 'objectName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'description'&gt;, &lt;bacnet.object.properties.OptionalProperty 'profileName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'propertyList'&gt;, &lt;bacnet.object.properties.ReadableProperty 'presentValue'&gt;, &lt;bacnet.object.properties.ReadableProperty 'statusFlags'&gt;, &lt;bacnet.object.properties.ReadableProperty 'eventState'&gt;, &lt;bacnet.object.properties.OptionalProperty 'reliability'&gt;, &lt;bacnet.object.properties.ReadableProperty 'outOfService'&gt;, &lt;bacnet.object.properties.ReadableProperty 'updateInterval'&gt;, &lt;bacnet.object.properties.ReadableProperty 'outputUnits'&gt;, &lt;bacnet.object.properties.ReadableProperty 'manipulatedVariableReference'&gt;, &lt;bacnet.object.properties.ReadableProperty 'controlledVariableReference'&gt;, &lt;bacnet.object.properties.ReadableProperty 'controlledVariableValue'&gt;, &lt;bacnet.object.properties.ReadableProperty 'controlledVariableUnits'&gt;, &lt;bacnet.object.properties.ReadableProperty 'setpointReference'&gt;, &lt;bacnet.object.properties.ReadableProperty 'setpoint'&gt;, &lt;bacnet.object.properties.ReadableProperty 'action'&gt;, &lt;bacnet.object.properties.OptionalProperty 'proportionalConstant'&gt;, &lt;bacnet.object.properties.OptionalProperty 'proportionalConstantUnits'&gt;, &lt;bacnet.object.properties.OptionalProperty 'integralConstant'&gt;, &lt;bacnet.object.properties.OptionalProperty 'integralConstantUnits'&gt;, &lt;bacnet.object.properties.OptionalProperty 'derivativeConstant'&gt;, &lt;bacnet.object.properties.OptionalProperty 'derivativeConstantUnits'&gt;, &lt;bacnet.object.properties.OptionalProperty 'bias'&gt;, &lt;bacnet.object.properties.OptionalProperty 'maximumOutput'&gt;, &lt;bacnet.object.properties.OptionalProperty 'minimumOutput'&gt;, &lt;bacnet.object.properties.ReadableProperty 'priorityForWriting'&gt;, &lt;bacnet.object.properties.OptionalProperty 'covIncrement'&gt;, &lt;bacnet.object.properties.OptionalProperty 'timeDelay'&gt;, &lt;bacnet.object.properties.OptionalProperty 'notificationClass'&gt;, &lt;bacnet.object.properties.OptionalProperty 'errorLimit'&gt;, &lt;bacnet.object.properties.OptionalProperty 'deadband'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventEnable'&gt;, &lt;bacnet.object.properties.OptionalProperty 'ackedTransitions'&gt;, &lt;bacnet.object.properties.OptionalProperty 'notifyType'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventTimeStamps'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventMessageTexts'&gt;]</em><a class="headerlink" href="#bacnet.object.basic.general.LoopObject.properties" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bacnet.object.basic.general.MultiStateInputObject">
+<em class="property">class </em><code class="descclassname">bacnet.object.basic.general.</code><code class="descname">MultiStateInputObject</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#bacnet.object.basic.general.MultiStateInputObject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bacnet.object.basic.general.Object" title="bacnet.object.basic.general.Object"><code class="xref py py-class docutils literal"><span class="pre">bacnet.object.basic.general.Object</span></code></a></p>
+<p>This class is an cov extended version of bacpypes MultiStateInputObject.</p>
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.MultiStateInputObject.objectType">
+<code class="descname">objectType</code><em class="property"> = 'multiStateInput'</em><a class="headerlink" href="#bacnet.object.basic.general.MultiStateInputObject.objectType" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.MultiStateInputObject.properties">
+<code class="descname">properties</code><em class="property"> = [&lt;bacnet.object.properties.ObjectIdentifierProperty 'objectIdentifier'&gt;, &lt;bacnet.object.properties.ReadableProperty 'objectName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'description'&gt;, &lt;bacnet.object.properties.OptionalProperty 'profileName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'propertyList'&gt;, &lt;bacnet.object.properties.ReadableProperty 'presentValue'&gt;, &lt;bacnet.object.properties.OptionalProperty 'deviceType'&gt;, &lt;bacnet.object.properties.ReadableProperty 'statusFlags'&gt;, &lt;bacnet.object.properties.ReadableProperty 'eventState'&gt;, &lt;bacnet.object.properties.OptionalProperty 'reliability'&gt;, &lt;bacnet.object.properties.ReadableProperty 'outOfService'&gt;, &lt;bacnet.object.properties.ReadableProperty 'numberOfStates'&gt;, &lt;bacnet.object.properties.OptionalProperty 'stateText'&gt;, &lt;bacnet.object.properties.OptionalProperty 'timeDelay'&gt;, &lt;bacnet.object.properties.OptionalProperty 'notificationClass'&gt;, &lt;bacnet.object.properties.OptionalProperty 'alarmValues'&gt;, &lt;bacnet.object.properties.OptionalProperty 'faultValues'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventEnable'&gt;, &lt;bacnet.object.properties.OptionalProperty 'ackedTransitions'&gt;, &lt;bacnet.object.properties.OptionalProperty 'notifyType'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventTimeStamps'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventMessageTexts'&gt;]</em><a class="headerlink" href="#bacnet.object.basic.general.MultiStateInputObject.properties" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bacnet.object.basic.general.MultiStateOutputObject">
+<em class="property">class </em><code class="descclassname">bacnet.object.basic.general.</code><code class="descname">MultiStateOutputObject</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#bacnet.object.basic.general.MultiStateOutputObject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bacnet.object.basic.general.Object" title="bacnet.object.basic.general.Object"><code class="xref py py-class docutils literal"><span class="pre">bacnet.object.basic.general.Object</span></code></a></p>
+<p>This class is an cov extended version of bacpypes MultiStateOutputObject.</p>
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.MultiStateOutputObject.objectType">
+<code class="descname">objectType</code><em class="property"> = 'multiStateOutput'</em><a class="headerlink" href="#bacnet.object.basic.general.MultiStateOutputObject.objectType" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.MultiStateOutputObject.properties">
+<code class="descname">properties</code><em class="property"> = [&lt;bacnet.object.properties.ObjectIdentifierProperty 'objectIdentifier'&gt;, &lt;bacnet.object.properties.ReadableProperty 'objectName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'description'&gt;, &lt;bacnet.object.properties.OptionalProperty 'profileName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'propertyList'&gt;, &lt;bacnet.object.properties.WritableProperty 'presentValue'&gt;, &lt;bacnet.object.properties.OptionalProperty 'deviceType'&gt;, &lt;bacnet.object.properties.ReadableProperty 'statusFlags'&gt;, &lt;bacnet.object.properties.ReadableProperty 'eventState'&gt;, &lt;bacnet.object.properties.OptionalProperty 'reliability'&gt;, &lt;bacnet.object.properties.ReadableProperty 'outOfService'&gt;, &lt;bacnet.object.properties.ReadableProperty 'numberOfStates'&gt;, &lt;bacnet.object.properties.OptionalProperty 'stateText'&gt;, &lt;bacnet.object.properties.ReadableProperty 'priorityArray'&gt;, &lt;bacnet.object.properties.OptionalProperty 'relinquishDefault'&gt;, &lt;bacnet.object.properties.OptionalProperty 'timeDelay'&gt;, &lt;bacnet.object.properties.OptionalProperty 'notificationClass'&gt;, &lt;bacnet.object.properties.OptionalProperty 'feedbackValue'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventEnable'&gt;, &lt;bacnet.object.properties.OptionalProperty 'ackedTransitions'&gt;, &lt;bacnet.object.properties.OptionalProperty 'notifyType'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventTimeStamps'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventMessageTexts'&gt;]</em><a class="headerlink" href="#bacnet.object.basic.general.MultiStateOutputObject.properties" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bacnet.object.basic.general.MultiStateValueObject">
+<em class="property">class </em><code class="descclassname">bacnet.object.basic.general.</code><code class="descname">MultiStateValueObject</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#bacnet.object.basic.general.MultiStateValueObject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bacnet.object.basic.general.Object" title="bacnet.object.basic.general.Object"><code class="xref py py-class docutils literal"><span class="pre">bacnet.object.basic.general.Object</span></code></a></p>
+<p>This class is an cov extended version of bacpypes MultiStateValueObject.</p>
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.MultiStateValueObject.objectType">
+<code class="descname">objectType</code><em class="property"> = 'multiStateValue'</em><a class="headerlink" href="#bacnet.object.basic.general.MultiStateValueObject.objectType" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.MultiStateValueObject.properties">
+<code class="descname">properties</code><em class="property"> = [&lt;bacnet.object.properties.ObjectIdentifierProperty 'objectIdentifier'&gt;, &lt;bacnet.object.properties.ReadableProperty 'objectName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'description'&gt;, &lt;bacnet.object.properties.OptionalProperty 'profileName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'propertyList'&gt;, &lt;bacnet.object.properties.ReadableProperty 'presentValue'&gt;, &lt;bacnet.object.properties.ReadableProperty 'statusFlags'&gt;, &lt;bacnet.object.properties.ReadableProperty 'eventState'&gt;, &lt;bacnet.object.properties.OptionalProperty 'reliability'&gt;, &lt;bacnet.object.properties.ReadableProperty 'outOfService'&gt;, &lt;bacnet.object.properties.ReadableProperty 'numberOfStates'&gt;, &lt;bacnet.object.properties.OptionalProperty 'stateText'&gt;, &lt;bacnet.object.properties.OptionalProperty 'priorityArray'&gt;, &lt;bacnet.object.properties.OptionalProperty 'relinquishDefault'&gt;, &lt;bacnet.object.properties.OptionalProperty 'timeDelay'&gt;, &lt;bacnet.object.properties.OptionalProperty 'notificationClass'&gt;, &lt;bacnet.object.properties.OptionalProperty 'alarmValues'&gt;, &lt;bacnet.object.properties.OptionalProperty 'faultValues'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventEnable'&gt;, &lt;bacnet.object.properties.OptionalProperty 'ackedTransitions'&gt;, &lt;bacnet.object.properties.OptionalProperty 'notifyType'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventTimeStamps'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventMessageTexts'&gt;]</em><a class="headerlink" href="#bacnet.object.basic.general.MultiStateValueObject.properties" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bacnet.object.basic.general.NetworkSecurityObject">
+<em class="property">class </em><code class="descclassname">bacnet.object.basic.general.</code><code class="descname">NetworkSecurityObject</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#bacnet.object.basic.general.NetworkSecurityObject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bacnet.object.basic.general.Object" title="bacnet.object.basic.general.Object"><code class="xref py py-class docutils literal"><span class="pre">bacnet.object.basic.general.Object</span></code></a></p>
+<p>This class is an cov extended version of bacpypes NetworkSecurityObject.</p>
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.NetworkSecurityObject.objectType">
+<code class="descname">objectType</code><em class="property"> = 'networkSecurity'</em><a class="headerlink" href="#bacnet.object.basic.general.NetworkSecurityObject.objectType" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.NetworkSecurityObject.properties">
+<code class="descname">properties</code><em class="property"> = [&lt;bacnet.object.properties.ObjectIdentifierProperty 'objectIdentifier'&gt;, &lt;bacnet.object.properties.ReadableProperty 'objectName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'description'&gt;, &lt;bacnet.object.properties.OptionalProperty 'profileName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'propertyList'&gt;, &lt;bacnet.object.properties.WritableProperty 'baseDeviceSecurityPolicy'&gt;]</em><a class="headerlink" href="#bacnet.object.basic.general.NetworkSecurityObject.properties" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bacnet.object.basic.general.NotificationClassObject">
+<em class="property">class </em><code class="descclassname">bacnet.object.basic.general.</code><code class="descname">NotificationClassObject</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#bacnet.object.basic.general.NotificationClassObject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bacnet.object.basic.general.Object" title="bacnet.object.basic.general.Object"><code class="xref py py-class docutils literal"><span class="pre">bacnet.object.basic.general.Object</span></code></a></p>
+<p>This class is an cov extended version of bacpypes NotificationClassObject.</p>
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.NotificationClassObject.objectType">
+<code class="descname">objectType</code><em class="property"> = 'notificationClass'</em><a class="headerlink" href="#bacnet.object.basic.general.NotificationClassObject.objectType" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.NotificationClassObject.properties">
+<code class="descname">properties</code><em class="property"> = [&lt;bacnet.object.properties.ObjectIdentifierProperty 'objectIdentifier'&gt;, &lt;bacnet.object.properties.ReadableProperty 'objectName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'description'&gt;, &lt;bacnet.object.properties.OptionalProperty 'profileName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'propertyList'&gt;, &lt;bacnet.object.properties.ReadableProperty 'notificationClass'&gt;, &lt;bacnet.object.properties.ReadableProperty 'priority'&gt;, &lt;bacnet.object.properties.ReadableProperty 'ackRequired'&gt;, &lt;bacnet.object.properties.ReadableProperty 'recipientList'&gt;]</em><a class="headerlink" href="#bacnet.object.basic.general.NotificationClassObject.properties" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bacnet.object.basic.general.Object">
+<em class="property">class </em><code class="descclassname">bacnet.object.basic.general.</code><code class="descname">Object</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/object/basic/general.html#Object"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.object.basic.general.Object" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">bacpypes.object.Object</span></code></p>
+<p>This class is an extension of the bacpypes Object class to support COV notifications.</p>
+<dl class="method">
+<dt id="bacnet.object.basic.general.Object.ReadProperty">
+<code class="descname">ReadProperty</code><span class="sig-paren">(</span><em>propid</em>, <em>arrayIndex=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/object/basic/general.html#Object.ReadProperty"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.object.basic.general.Object.ReadProperty" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function handles reading of property values.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>propid</strong> &#8211; property identifier</li>
+<li><strong>arrayIndex</strong> &#8211; property index</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">property value</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.object.basic.general.Object.WriteProperty">
+<code class="descname">WriteProperty</code><span class="sig-paren">(</span><em>propid</em>, <em>value</em>, <em>arrayIndex=None</em>, <em>priority=None</em>, <em>direct=False</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/object/basic/general.html#Object.WriteProperty"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.object.basic.general.Object.WriteProperty" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function handles writing of property values.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>propid</strong> &#8211; property identifier</li>
+<li><strong>value</strong> &#8211; property value</li>
+<li><strong>arrayIndex</strong> &#8211; property index</li>
+<li><strong>priority</strong> &#8211; write priority</li>
+<li><strong>direct</strong> &#8211; direct write</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">property value</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.object.basic.general.Object.add_cov_subscription">
+<code class="descname">add_cov_subscription</code><span class="sig-paren">(</span><em>subscription</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/object/basic/general.html#Object.add_cov_subscription"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.object.basic.general.Object.add_cov_subscription" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function adds subscription to cov subscription list.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>subscription</strong> &#8211; subscription</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.object.basic.general.Object.cov_supported">
+<code class="descname">cov_supported</code><span class="sig-paren">(</span><em>prop=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/object/basic/general.html#Object.cov_supported"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.object.basic.general.Object.cov_supported" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function checks if COV subscription is supported.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>prop</strong> &#8211; property object or identifier</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">COV is supported</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.object.basic.general.Object.delete_cov_subscription">
+<code class="descname">delete_cov_subscription</code><span class="sig-paren">(</span><em>subscriptions</em>, <em>inform_app=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/object/basic/general.html#Object.delete_cov_subscription"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.object.basic.general.Object.delete_cov_subscription" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function deletes subscription from cov subscription list.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>subscriptions</strong> &#8211; subscriptions</li>
+<li><strong>inform_app</strong> &#8211; inform application</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.object.basic.general.Object.get_property">
+<code class="descname">get_property</code><span class="sig-paren">(</span><em>identifier</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/object/basic/general.html#Object.get_property"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.object.basic.general.Object.get_property" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function returns the property for identifier.
+:param identifier: property identifier
+:return: property</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.object.basic.general.Object.get_value">
+<code class="descname">get_value</code><span class="sig-paren">(</span><em>identifier</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/object/basic/general.html#Object.get_value"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.object.basic.general.Object.get_value" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function returns the value for property identifier.
+:param identifier: property identifier
+:return: value</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.object.basic.general.Object.poll_hardware">
+<code class="descname">poll_hardware</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/object/basic/general.html#Object.poll_hardware"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.object.basic.general.Object.poll_hardware" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function checks for value updates for hardware.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.Object.properties">
+<code class="descname">properties</code><em class="property"> = [&lt;bacnet.object.properties.ObjectIdentifierProperty 'objectIdentifier'&gt;, &lt;bacnet.object.properties.ReadableProperty 'objectName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'description'&gt;, &lt;bacnet.object.properties.OptionalProperty 'profileName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'propertyList'&gt;]</em><a class="headerlink" href="#bacnet.object.basic.general.Object.properties" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bacnet.object.basic.general.Object.renew_cov_subscription">
+<code class="descname">renew_cov_subscription</code><span class="sig-paren">(</span><em>subscription</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/object/basic/general.html#Object.renew_cov_subscription"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.object.basic.general.Object.renew_cov_subscription" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function checks if subscription can be renewed and returns boolean of this action.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>subscription</strong> &#8211; subscription</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">subscription renewed</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.object.basic.general.Object.set_application">
+<code class="descname">set_application</code><span class="sig-paren">(</span><em>application</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/object/basic/general.html#Object.set_application"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.object.basic.general.Object.set_application" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function defines the application associated to this object.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>application</strong> &#8211; application object</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.object.basic.general.Object.set_value">
+<code class="descname">set_value</code><span class="sig-paren">(</span><em>identifier</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/object/basic/general.html#Object.set_value"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.object.basic.general.Object.set_value" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function sets the value for property identifier.
+:param identifier: property identifier
+:param value: property value
+:return: None</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bacnet.object.basic.general.OctetStringValueObject">
+<em class="property">class </em><code class="descclassname">bacnet.object.basic.general.</code><code class="descname">OctetStringValueObject</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#bacnet.object.basic.general.OctetStringValueObject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bacnet.object.basic.general.Object" title="bacnet.object.basic.general.Object"><code class="xref py py-class docutils literal"><span class="pre">bacnet.object.basic.general.Object</span></code></a></p>
+<p>This class is an cov extended version of bacpypes OctetStringValueObject.</p>
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.OctetStringValueObject.objectType">
+<code class="descname">objectType</code><em class="property"> = 'octetstringValue'</em><a class="headerlink" href="#bacnet.object.basic.general.OctetStringValueObject.objectType" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.OctetStringValueObject.properties">
+<code class="descname">properties</code><em class="property"> = [&lt;bacnet.object.properties.ObjectIdentifierProperty 'objectIdentifier'&gt;, &lt;bacnet.object.properties.ReadableProperty 'objectName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'description'&gt;, &lt;bacnet.object.properties.OptionalProperty 'profileName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'propertyList'&gt;, &lt;bacnet.object.properties.ReadableProperty 'presentValue'&gt;, &lt;bacnet.object.properties.ReadableProperty 'statusFlags'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventState'&gt;, &lt;bacnet.object.properties.OptionalProperty 'reliability'&gt;, &lt;bacnet.object.properties.OptionalProperty 'outOfService'&gt;, &lt;bacnet.object.properties.OptionalProperty 'priorityArray'&gt;, &lt;bacnet.object.properties.OptionalProperty 'relinquishDefault'&gt;]</em><a class="headerlink" href="#bacnet.object.basic.general.OctetStringValueObject.properties" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bacnet.object.basic.general.PositiveIntegerValueObject">
+<em class="property">class </em><code class="descclassname">bacnet.object.basic.general.</code><code class="descname">PositiveIntegerValueObject</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#bacnet.object.basic.general.PositiveIntegerValueObject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bacnet.object.basic.general.Object" title="bacnet.object.basic.general.Object"><code class="xref py py-class docutils literal"><span class="pre">bacnet.object.basic.general.Object</span></code></a></p>
+<p>This class is an cov extended version of bacpypes PositiveIntegerValueObject.</p>
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.PositiveIntegerValueObject.objectType">
+<code class="descname">objectType</code><em class="property"> = 'positiveIntegerValue'</em><a class="headerlink" href="#bacnet.object.basic.general.PositiveIntegerValueObject.objectType" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.PositiveIntegerValueObject.properties">
+<code class="descname">properties</code><em class="property"> = [&lt;bacnet.object.properties.ObjectIdentifierProperty 'objectIdentifier'&gt;, &lt;bacnet.object.properties.ReadableProperty 'objectName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'description'&gt;, &lt;bacnet.object.properties.OptionalProperty 'profileName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'propertyList'&gt;, &lt;bacnet.object.properties.ReadableProperty 'presentValue'&gt;, &lt;bacnet.object.properties.ReadableProperty 'statusFlags'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventState'&gt;, &lt;bacnet.object.properties.OptionalProperty 'reliability'&gt;, &lt;bacnet.object.properties.OptionalProperty 'outOfService'&gt;, &lt;bacnet.object.properties.ReadableProperty 'units'&gt;, &lt;bacnet.object.properties.OptionalProperty 'priorityArray'&gt;, &lt;bacnet.object.properties.OptionalProperty 'relinquishDefault'&gt;, &lt;bacnet.object.properties.OptionalProperty 'covIncrement'&gt;, &lt;bacnet.object.properties.OptionalProperty 'timeDelay'&gt;, &lt;bacnet.object.properties.OptionalProperty 'notificationClass'&gt;, &lt;bacnet.object.properties.OptionalProperty 'highLimit'&gt;, &lt;bacnet.object.properties.OptionalProperty 'lowLimit'&gt;, &lt;bacnet.object.properties.OptionalProperty 'deadband'&gt;, &lt;bacnet.object.properties.OptionalProperty 'limitEnable'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventEnable'&gt;, &lt;bacnet.object.properties.OptionalProperty 'ackedTransitions'&gt;, &lt;bacnet.object.properties.OptionalProperty 'notifyType'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventTimeStamps'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventMessageTexts'&gt;]</em><a class="headerlink" href="#bacnet.object.basic.general.PositiveIntegerValueObject.properties" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bacnet.object.basic.general.ProgramObject">
+<em class="property">class </em><code class="descclassname">bacnet.object.basic.general.</code><code class="descname">ProgramObject</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#bacnet.object.basic.general.ProgramObject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bacnet.object.basic.general.Object" title="bacnet.object.basic.general.Object"><code class="xref py py-class docutils literal"><span class="pre">bacnet.object.basic.general.Object</span></code></a></p>
+<p>This class is an cov extended version of bacpypes ProgramObject.</p>
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.ProgramObject.objectType">
+<code class="descname">objectType</code><em class="property"> = 'program'</em><a class="headerlink" href="#bacnet.object.basic.general.ProgramObject.objectType" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.ProgramObject.properties">
+<code class="descname">properties</code><em class="property"> = [&lt;bacnet.object.properties.ObjectIdentifierProperty 'objectIdentifier'&gt;, &lt;bacnet.object.properties.ReadableProperty 'objectName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'description'&gt;, &lt;bacnet.object.properties.OptionalProperty 'profileName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'propertyList'&gt;, &lt;bacnet.object.properties.ReadableProperty 'programState'&gt;, &lt;bacnet.object.properties.WritableProperty 'programChange'&gt;, &lt;bacnet.object.properties.OptionalProperty 'reasonForHalt'&gt;, &lt;bacnet.object.properties.OptionalProperty 'descriptionOfHalt'&gt;, &lt;bacnet.object.properties.OptionalProperty 'programLocation'&gt;, &lt;bacnet.object.properties.OptionalProperty 'instanceOf'&gt;, &lt;bacnet.object.properties.ReadableProperty 'statusFlags'&gt;, &lt;bacnet.object.properties.OptionalProperty 'reliability'&gt;, &lt;bacnet.object.properties.ReadableProperty 'outOfService'&gt;]</em><a class="headerlink" href="#bacnet.object.basic.general.ProgramObject.properties" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bacnet.object.basic.general.PulseConverterObject">
+<em class="property">class </em><code class="descclassname">bacnet.object.basic.general.</code><code class="descname">PulseConverterObject</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#bacnet.object.basic.general.PulseConverterObject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bacnet.object.basic.general.Object" title="bacnet.object.basic.general.Object"><code class="xref py py-class docutils literal"><span class="pre">bacnet.object.basic.general.Object</span></code></a></p>
+<p>This class is an cov extended version of bacpypes PulseConverterObject.</p>
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.PulseConverterObject.objectType">
+<code class="descname">objectType</code><em class="property"> = 'pulseConverter'</em><a class="headerlink" href="#bacnet.object.basic.general.PulseConverterObject.objectType" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.PulseConverterObject.properties">
+<code class="descname">properties</code><em class="property"> = [&lt;bacnet.object.properties.ObjectIdentifierProperty 'objectIdentifier'&gt;, &lt;bacnet.object.properties.ReadableProperty 'objectName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'description'&gt;, &lt;bacnet.object.properties.OptionalProperty 'profileName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'propertyList'&gt;, &lt;bacnet.object.properties.ReadableProperty 'presentValue'&gt;, &lt;bacnet.object.properties.OptionalProperty 'inputReference'&gt;, &lt;bacnet.object.properties.ReadableProperty 'statusFlags'&gt;, &lt;bacnet.object.properties.ReadableProperty 'eventState'&gt;, &lt;bacnet.object.properties.OptionalProperty 'reliability'&gt;, &lt;bacnet.object.properties.ReadableProperty 'outOfService'&gt;, &lt;bacnet.object.properties.ReadableProperty 'units'&gt;, &lt;bacnet.object.properties.ReadableProperty 'scaleFactor'&gt;, &lt;bacnet.object.properties.WritableProperty 'adjustValue'&gt;, &lt;bacnet.object.properties.ReadableProperty 'count'&gt;, &lt;bacnet.object.properties.ReadableProperty 'updateTime'&gt;, &lt;bacnet.object.properties.ReadableProperty 'countChangeTime'&gt;, &lt;bacnet.object.properties.ReadableProperty 'countBeforeChange'&gt;, &lt;bacnet.object.properties.OptionalProperty 'covIncrement'&gt;, &lt;bacnet.object.properties.OptionalProperty 'covPeriod'&gt;, &lt;bacnet.object.properties.OptionalProperty 'notificationClass'&gt;, &lt;bacnet.object.properties.OptionalProperty 'timeDelay'&gt;, &lt;bacnet.object.properties.OptionalProperty 'highLimit'&gt;, &lt;bacnet.object.properties.OptionalProperty 'lowLimit'&gt;, &lt;bacnet.object.properties.OptionalProperty 'deadband'&gt;, &lt;bacnet.object.properties.OptionalProperty 'limitEnable'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventEnable'&gt;, &lt;bacnet.object.properties.OptionalProperty 'ackedTransitions'&gt;, &lt;bacnet.object.properties.OptionalProperty 'notifyType'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventTimeStamps'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventMessageTexts'&gt;]</em><a class="headerlink" href="#bacnet.object.basic.general.PulseConverterObject.properties" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bacnet.object.basic.general.ScheduleObject">
+<em class="property">class </em><code class="descclassname">bacnet.object.basic.general.</code><code class="descname">ScheduleObject</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#bacnet.object.basic.general.ScheduleObject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bacnet.object.basic.general.Object" title="bacnet.object.basic.general.Object"><code class="xref py py-class docutils literal"><span class="pre">bacnet.object.basic.general.Object</span></code></a></p>
+<p>This class is an cov extended version of bacpypes ScheduleObject.</p>
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.ScheduleObject.objectType">
+<code class="descname">objectType</code><em class="property"> = 'schedule'</em><a class="headerlink" href="#bacnet.object.basic.general.ScheduleObject.objectType" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.ScheduleObject.properties">
+<code class="descname">properties</code><em class="property"> = [&lt;bacnet.object.properties.ObjectIdentifierProperty 'objectIdentifier'&gt;, &lt;bacnet.object.properties.ReadableProperty 'objectName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'description'&gt;, &lt;bacnet.object.properties.OptionalProperty 'profileName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'propertyList'&gt;, &lt;bacnet.object.properties.ReadableProperty 'presentValue'&gt;, &lt;bacnet.object.properties.ReadableProperty 'effectivePeriod'&gt;, &lt;bacnet.object.properties.OptionalProperty 'weeklySchedule'&gt;, &lt;bacnet.object.properties.OptionalProperty 'exceptionSchedule'&gt;, &lt;bacnet.object.properties.ReadableProperty 'scheduleDefault'&gt;, &lt;bacnet.object.properties.ReadableProperty 'listOfObjectPropertyReferences'&gt;, &lt;bacnet.object.properties.ReadableProperty 'priorityForWriting'&gt;, &lt;bacnet.object.properties.ReadableProperty 'statusFlags'&gt;, &lt;bacnet.object.properties.ReadableProperty 'reliability'&gt;, &lt;bacnet.object.properties.ReadableProperty 'outOfService'&gt;]</em><a class="headerlink" href="#bacnet.object.basic.general.ScheduleObject.properties" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bacnet.object.basic.general.StructuredViewObject">
+<em class="property">class </em><code class="descclassname">bacnet.object.basic.general.</code><code class="descname">StructuredViewObject</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#bacnet.object.basic.general.StructuredViewObject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bacnet.object.basic.general.Object" title="bacnet.object.basic.general.Object"><code class="xref py py-class docutils literal"><span class="pre">bacnet.object.basic.general.Object</span></code></a></p>
+<p>This class is an cov extended version of bacpypes StructuredViewObject.</p>
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.StructuredViewObject.objectType">
+<code class="descname">objectType</code><em class="property"> = 'structuredView'</em><a class="headerlink" href="#bacnet.object.basic.general.StructuredViewObject.objectType" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.StructuredViewObject.properties">
+<code class="descname">properties</code><em class="property"> = [&lt;bacnet.object.properties.ObjectIdentifierProperty 'objectIdentifier'&gt;, &lt;bacnet.object.properties.ReadableProperty 'objectName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'description'&gt;, &lt;bacnet.object.properties.OptionalProperty 'profileName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'propertyList'&gt;, &lt;bacnet.object.properties.ReadableProperty 'nodeType'&gt;, &lt;bacnet.object.properties.OptionalProperty 'nodeSubtype'&gt;, &lt;bacnet.object.properties.ReadableProperty 'subordinateList'&gt;, &lt;bacnet.object.properties.OptionalProperty 'subordinateAnnotations'&gt;]</em><a class="headerlink" href="#bacnet.object.basic.general.StructuredViewObject.properties" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bacnet.object.basic.general.TimePatternValueObject">
+<em class="property">class </em><code class="descclassname">bacnet.object.basic.general.</code><code class="descname">TimePatternValueObject</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#bacnet.object.basic.general.TimePatternValueObject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bacnet.object.basic.general.Object" title="bacnet.object.basic.general.Object"><code class="xref py py-class docutils literal"><span class="pre">bacnet.object.basic.general.Object</span></code></a></p>
+<p>This class is an cov extended version of bacpypes TimePatternValueObject.</p>
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.TimePatternValueObject.objectType">
+<code class="descname">objectType</code><em class="property"> = 'timePatternValue'</em><a class="headerlink" href="#bacnet.object.basic.general.TimePatternValueObject.objectType" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.TimePatternValueObject.properties">
+<code class="descname">properties</code><em class="property"> = [&lt;bacnet.object.properties.ObjectIdentifierProperty 'objectIdentifier'&gt;, &lt;bacnet.object.properties.ReadableProperty 'objectName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'description'&gt;, &lt;bacnet.object.properties.OptionalProperty 'profileName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'propertyList'&gt;, &lt;bacnet.object.properties.ReadableProperty 'presentValue'&gt;, &lt;bacnet.object.properties.ReadableProperty 'statusFlags'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventState'&gt;, &lt;bacnet.object.properties.OptionalProperty 'reliability'&gt;, &lt;bacnet.object.properties.OptionalProperty 'outOfService'&gt;, &lt;bacnet.object.properties.OptionalProperty 'priorityArray'&gt;, &lt;bacnet.object.properties.OptionalProperty 'relinquishDefault'&gt;]</em><a class="headerlink" href="#bacnet.object.basic.general.TimePatternValueObject.properties" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bacnet.object.basic.general.TimeValueObject">
+<em class="property">class </em><code class="descclassname">bacnet.object.basic.general.</code><code class="descname">TimeValueObject</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#bacnet.object.basic.general.TimeValueObject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bacnet.object.basic.general.Object" title="bacnet.object.basic.general.Object"><code class="xref py py-class docutils literal"><span class="pre">bacnet.object.basic.general.Object</span></code></a></p>
+<p>This class is an cov extended version of bacpypes TimeValueObject.</p>
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.TimeValueObject.objectType">
+<code class="descname">objectType</code><em class="property"> = 'timeValue'</em><a class="headerlink" href="#bacnet.object.basic.general.TimeValueObject.objectType" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.TimeValueObject.properties">
+<code class="descname">properties</code><em class="property"> = [&lt;bacnet.object.properties.ObjectIdentifierProperty 'objectIdentifier'&gt;, &lt;bacnet.object.properties.ReadableProperty 'objectName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'description'&gt;, &lt;bacnet.object.properties.OptionalProperty 'profileName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'propertyList'&gt;, &lt;bacnet.object.properties.ReadableProperty 'presentValue'&gt;, &lt;bacnet.object.properties.ReadableProperty 'statusFlags'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventState'&gt;, &lt;bacnet.object.properties.OptionalProperty 'reliability'&gt;, &lt;bacnet.object.properties.OptionalProperty 'outOfService'&gt;, &lt;bacnet.object.properties.OptionalProperty 'priorityArray'&gt;, &lt;bacnet.object.properties.OptionalProperty 'relinquishDefault'&gt;]</em><a class="headerlink" href="#bacnet.object.basic.general.TimeValueObject.properties" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bacnet.object.basic.general.TrendLogMultipleObject">
+<em class="property">class </em><code class="descclassname">bacnet.object.basic.general.</code><code class="descname">TrendLogMultipleObject</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#bacnet.object.basic.general.TrendLogMultipleObject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bacnet.object.basic.general.Object" title="bacnet.object.basic.general.Object"><code class="xref py py-class docutils literal"><span class="pre">bacnet.object.basic.general.Object</span></code></a></p>
+<p>This class is an cov extended version of bacpypes TrendLogMultipleObject.</p>
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.TrendLogMultipleObject.objectType">
+<code class="descname">objectType</code><em class="property"> = 'trendLogMultiple'</em><a class="headerlink" href="#bacnet.object.basic.general.TrendLogMultipleObject.objectType" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.TrendLogMultipleObject.properties">
+<code class="descname">properties</code><em class="property"> = [&lt;bacnet.object.properties.ObjectIdentifierProperty 'objectIdentifier'&gt;, &lt;bacnet.object.properties.ReadableProperty 'objectName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'description'&gt;, &lt;bacnet.object.properties.OptionalProperty 'profileName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'propertyList'&gt;, &lt;bacnet.object.properties.ReadableProperty 'statusFlags'&gt;, &lt;bacnet.object.properties.ReadableProperty 'eventState'&gt;, &lt;bacnet.object.properties.OptionalProperty 'reliability'&gt;, &lt;bacnet.object.properties.WritableProperty 'enable'&gt;, &lt;bacnet.object.properties.OptionalProperty 'startTime'&gt;, &lt;bacnet.object.properties.OptionalProperty 'stopTime'&gt;, &lt;bacnet.object.properties.ReadableProperty 'logDeviceObjectProperty'&gt;, &lt;bacnet.object.properties.ReadableProperty 'loggingType'&gt;, &lt;bacnet.object.properties.ReadableProperty 'logInterval'&gt;, &lt;bacnet.object.properties.OptionalProperty 'alignIntervals'&gt;, &lt;bacnet.object.properties.OptionalProperty 'intervalOffset'&gt;, &lt;bacnet.object.properties.OptionalProperty 'trigger'&gt;, &lt;bacnet.object.properties.ReadableProperty 'stopWhenFull'&gt;, &lt;bacnet.object.properties.ReadableProperty 'bufferSize'&gt;, &lt;bacnet.object.properties.ReadableProperty 'logBuffer'&gt;, &lt;bacnet.object.properties.WritableProperty 'recordCount'&gt;, &lt;bacnet.object.properties.ReadableProperty 'totalRecordCount'&gt;, &lt;bacnet.object.properties.OptionalProperty 'notificationThreshold'&gt;, &lt;bacnet.object.properties.OptionalProperty 'recordsSinceNotification'&gt;, &lt;bacnet.object.properties.OptionalProperty 'lastNotifyRecord'&gt;, &lt;bacnet.object.properties.OptionalProperty 'notificationClass'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventEnable'&gt;, &lt;bacnet.object.properties.OptionalProperty 'ackedTransitions'&gt;, &lt;bacnet.object.properties.OptionalProperty 'notifyType'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventTimeStamps'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventMessageTexts'&gt;]</em><a class="headerlink" href="#bacnet.object.basic.general.TrendLogMultipleObject.properties" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="bacnet.object.basic.general.TrendLogObject">
+<em class="property">class </em><code class="descclassname">bacnet.object.basic.general.</code><code class="descname">TrendLogObject</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#bacnet.object.basic.general.TrendLogObject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bacnet.object.basic.general.Object" title="bacnet.object.basic.general.Object"><code class="xref py py-class docutils literal"><span class="pre">bacnet.object.basic.general.Object</span></code></a></p>
+<p>This class is an cov extended version of bacpypes TrendLogObject.</p>
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.TrendLogObject.objectType">
+<code class="descname">objectType</code><em class="property"> = 'trendLog'</em><a class="headerlink" href="#bacnet.object.basic.general.TrendLogObject.objectType" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.TrendLogObject.properties">
+<code class="descname">properties</code><em class="property"> = [&lt;bacnet.object.properties.ObjectIdentifierProperty 'objectIdentifier'&gt;, &lt;bacnet.object.properties.ReadableProperty 'objectName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'description'&gt;, &lt;bacnet.object.properties.OptionalProperty 'profileName'&gt;, &lt;bacnet.object.properties.ReadableProperty 'propertyList'&gt;, &lt;bacnet.object.properties.ReadableProperty 'statusFlags'&gt;, &lt;bacnet.object.properties.ReadableProperty 'eventState'&gt;, &lt;bacnet.object.properties.OptionalProperty 'reliability'&gt;, &lt;bacnet.object.properties.WritableProperty 'enable'&gt;, &lt;bacnet.object.properties.OptionalProperty 'startTime'&gt;, &lt;bacnet.object.properties.OptionalProperty 'stopTime'&gt;, &lt;bacnet.object.properties.OptionalProperty 'logDeviceObjectProperty'&gt;, &lt;bacnet.object.properties.OptionalProperty 'logInterval'&gt;, &lt;bacnet.object.properties.OptionalProperty 'covResubscriptionInterval'&gt;, &lt;bacnet.object.properties.OptionalProperty 'clientCovIncrement'&gt;, &lt;bacnet.object.properties.ReadableProperty 'stopWhenFull'&gt;, &lt;bacnet.object.properties.ReadableProperty 'bufferSize'&gt;, &lt;bacnet.object.properties.ReadableProperty 'logBuffer'&gt;, &lt;bacnet.object.properties.WritableProperty 'recordCount'&gt;, &lt;bacnet.object.properties.ReadableProperty 'totalRecordCount'&gt;, &lt;bacnet.object.properties.ReadableProperty 'loggingType'&gt;, &lt;bacnet.object.properties.OptionalProperty 'alignIntervals'&gt;, &lt;bacnet.object.properties.OptionalProperty 'intervalOffset'&gt;, &lt;bacnet.object.properties.OptionalProperty 'trigger'&gt;, &lt;bacnet.object.properties.ReadableProperty 'statusFlags'&gt;, &lt;bacnet.object.properties.OptionalProperty 'reliability'&gt;, &lt;bacnet.object.properties.OptionalProperty 'notificationThreshold'&gt;, &lt;bacnet.object.properties.OptionalProperty 'recordsSinceNotification'&gt;, &lt;bacnet.object.properties.OptionalProperty 'lastNotifyRecord'&gt;, &lt;bacnet.object.properties.ReadableProperty 'eventState'&gt;, &lt;bacnet.object.properties.OptionalProperty 'notificationClass'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventEnable'&gt;, &lt;bacnet.object.properties.OptionalProperty 'ackedTransitions'&gt;, &lt;bacnet.object.properties.OptionalProperty 'notifyType'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventTimeStamps'&gt;, &lt;bacnet.object.properties.OptionalProperty 'eventMessageTexts'&gt;]</em><a class="headerlink" href="#bacnet.object.basic.general.TrendLogObject.properties" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.cls_obj">
+<code class="descclassname">bacnet.object.basic.general.</code><code class="descname">cls_obj</code><a class="headerlink" href="#bacnet.object.basic.general.cls_obj" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="#bacnet.object.basic.general.Object" title="bacnet.object.basic.general.Object"><code class="xref py py-class docutils literal"><span class="pre">Object</span></code></a></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="bacnet.object.basic.general.get_datatype">
+<code class="descclassname">bacnet.object.basic.general.</code><code class="descname">get_datatype</code><span class="sig-paren">(</span><em>cls</em>, <em>prop_id</em>, <em>vendor_id=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/object/basic/general.html#get_datatype"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.object.basic.general.get_datatype" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function returns the data type for a specified class and property identifier.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>cls</strong> &#8211; object class</li>
+<li><strong>prop_id</strong> &#8211; property identifier</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">object type</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="bacnet.object.basic.general.get_object_class">
+<code class="descclassname">bacnet.object.basic.general.</code><code class="descname">get_object_class</code><span class="sig-paren">(</span><em>cls</em>, <em>vendor_id=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/object/basic/general.html#get_object_class"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.object.basic.general.get_object_class" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function returns the object type for a specified class.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>cls</strong> &#8211; object class</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">object type</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bacnet.object.basic.general.new_class">
+<code class="descclassname">bacnet.object.basic.general.</code><code class="descname">new_class</code><a class="headerlink" href="#bacnet.object.basic.general.new_class" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="#bacnet.object.basic.general.TrendLogMultipleObject" title="bacnet.object.basic.general.TrendLogMultipleObject"><code class="xref py py-class docutils literal"><span class="pre">TrendLogMultipleObject</span></code></a></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="bacnet.object.basic.general.new_property">
+<code class="descclassname">bacnet.object.basic.general.</code><code class="descname">new_property</code><span class="sig-paren">(</span><em>cls_type</em>, <em>old_prop</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/object/basic/general.html#new_property"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.object.basic.general.new_property" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function converts bacpypes properties into new bacnet properties.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>cls_type</strong> &#8211; object type</li>
+<li><strong>old_prop</strong> &#8211; old property</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">new property</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="bacnet.object.basic.general.register_object_type">
+<code class="descclassname">bacnet.object.basic.general.</code><code class="descname">register_object_type</code><span class="sig-paren">(</span><em>cls</em>, <em>vendor_id=0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/object/basic/general.html#register_object_type"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.object.basic.general.register_object_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function stores new object types.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>cls</strong> &#8211; object class</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="module-bacnet.object.basic.program">
+<span id="bacnet-object-basic-program-module"></span><h2>bacnet.object.basic.program module<a class="headerlink" href="#module-bacnet.object.basic.program" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id2">
+<h3>Object Basic Module<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<p>This module contains basic definitions of BACpypes Object.</p>
+<dl class="class">
+<dt id="bacnet.object.basic.program.ExecProgramObject">
+<em class="property">class </em><code class="descclassname">bacnet.object.basic.program.</code><code class="descname">ExecProgramObject</code><span class="sig-paren">(</span><em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/object/basic/program.html#ExecProgramObject"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.object.basic.program.ExecProgramObject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bacnet.object.basic.general.ProgramObject" title="bacnet.object.basic.general.ProgramObject"><code class="xref py py-class docutils literal"><span class="pre">bacnet.object.basic.general.ProgramObject</span></code></a></p>
+<p>This class provides additional functionality for python programs.</p>
+<dl class="method">
+<dt id="bacnet.object.basic.program.ExecProgramObject.WriteProperty">
+<code class="descname">WriteProperty</code><span class="sig-paren">(</span><em>prop_id</em>, <em>value</em>, <em>arrayIndex=None</em>, <em>priority=None</em>, <em>direct=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/object/basic/program.html#ExecProgramObject.WriteProperty"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.object.basic.program.ExecProgramObject.WriteProperty" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function writes to property.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>prop_id</strong> &#8211; property identifier</li>
+<li><strong>value</strong> &#8211; value</li>
+<li><strong>arrayIndex</strong> &#8211; index</li>
+<li><strong>priority</strong> &#8211; priority</li>
+<li><strong>direct</strong> &#8211; direct</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">None</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.object.basic.program.ExecProgramObject.do_haltProgram">
+<code class="descname">do_haltProgram</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/object/basic/program.html#ExecProgramObject.do_haltProgram"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.object.basic.program.ExecProgramObject.do_haltProgram" title="Permalink to this definition">¶</a></dt>
+<dd><p>This functions watches over the halt process of the executed program.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.object.basic.program.ExecProgramObject.haltProgram">
+<code class="descname">haltProgram</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/object/basic/program.html#ExecProgramObject.haltProgram"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.object.basic.program.ExecProgramObject.haltProgram" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function halts the program.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.object.basic.program.ExecProgramObject.loadProgram">
+<code class="descname">loadProgram</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/object/basic/program.html#ExecProgramObject.loadProgram"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.object.basic.program.ExecProgramObject.loadProgram" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function loads the program.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.object.basic.program.ExecProgramObject.runProgram">
+<code class="descname">runProgram</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/object/basic/program.html#ExecProgramObject.runProgram"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.object.basic.program.ExecProgramObject.runProgram" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function runs the program.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.object.basic.program.ExecProgramObject.safe_delete">
+<code class="descname">safe_delete</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/object/basic/program.html#ExecProgramObject.safe_delete"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.object.basic.program.ExecProgramObject.safe_delete" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function handles safe deletion</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.object.basic.program.ExecProgramObject.set_application">
+<code class="descname">set_application</code><span class="sig-paren">(</span><em>application</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/object/basic/program.html#ExecProgramObject.set_application"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.object.basic.program.ExecProgramObject.set_application" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function defines the application associated to this object.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>application</strong> &#8211; application object</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.object.basic.program.ExecProgramObject.unloadProgram">
+<code class="descname">unloadProgram</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/object/basic/program.html#ExecProgramObject.unloadProgram"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.object.basic.program.ExecProgramObject.unloadProgram" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function unloads the program.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.object.basic.program.ExecProgramObject.watchdog">
+<code class="descname">watchdog</code><span class="sig-paren">(</span><em>*funcs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/object/basic/program.html#ExecProgramObject.watchdog"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.object.basic.program.ExecProgramObject.watchdog" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function watches over the executed program changes.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="module-bacnet.object.basic">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-bacnet.object.basic" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="id3">
+<h3>Object Basic Module<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<p>This module contains basic definitions of BACpypes Object.</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">bacnet.object.basic package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-bacnet.object.basic.cov_support">bacnet.object.basic.cov_support module</a><ul>
+<li><a class="reference internal" href="#cov-support-module">COV Support Module</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-bacnet.object.basic.device">bacnet.object.basic.device module</a><ul>
+<li><a class="reference internal" href="#object-basic-module">Object Basic Module</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-bacnet.object.basic.fileaccess">bacnet.object.basic.fileaccess module</a><ul>
+<li><a class="reference internal" href="#file-access-object-module">File Access Object Module</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-bacnet.object.basic.general">bacnet.object.basic.general module</a><ul>
+<li><a class="reference internal" href="#id1">Object Basic Module</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-bacnet.object.basic.program">bacnet.object.basic.program module</a><ul>
+<li><a class="reference internal" href="#id2">Object Basic Module</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-bacnet.object.basic">Module contents</a><ul>
+<li><a class="reference internal" href="#id3">Object Basic Module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="bacnet.object.html"
+                        title="previous chapter">bacnet.object package</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="bacnet.object.hardware.html"
+                        title="next chapter">bacnet.object.hardware package</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/bacnet.object.basic.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Tobias Grosch.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.3</a>
+      
+      |
+      <a href="_sources/bacnet.object.basic.txt"
+          rel="nofollow">Page source</a></li>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,224 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>bacnet.console.creator.events &mdash; Masterarbeit Grosch 0.4c0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.4c0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="Masterarbeit Grosch 0.4c0 documentation" href="../../../../index.html" />
+    <link rel="up" title="bacnet.console.creator" href="../creator.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">Masterarbeit Grosch 0.4c0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="../../console.html" >bacnet.console</a> &raquo;</li>
+          <li class="nav-item nav-item-3"><a href="../creator.html" accesskey="U">bacnet.console.creator</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for bacnet.console.creator.events</h1><div class="highlight"><pre>
+<span class="c"># pylint: disable=unused-argument, too-many-branches</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Event Handler Module</span>
+<span class="sd">--------------------</span>
+
+<span class="sd">This module provides COV and event requests.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+
+<span class="kn">from</span> <span class="nn">bacpypes.basetypes</span> <span class="kn">import</span> <span class="n">PropertyReference</span>
+
+<span class="kn">from</span> <span class="nn">bacpypes.pdu</span> <span class="kn">import</span> <span class="n">Address</span>
+<span class="kn">from</span> <span class="nn">bacpypes.apdu</span> <span class="kn">import</span> <span class="n">SubscribeCOVRequest</span><span class="p">,</span> <span class="n">SubscribeCOVPropertyRequest</span>
+
+<span class="kn">from</span> <span class="nn">bacnet.object</span> <span class="kn">import</span> <span class="n">get_object_class</span>
+
+
+<div class="viewcode-block" id="subscribe_request"><a class="viewcode-back" href="../../../../bacnet.console.creator.html#bacnet.console.creator.events.subscribe_request">[docs]</a><span class="k">def</span> <span class="nf">subscribe_request</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">console</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function creates a write file stream request.</span>
+
+<span class="sd">    Usage: subscribe &lt;address&gt; &lt;lifetime&gt; &lt;confirmed&gt; &lt;type&gt; &lt;instance&gt; [ &lt;property&gt; &lt;increment&gt; [ \</span>
+<span class="sd">&lt;index&gt; ] ]</span>
+
+<span class="sd">    :param args: list of parameters</span>
+<span class="sd">    :param console: console object</span>
+<span class="sd">    :return: request</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># check if arguments were provided</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">5</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;too few arguments&#39;</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">8</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;too many arguments&#39;</span><span class="p">)</span>
+
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">5</span>
+
+    <span class="c"># read address, life time, type and instance</span>
+    <span class="n">address</span><span class="p">,</span> <span class="n">lifetime</span><span class="p">,</span> <span class="n">confirmed</span><span class="p">,</span> <span class="n">obj_type</span><span class="p">,</span> <span class="n">obj_inst</span> <span class="o">=</span> <span class="n">args</span><span class="p">[:</span><span class="n">i</span><span class="p">]</span>
+
+    <span class="c"># check if life time is correct</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">lifetime</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;life time must be an integer&#39;</span><span class="p">)</span>
+
+    <span class="c"># check if confirmed is correct</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">confirmed</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;true&#39;</span><span class="p">,</span> <span class="s">&#39;false&#39;</span><span class="p">,</span> <span class="s">&#39;0&#39;</span><span class="p">,</span> <span class="s">&#39;1&#39;</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;confirmed must be &quot;true&quot; (&quot;1&quot;) or &quot;false&quot; (&quot;0&quot;)&#39;</span><span class="p">)</span>
+
+    <span class="n">lifetime</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">lifetime</span><span class="p">)</span>
+
+    <span class="c"># check if object type is correct</span>
+    <span class="k">if</span> <span class="n">obj_type</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+        <span class="n">obj_type</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">obj_type</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="ow">not</span> <span class="n">get_object_class</span><span class="p">(</span><span class="n">obj_type</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;unknown object type&#39;</span><span class="p">)</span>
+
+    <span class="c"># check if object instance is correct</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">obj_inst</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;object instance must be an integer&#39;</span><span class="p">)</span>
+
+    <span class="n">obj_inst</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">obj_inst</span><span class="p">)</span>
+
+    <span class="c"># check if property was provided</span>
+    <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+        <span class="c"># read property identifier</span>
+        <span class="n">prop_id</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+        <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;cov increment must be set&#39;</span><span class="p">)</span>
+
+        <span class="c"># read cov increment</span>
+        <span class="n">cov_inc</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+        <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="c"># check if cov increment is correct</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">cov_inc</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;cov increment must be an integer&#39;</span><span class="p">)</span>
+
+        <span class="n">cov_inc</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">cov_inc</span><span class="p">)</span>
+
+        <span class="c"># initialize property array index</span>
+        <span class="n">prop_index</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="c"># check if property array index was provided</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+            <span class="c"># read property array index</span>
+            <span class="n">prop_index</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+        <span class="c"># check if property array index was defined</span>
+        <span class="k">if</span> <span class="n">prop_index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="c"># check if property array index is correct</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">prop_index</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;object instance must be an integer&#39;</span><span class="p">)</span>
+
+            <span class="n">prop_index</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">prop_index</span><span class="p">)</span>
+
+        <span class="c"># create request</span>
+        <span class="n">request</span> <span class="o">=</span> <span class="n">SubscribeCOVPropertyRequest</span><span class="p">(</span>
+            <span class="n">monitoredPropertyIdentifier</span><span class="o">=</span><span class="n">PropertyReference</span><span class="p">(</span>
+                <span class="n">propertyIdentifier</span><span class="o">=</span><span class="n">prop_id</span><span class="p">,</span>
+                <span class="n">propertyArrayIndex</span><span class="o">=</span><span class="n">prop_index</span><span class="p">,</span>
+            <span class="p">),</span>
+            <span class="n">covIncrement</span><span class="o">=</span><span class="n">cov_inc</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c"># create request</span>
+        <span class="n">request</span> <span class="o">=</span> <span class="n">SubscribeCOVRequest</span><span class="p">()</span>
+
+    <span class="c"># check if arguments are leftover</span>
+    <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;too many arguments&#39;</span><span class="p">)</span>
+
+    <span class="c"># set variables for subscription</span>
+    <span class="n">request</span><span class="o">.</span><span class="n">lifetime</span> <span class="o">=</span> <span class="n">lifetime</span>
+    <span class="n">request</span><span class="o">.</span><span class="n">subscriberProcessIdentifier</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">request</span><span class="o">.</span><span class="n">monitoredObjectIdentifier</span> <span class="o">=</span> <span class="p">(</span><span class="n">obj_type</span><span class="p">,</span> <span class="n">obj_inst</span><span class="p">)</span>
+    <span class="n">request</span><span class="o">.</span><span class="n">issueConfirmedNotifications</span> <span class="o">=</span> <span class="n">confirmed</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;true&#39;</span><span class="p">,</span> <span class="s">&#39;1&#39;</span><span class="p">)</span>
+
+    <span class="c"># set destination</span>
+    <span class="n">request</span><span class="o">.</span><span class="n">pduDestination</span> <span class="o">=</span> <span class="n">Address</span><span class="p">(</span><span class="n">address</span><span class="p">)</span>
+
+    <span class="c"># return request</span>
+    <span class="k">return</span> <span class="n">request</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Tobias Grosch.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.3</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

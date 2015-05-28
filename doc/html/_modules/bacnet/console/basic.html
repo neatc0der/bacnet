@@ -1,0 +1,891 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>bacnet.console.basic &mdash; Masterarbeit Grosch 0.4c0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.4c0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="Masterarbeit Grosch 0.4c0 documentation" href="../../../index.html" />
+    <link rel="up" title="bacnet.console" href="../console.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Masterarbeit Grosch 0.4c0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="../console.html" accesskey="U">bacnet.console</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for bacnet.console.basic</h1><div class="highlight"><pre>
+<span class="c"># coding=utf-8</span>
+<span class="c"># pylint: disable=too-few-public-methods, invalid-name, broad-except, too-many-public-methods</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Console Basic Module</span>
+<span class="sd">--------------------</span>
+
+<span class="sd">This module provides a basic BACpypes console commands object.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+
+<span class="kn">from</span> <span class="nn">cmd</span> <span class="kn">import</span> <span class="n">Cmd</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+<span class="kn">import</span> <span class="nn">gc</span>
+<span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="kn">import</span> <span class="n">Process</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">readline</span>
+<span class="kn">import</span> <span class="nn">shlex</span>
+<span class="kn">import</span> <span class="nn">signal</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">threading</span> <span class="kn">import</span> <span class="n">Thread</span>
+<span class="kn">import</span> <span class="nn">types</span>
+
+<span class="kn">from</span> <span class="nn">bacpypes</span> <span class="kn">import</span> <span class="n">apdu</span> <span class="k">as</span> <span class="n">bacpypes_apdu</span>
+
+<span class="kn">from</span> <span class="nn">bacnet.debugging</span> <span class="kn">import</span> <span class="n">bacnet_debug</span><span class="p">,</span> <span class="n">ModuleLogger</span><span class="p">,</span> <span class="n">get_loggers</span><span class="p">,</span> <span class="n">set_handler</span>
+
+<span class="kn">from</span> <span class="nn">bacnet.system.version</span> <span class="kn">import</span> <span class="n">get_version</span>
+<span class="kn">from</span> <span class="nn">bacnet.system.managing</span> <span class="kn">import</span> <span class="n">client_manager</span>
+
+<span class="kn">from</span> <span class="nn">bacnet.api</span> <span class="kn">import</span> <span class="n">BACnetAPI</span>
+
+<span class="kn">from</span> <span class="nn">.creator</span> <span class="kn">import</span> <span class="n">print_values</span><span class="p">,</span> <span class="n">request_creator</span><span class="p">,</span> <span class="n">COMMAND_DICT</span>
+<span class="kn">from</span> <span class="nn">.parser</span> <span class="kn">import</span> <span class="n">response_parser</span>
+
+
+<span class="c"># enabling logging</span>
+<span class="n">ModuleLogger</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="s">&#39;INFO&#39;</span><span class="p">)</span>
+
+
+<span class="nd">@bacnet_debug</span><span class="p">(</span><span class="n">formatter</span><span class="o">=</span><span class="s">&#39;</span><span class="si">%(levelname)s</span><span class="s">:console: </span><span class="si">%(message)s</span><span class="s">&#39;</span><span class="p">)</span>
+<div class="viewcode-block" id="BasicConsole"><a class="viewcode-back" href="../../../bacnet.console.html#bacnet.console.basic.BasicConsole">[docs]</a><span class="k">class</span> <span class="nc">BasicConsole</span><span class="p">(</span><span class="n">Cmd</span><span class="p">,</span> <span class="n">Process</span><span class="p">):</span>
+    <span class="c"># pylint: disable=unused-argument, too-many-instance-attributes, arguments-differ</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class describes a basic BACpypes shell including simple commands.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">device</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">application</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">device</span><span class="p">,</span> <span class="n">application</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function constructs the console commands object and links it to the application.</span>
+
+<span class="sd">        :param application: application</span>
+<span class="sd">        :return: BasicConsole instance</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;__init__ </span><span class="si">%r</span><span class="s">, </span><span class="si">%r</span><span class="s">, </span><span class="si">%r</span><span class="s">, </span><span class="si">%r</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">device</span><span class="p">,</span> <span class="n">application</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="s">&#39;prompt&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">prompt</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;prompt&#39;</span><span class="p">]</span>
+            <span class="k">del</span> <span class="n">kwargs</span><span class="p">[</span><span class="s">&#39;prompt&#39;</span><span class="p">]</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">prompt</span> <span class="o">=</span> <span class="s">&#39;&gt; &#39;</span>
+
+        <span class="c"># remove keys for additional processing</span>
+        <span class="c"># for key in (&#39;processes&#39;, &#39;out_queues&#39;, &#39;in_queues&#39;):</span>
+        <span class="c">#     if key in kwargs:</span>
+        <span class="c">#         del kwargs[key]</span>
+
+        <span class="n">Cmd</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">Process</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">&#39;console&#39;</span><span class="p">)</span>
+
+        <span class="c"># gc counters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">type2count</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">type2all</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c"># execution space for the user</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_locals</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_globals</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c"># bacpype objects</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="n">device</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="o">=</span> <span class="n">application</span>
+
+        <span class="c"># activate rawinput and thereby line completion</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">use_rawinput</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">3</span>
+
+        <span class="c"># activate shell</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">allow_shell</span> <span class="o">=</span> <span class="bp">True</span>
+
+        <span class="c"># deactivate python exec</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">allow_exec</span> <span class="o">=</span> <span class="bp">False</span>
+
+        <span class="c"># set ignore command due to interrupt</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ignore_command</span> <span class="o">=</span> <span class="bp">False</span>
+
+        <span class="c"># set callback output</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">info_dict</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">({</span>
+            <span class="s">&#39;local&#39;</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+            <span class="s">&#39;incoming&#39;</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+            <span class="s">&#39;outgoing&#39;</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+        <span class="p">})</span>
+
+        <span class="c"># populate callback output</span>
+        <span class="k">for</span> <span class="n">request_type</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">bacpypes_apdu</span><span class="p">):</span>
+            <span class="c"># check if name is request type</span>
+            <span class="k">if</span> <span class="n">request_type</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;Request&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">request_type</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;ACK&#39;</span><span class="p">):</span>
+                <span class="c"># lowercase request type</span>
+                <span class="n">request_type</span> <span class="o">=</span> <span class="n">request_type</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+
+                <span class="c"># check if request type was already declared</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">request_type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">info_dict</span><span class="p">:</span>
+                    <span class="c"># set request type</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">info_dict</span><span class="p">[</span><span class="n">request_type</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">info_dict</span><span class="p">[</span><span class="s">&#39;iamrequest&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">info_dict</span><span class="p">[</span><span class="s">&#39;whoisrequest&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">False</span>
+
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">signal</span><span class="p">,</span> <span class="s">&#39;SIGTERM&#39;</span><span class="p">):</span>
+            <span class="n">signal</span><span class="o">.</span><span class="n">signal</span><span class="p">(</span><span class="n">signal</span><span class="o">.</span><span class="n">SIGTERM</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">shutdown</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">signal</span><span class="p">,</span> <span class="s">&#39;SIGINT&#39;</span><span class="p">):</span>
+            <span class="n">signal</span><span class="o">.</span><span class="n">signal</span><span class="p">(</span><span class="n">signal</span><span class="o">.</span><span class="n">SIGINT</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">console_interrupt</span><span class="p">)</span>
+
+        <span class="c"># get manager</span>
+        <span class="n">manager</span> <span class="o">=</span> <span class="n">client_manager</span><span class="p">()</span>
+
+        <span class="c"># get log queue</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log</span> <span class="o">=</span> <span class="n">manager</span><span class="o">.</span><span class="n">log</span><span class="p">()</span>
+
+        <span class="c"># get node address</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">node_address</span> <span class="o">=</span> <span class="n">manager</span><span class="o">.</span><span class="n">ip_address</span><span class="p">()</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s">&#39;ascii&#39;</span><span class="p">)</span>
+
+        <span class="c"># get node address</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">node_port</span> <span class="o">=</span> <span class="n">manager</span><span class="o">.</span><span class="n">port</span><span class="p">()</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s">&#39;ascii&#39;</span><span class="p">)</span>
+
+        <span class="c"># get api access</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">api</span> <span class="o">=</span> <span class="n">BACnetAPI</span><span class="p">(</span><span class="n">manager</span><span class="o">.</span><span class="n">app</span><span class="p">(),</span> <span class="n">manager</span><span class="o">.</span><span class="n">console</span><span class="p">(),</span> <span class="mi">3</span><span class="p">)</span>
+
+        <span class="c"># predefine thread</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">comm_thread</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="c"># start process</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+<div class="viewcode-block" id="BasicConsole.console_interrupt"><a class="viewcode-back" href="../../../bacnet.console.html#bacnet.console.basic.BasicConsole.console_interrupt">[docs]</a>    <span class="k">def</span> <span class="nf">console_interrupt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function is the catch for interrupts.</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># check if this the forked process</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_popen</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;console_interrupt </span><span class="si">%r</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span>
+
+            <span class="c"># print info</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;Keyboard interrupt trapped - press enter to continue</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c"># set ignore current command</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ignore_command</span> <span class="o">=</span> <span class="bp">True</span>
+
+            <span class="c"># send new line to stdin</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stdin</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="BasicConsole.check_queue"><a class="viewcode-back" href="../../../bacnet.console.html#bacnet.console.basic.BasicConsole.check_queue">[docs]</a>    <span class="k">def</span> <span class="nf">check_queue</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function checks for queued outgoing requests.</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;running: comm thread&#39;</span><span class="p">)</span>
+
+        <span class="c"># handle request queue</span>
+        <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c"># wait for request</span>
+                <span class="n">apdu</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">receive</span><span class="p">()</span>
+
+                <span class="c"># initiate callback</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">callback</span><span class="p">(</span><span class="n">apdu</span><span class="p">)</span>
+
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_exception</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
+                <span class="k">break</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;finished: comm thread&#39;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="BasicConsole.run"><a class="viewcode-back" href="../../../bacnet.console.html#bacnet.console.basic.BasicConsole.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function initiates processing.</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;running as </span><span class="si">%r</span><span class="s">&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c"># open file descriptor if needed</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stdin</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+                <span class="c"># override sys.stdin</span>
+                <span class="n">sys</span><span class="o">.</span><span class="n">stdin</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stdin</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">fdopen</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stdin</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+
+            <span class="c"># start thread</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">comm_thread</span> <span class="o">=</span> <span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">check_queue</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">comm_thread</span><span class="o">.</span><span class="n">setDaemon</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">comm_thread</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+
+            <span class="c"># enter loop</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cmdloop</span><span class="p">()</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">stdin</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_exception</span><span class="p">(</span><span class="s">&#39;exception: </span><span class="si">%r</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">error</span><span class="p">)</span>
+
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;finished&#39;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="BasicConsole.terminate"><a class="viewcode-back" href="../../../bacnet.console.html#bacnet.console.basic.BasicConsole.terminate">[docs]</a>    <span class="k">def</span> <span class="nf">terminate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function terminates processing.</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;terminated&#39;</span><span class="p">)</span>
+
+        <span class="c"># terminate process</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_popen</span><span class="o">.</span><span class="n">terminate</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="BasicConsole.shutdown"><a class="viewcode-back" href="../../../bacnet.console.html#bacnet.console.basic.BasicConsole.shutdown">[docs]</a>    <span class="k">def</span> <span class="nf">shutdown</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function shuts down the process.</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;shutdown&#39;</span><span class="p">)</span>
+
+        <span class="c"># TODO: terminate raw_input</span>
+</div>
+<div class="viewcode-block" id="BasicConsole.preloop"><a class="viewcode-back" href="../../../bacnet.console.html#bacnet.console.basic.BasicConsole.preloop">[docs]</a>    <span class="k">def</span> <span class="nf">preloop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function prepares loop by loading readline history file.</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># call predecessor function</span>
+        <span class="n">Cmd</span><span class="o">.</span><span class="n">preloop</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c"># load history</span>
+            <span class="n">readline</span><span class="o">.</span><span class="n">read_history_file</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s">&#39;.history&#39;</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_error</span><span class="p">(</span><span class="s">&quot;history error: </span><span class="si">%s</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">error</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="BasicConsole.postloop"><a class="viewcode-back" href="../../../bacnet.console.html#bacnet.console.basic.BasicConsole.postloop">[docs]</a>    <span class="k">def</span> <span class="nf">postloop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function wraps up readline history after loop has finished.</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c"># store history</span>
+            <span class="n">readline</span><span class="o">.</span><span class="n">write_history_file</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s">&#39;.history&#39;</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_error</span><span class="p">(</span><span class="s">&quot;history error: </span><span class="si">%s</span><span class="se">\n</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">error</span><span class="p">)</span>
+
+        <span class="c"># call predecessor function</span>
+        <span class="n">Cmd</span><span class="o">.</span><span class="n">postloop</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+</div>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_split</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function splits line and removes escapes.</span>
+
+<span class="sd">        :param args: line of command</span>
+<span class="sd">        :return: split and unescaped line of command</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># return</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">arg</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s">&#39;unicode-escape&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s">&#39;ascii&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">shlex</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">args</span><span class="p">)]</span>
+
+<div class="viewcode-block" id="BasicConsole.onecmd"><a class="viewcode-back" href="../../../bacnet.console.html#bacnet.console.basic.BasicConsole.onecmd">[docs]</a>    <span class="k">def</span> <span class="nf">onecmd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">line</span><span class="p">,</span> <span class="n">queue</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function interprets the command line.</span>
+
+<span class="sd">        :param line: user command line</span>
+<span class="sd">        :return: command result</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;onecmd </span><span class="si">%r</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">line</span><span class="p">)</span>
+
+        <span class="c"># check if command should be ignored</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ignore_command</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">:</span>
+            <span class="c"># unset ignore command</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ignore_command</span> <span class="o">=</span> <span class="bp">False</span>
+
+            <span class="c"># exit</span>
+            <span class="k">return</span> <span class="bp">None</span>
+
+        <span class="c"># let the real command run, trapping errors</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c"># parse line</span>
+            <span class="n">cmd</span><span class="p">,</span> <span class="n">arg</span><span class="p">,</span> <span class="n">line</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parseline</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+
+            <span class="c"># check if line is empty</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">line</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">emptyline</span><span class="p">()</span>
+
+            <span class="c"># check if command was supplied</span>
+            <span class="k">if</span> <span class="n">cmd</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">default</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+
+            <span class="c"># set last line to current</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">lastcmd</span> <span class="o">=</span> <span class="n">line</span>
+
+            <span class="c"># check if line was set to EOF</span>
+            <span class="k">if</span> <span class="n">line</span> <span class="o">==</span> <span class="s">&#39;EOF&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">lastcmd</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+
+            <span class="c"># check if command was supplied</span>
+            <span class="k">if</span> <span class="n">cmd</span> <span class="o">==</span> <span class="s">&#39;&#39;</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">default</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="c"># check if specific function was defined</span>
+                    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;do_&#39;</span> <span class="o">+</span> <span class="n">cmd</span><span class="p">)</span> <span class="ow">or</span> <span class="n">cmd</span> <span class="o">==</span> <span class="s">&#39;shell&#39;</span><span class="p">:</span>
+                        <span class="n">request</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;do_&#39;</span> <span class="o">+</span> <span class="n">cmd</span><span class="p">)(</span><span class="n">arg</span><span class="p">)</span>
+
+                    <span class="c"># use default handler</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">request</span> <span class="o">=</span> <span class="n">request_creator</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="n">console</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">local_id</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+
+                    <span class="c"># check if request was defined</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">bacpypes_apdu</span><span class="o">.</span><span class="n">APDU</span><span class="p">):</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;   - request: </span><span class="si">%r</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">request</span><span class="p">)</span>
+
+                        <span class="c"># check if request should be queued</span>
+                        <span class="k">if</span> <span class="n">queue</span><span class="p">:</span>
+                            <span class="c"># queue request</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
+
+                            <span class="c"># reset result to None</span>
+                            <span class="n">request</span> <span class="o">=</span> <span class="bp">None</span>
+
+                    <span class="c"># return result</span>
+                    <span class="k">return</span> <span class="n">request</span>
+
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+                    <span class="c"># self._exception(&#39;exception: %r&#39;, error)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_error</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_exception</span><span class="p">(</span><span class="s">&quot;exception: </span><span class="si">%r</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">e</span><span class="p">)</span>
+</div>
+    <span class="k">def</span> <span class="nf">__pretty_stdout</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">inline</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function prints pretty objects to stdout.</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">class</span> <span class="nc">IndentedOutput</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            This class simulates stdout.</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+
+            <span class="n">offset</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">obj</span> <span class="o">=</span> <span class="bp">None</span>
+
+            <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">output_obj</span><span class="p">,</span> <span class="n">intend</span><span class="p">):</span>
+                <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">                This function initializes an instance.</span>
+<span class="sd">                &quot;&quot;&quot;</span>
+
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">intend</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">or</span> <span class="n">intend</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;offset must be integer greater or equal 0&#39;</span><span class="p">)</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">offset</span> <span class="o">=</span> <span class="n">intend</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">obj</span> <span class="o">=</span> <span class="n">output_obj</span>
+
+            <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
+                <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">                This function writes to stdout.</span>
+<span class="sd">                &quot;&quot;&quot;</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">obj</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39; &#39;</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">offset</span> <span class="o">+</span> <span class="n">text</span><span class="p">)</span>
+
+            <span class="k">def</span> <span class="nf">flush</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+                <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">                This function flushes stdout</span>
+<span class="sd">                &quot;&quot;&quot;</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">obj</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">prefix</span><span class="p">)</span>
+
+        <span class="n">start</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+        <span class="n">end</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+        <span class="n">loop</span> <span class="o">=</span> <span class="bp">False</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">start</span> <span class="o">=</span> <span class="s">&#39;[&#39;</span>
+            <span class="n">end</span> <span class="o">=</span> <span class="s">&#39;]&#39;</span>
+            <span class="n">loop</span> <span class="o">=</span> <span class="n">obj</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+            <span class="n">start</span> <span class="o">=</span> <span class="s">&#39;(&#39;</span>
+            <span class="n">end</span> <span class="o">=</span> <span class="s">&#39;)&#39;</span>
+            <span class="n">loop</span> <span class="o">=</span> <span class="n">obj</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">start</span> <span class="o">=</span> <span class="s">&#39;{&#39;</span>
+            <span class="n">end</span> <span class="o">=</span> <span class="s">&#39;}&#39;</span>
+            <span class="n">loop</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+
+        <span class="n">cols</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">prefix</span><span class="p">)</span> <span class="o">+</span> <span class="n">offset</span>
+        <span class="n">offset_cols</span> <span class="o">=</span> <span class="n">cols</span> <span class="o">+</span> <span class="mi">4</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">start</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">loop</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">False</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">argument</span> <span class="ow">in</span> <span class="n">loop</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">argument</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">+</span> <span class="n">offset_cols</span> <span class="o">*</span> <span class="s">&#39; &#39;</span> <span class="o">+</span> <span class="s">&#39;</span><span class="si">%r</span><span class="s">: &#39;</span> <span class="o">%</span> <span class="n">argument</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">__pretty_stdout</span><span class="p">(</span><span class="n">argument</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">offset</span><span class="o">=</span><span class="n">offset_cols</span><span class="p">,</span> <span class="n">inline</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;,&#39;</span><span class="p">)</span>
+
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">+</span> <span class="n">offset_cols</span> <span class="o">*</span> <span class="s">&#39; &#39;</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">__pretty_stdout</span><span class="p">(</span><span class="n">argument</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="n">offset_cols</span><span class="p">,</span> <span class="n">inline</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;,&#39;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">obj</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">+</span> <span class="n">cols</span> <span class="o">*</span> <span class="s">&#39; &#39;</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="nb">basestring</span><span class="p">)</span> <span class="k">else</span> <span class="s">&#39;</span><span class="si">%r</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">obj</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">end</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">inline</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s">&#39;debug_contents&#39;</span><span class="p">):</span>
+                <span class="n">obj</span><span class="o">.</span><span class="n">debug_contents</span><span class="p">(</span><span class="nb">file</span><span class="o">=</span><span class="n">IndentedOutput</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cols</span><span class="p">))</span>
+
+<div class="viewcode-block" id="BasicConsole.callback"><a class="viewcode-back" href="../../../bacnet.console.html#bacnet.console.basic.BasicConsole.callback">[docs]</a>    <span class="k">def</span> <span class="nf">callback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">apdu</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function provides a callback for command executions.</span>
+
+<span class="sd">        :param apdu: message</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;callback&#39;</span><span class="p">)</span>
+
+        <span class="c"># check if message came from the network</span>
+        <span class="n">transmit</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">apdu</span><span class="o">.</span><span class="n">pduSource</span><span class="p">)</span> <span class="ow">in</span> <span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">node_address</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">str</span><span class="p">(</span><span class="n">apdu</span><span class="o">.</span><span class="n">pduSource</span><span class="p">)</span><span class="o">.</span><span class="n">isdigit</span><span class="p">()</span>
+
+        <span class="c"># set format</span>
+        <span class="n">formatter</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s"> (Service: {apduService}&#39;</span> <span class="o">%</span> <span class="n">apdu</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span>
+        <span class="k">if</span> <span class="n">apdu</span><span class="o">.</span><span class="n">apduInvokeID</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">formatter</span> <span class="o">+=</span> <span class="s">&#39;, ID: {apduInvokeID}&#39;</span>
+        <span class="n">formatter</span> <span class="o">+=</span> <span class="s">&#39;)&#39;</span>
+
+        <span class="k">if</span> <span class="n">transmit</span><span class="p">:</span>
+            <span class="n">formatter</span> <span class="o">=</span> <span class="s">&#39;&gt;&gt;&gt;&gt; {pduDestination} &#39;</span> <span class="o">+</span> <span class="n">formatter</span> <span class="o">+</span> <span class="s">&#39; &gt;&gt;&gt;&gt;&#39;</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">formatter</span> <span class="o">=</span> <span class="s">&#39;&lt;&lt;&lt;&lt; {pduSource} &#39;</span> <span class="o">+</span> <span class="n">formatter</span> <span class="o">+</span> <span class="s">&#39; &lt;&lt;&lt;&lt;&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="n">formatter</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="o">**</span><span class="n">apdu</span><span class="o">.</span><span class="n">__dict__</span><span class="p">))</span>
+
+        <span class="c"># acknowledge handler</span>
+        <span class="n">response_parser</span><span class="p">(</span><span class="n">apdu</span><span class="p">,</span> <span class="n">console</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="BasicConsole.emptyline"><a class="viewcode-back" href="../../../bacnet.console.html#bacnet.console.basic.BasicConsole.emptyline">[docs]</a>    <span class="k">def</span> <span class="nf">emptyline</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function ignores empty lines.</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">pass</span>
+</div>
+<div class="viewcode-block" id="BasicConsole.default"><a class="viewcode-back" href="../../../bacnet.console.html#bacnet.console.basic.BasicConsole.default">[docs]</a>    <span class="k">def</span> <span class="nf">default</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">line</span><span class="p">):</span>
+        <span class="c"># pylint: disable=exec-used</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function handles the command line if no command was found.</span>
+
+<span class="sd">        :param line: command line</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">allow_exec</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Cmd</span><span class="o">.</span><span class="n">default</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">line</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">exec</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_locals</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_globals</span>
+
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%s</span><span class="s"> : </span><span class="si">%s</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="BasicConsole.get_names"><a class="viewcode-back" href="../../../bacnet.console.html#bacnet.console.basic.BasicConsole.get_names">[docs]</a>    <span class="k">def</span> <span class="nf">get_names</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function collects all attributes.</span>
+
+<span class="sd">        :return: list of attributes</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># get all attributes of class</span>
+        <span class="n">attributes</span> <span class="o">=</span> <span class="nb">dir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="p">)</span>
+
+        <span class="c"># add request functions</span>
+        <span class="n">attributes</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="s">&#39;do_</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">COMMAND_DICT</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+
+        <span class="c"># return all attributes</span>
+        <span class="k">return</span> <span class="n">attributes</span>
+</div>
+<div class="viewcode-block" id="BasicConsole.do_version"><a class="viewcode-back" href="../../../bacnet.console.html#bacnet.console.basic.BasicConsole.do_version">[docs]</a>    <span class="k">def</span> <span class="nf">do_version</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function prints current software version.</span>
+
+<span class="sd">        Usage: version</span>
+
+<span class="sd">        :param args: string of parameters</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># print version</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%s</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">get_version</span><span class="p">())</span>
+
+</div>
+<div class="viewcode-block" id="BasicConsole.do_gc"><a class="viewcode-back" href="../../../bacnet.console.html#bacnet.console.basic.BasicConsole.do_gc">[docs]</a>    <span class="k">def</span> <span class="nf">do_gc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function prints current garbage collection information.</span>
+
+<span class="sd">        Usage: gc</span>
+
+<span class="sd">        :param args: string of parameters</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># snapshot of counts</span>
+        <span class="n">type2count</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">type2all</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">gc</span><span class="o">.</span><span class="n">get_objects</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">types</span><span class="o">.</span><span class="n">InstanceType</span><span class="p">):</span>
+                <span class="n">type2count</span><span class="p">[</span><span class="n">obj</span><span class="o">.</span><span class="n">__class__</span><span class="p">]</span> <span class="o">=</span> <span class="n">type2count</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">__class__</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="n">type2all</span><span class="p">[</span><span class="n">obj</span><span class="o">.</span><span class="n">__class__</span><span class="p">]</span> <span class="o">=</span> <span class="n">type2all</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">__class__</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="n">sys</span><span class="o">.</span><span class="n">getrefcount</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+
+        <span class="c"># count the things that have changed</span>
+        <span class="n">ct</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">(</span>
+                <span class="n">t</span><span class="o">.</span><span class="n">__module__</span><span class="p">,</span>
+                <span class="n">t</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span>
+                <span class="n">type2count</span><span class="p">[</span><span class="n">t</span><span class="p">],</span>
+                <span class="n">type2count</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">type2count</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+                <span class="n">type2all</span><span class="p">[</span><span class="n">t</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">type2all</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">type2count</span><span class="o">.</span><span class="n">iterkeys</span><span class="p">()</span>
+        <span class="p">]</span>
+
+        <span class="c"># ready for the next time</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">type2count</span> <span class="o">=</span> <span class="n">type2count</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">type2all</span> <span class="o">=</span> <span class="n">type2all</span>
+
+        <span class="n">fmt</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%-30s</span><span class="s"> </span><span class="si">%-30s</span><span class="s"> </span><span class="si">%6s</span><span class="s"> </span><span class="si">%6s</span><span class="s"> </span><span class="si">%6s</span><span class="se">\n</span><span class="s">&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">fmt</span> <span class="o">%</span> <span class="p">(</span><span class="s">&#39;Module&#39;</span><span class="p">,</span> <span class="s">&#39;Type&#39;</span><span class="p">,</span> <span class="s">&#39;Count&#39;</span><span class="p">,</span> <span class="s">&#39;dCount&#39;</span><span class="p">,</span> <span class="s">&#39;dRef&#39;</span><span class="p">))</span>
+
+        <span class="c"># sorted by count</span>
+        <span class="n">ct</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="nb">cmp</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">ct</span><span class="p">))):</span>
+            <span class="n">m</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">delta1</span><span class="p">,</span> <span class="n">delta2</span> <span class="o">=</span> <span class="n">ct</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">fmt</span> <span class="o">%</span> <span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">delta1</span><span class="p">,</span> <span class="n">delta2</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">fmt</span> <span class="o">%</span> <span class="p">(</span><span class="s">&#39;Module&#39;</span><span class="p">,</span> <span class="s">&#39;Type&#39;</span><span class="p">,</span> <span class="s">&#39;Count&#39;</span><span class="p">,</span> <span class="s">&#39;dCount&#39;</span><span class="p">,</span> <span class="s">&#39;dRef&#39;</span><span class="p">))</span>
+
+        <span class="c"># sorted by module and class</span>
+        <span class="n">ct</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">m</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">delta1</span><span class="p">,</span> <span class="n">delta2</span> <span class="ow">in</span> <span class="n">ct</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">delta1</span> <span class="ow">or</span> <span class="n">delta2</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">fmt</span> <span class="o">%</span> <span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">delta1</span><span class="p">,</span> <span class="n">delta2</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="BasicConsole.do_info"><a class="viewcode-back" href="../../../bacnet.console.html#bacnet.console.basic.BasicConsole.do_info">[docs]</a>    <span class="k">def</span> <span class="nf">do_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function adjusts package output.</span>
+
+<span class="sd">        Usage: info [ ( on | off ) ( &lt;msg_type&gt; )* ]</span>
+
+<span class="sd">        :param args: string of parameters</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># parse arguments</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+
+        <span class="c"># check if arguments were provided</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+
+            <span class="c"># check if first argument is correct</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;on&#39;</span><span class="p">,</span> <span class="s">&#39;off&#39;</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;first argument must be &quot;on&quot; or &quot;off&quot;&#39;</span><span class="p">)</span>
+
+            <span class="c"># set switch</span>
+            <span class="n">switch</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;on&#39;</span>
+
+            <span class="c"># read type list</span>
+            <span class="n">type_list</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">info_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+
+            <span class="c"># loop through all provided</span>
+            <span class="k">for</span> <span class="n">msg_type</span> <span class="ow">in</span> <span class="n">type_list</span><span class="p">:</span>
+                <span class="c"># check if message type exists</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">msg_type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">info_dict</span><span class="p">:</span>
+                    <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;&quot;</span><span class="si">%s</span><span class="s">&quot; is not a message type&#39;</span> <span class="o">%</span> <span class="n">msg_type</span><span class="p">)</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">info_dict</span><span class="p">[</span><span class="n">msg_type</span><span class="p">]</span> <span class="o">=</span> <span class="n">switch</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c"># print info</span>
+            <span class="n">print_values</span><span class="p">(</span>
+                <span class="p">((</span><span class="s">&#39;Name&#39;</span><span class="p">,</span> <span class="s">&#39;Print&#39;</span><span class="p">),)</span> <span class="o">+</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">msg_type</span> <span class="k">for</span> <span class="n">msg_type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">info_dict</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+            <span class="p">)</span>
+</div>
+<div class="viewcode-block" id="BasicConsole.do_exit"><a class="viewcode-back" href="../../../bacnet.console.html#bacnet.console.basic.BasicConsole.do_exit">[docs]</a>    <span class="k">def</span> <span class="nf">do_exit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function provides an exit.</span>
+
+<span class="sd">        Usage: exit</span>
+
+<span class="sd">        :param args: string of parameters</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;do_exit </span><span class="si">%r</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+</div>
+<div class="viewcode-block" id="BasicConsole.do_EOF"><a class="viewcode-back" href="../../../bacnet.console.html#bacnet.console.basic.BasicConsole.do_EOF">[docs]</a>    <span class="k">def</span> <span class="nf">do_EOF</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function provides an exit.</span>
+
+<span class="sd">        Usage: EOF</span>
+
+<span class="sd">        :param args: string of parameters</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;do_EOF </span><span class="si">%r</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">do_exit</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="BasicConsole.do_buggers"><a class="viewcode-back" href="../../../bacnet.console.html#bacnet.console.basic.BasicConsole.do_buggers">[docs]</a>    <span class="k">def</span> <span class="nf">do_buggers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function lists all buggers.</span>
+
+<span class="sd">        Usage: buggers [ &lt;prefix&gt; ]</span>
+
+<span class="sd">        :param args: string of parameters</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;do_buggers </span><span class="si">%r</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span>
+
+        <span class="c"># parse arguments</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;too many arguments&#39;</span><span class="p">)</span>
+
+        <span class="c"># get all loggers</span>
+        <span class="n">loggers</span> <span class="o">=</span> <span class="n">get_loggers</span><span class="p">()</span>
+
+        <span class="c"># print all loggers</span>
+        <span class="k">for</span> <span class="n">logger</span> <span class="ow">in</span> <span class="n">loggers</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">logger</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;  </span><span class="si">%s</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">logger</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="BasicConsole.do_bugin"><a class="viewcode-back" href="../../../bacnet.console.html#bacnet.console.basic.BasicConsole.do_bugin">[docs]</a>    <span class="k">def</span> <span class="nf">do_bugin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function activates debugging for mentioned buggers.</span>
+
+<span class="sd">        Usage: bugin ( &lt;bugger&gt; )+</span>
+
+<span class="sd">        :param args: string of parameters</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;do_bugin </span><span class="si">%r</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span>
+
+        <span class="c"># parse arguments</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;too few arguments&#39;</span><span class="p">)</span>
+
+        <span class="c"># set level to debug for all buggers</span>
+        <span class="k">for</span> <span class="n">logger</span> <span class="ow">in</span> <span class="n">args</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">logger</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;bacnet.console&#39;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;logger out of scope: subprocess</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">set_handler</span><span class="p">(</span><span class="n">logger</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s">&#39;DEBUG&#39;</span><span class="p">,</span> <span class="n">details</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="BasicConsole.do_bugout"><a class="viewcode-back" href="../../../bacnet.console.html#bacnet.console.basic.BasicConsole.do_bugout">[docs]</a>    <span class="k">def</span> <span class="nf">do_bugout</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function deactivates debugging for mentioned buggers.</span>
+
+<span class="sd">        Usage: bugout ( &lt;bugger&gt; )+</span>
+
+<span class="sd">        :param args: string of parameters</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;do_bugout </span><span class="si">%r</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span>
+
+        <span class="c"># parse arguments</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;too few arguments&#39;</span><span class="p">)</span>
+
+        <span class="c"># set level to error for all buggers</span>
+        <span class="k">for</span> <span class="n">logger</span> <span class="ow">in</span> <span class="n">args</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">logger</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;bacnet.console&#39;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;logger out of scope: subprocess</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">set_handler</span><span class="p">(</span><span class="n">logger</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s">&#39;ERROR&#39;</span><span class="p">,</span> <span class="n">details</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="BasicConsole.do_shell"><a class="viewcode-back" href="../../../bacnet.console.html#bacnet.console.basic.BasicConsole.do_shell">[docs]</a>    <span class="k">def</span> <span class="nf">do_shell</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function provides an access to shell execution.</span>
+
+<span class="sd">        Usage: ! &lt;command&gt;</span>
+
+<span class="sd">        :param args: string of parameters</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;do_shell </span><span class="si">%r</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span>
+
+        <span class="c"># check if shell execution is allowed</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">allow_shell</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_error</span><span class="p">(</span><span class="s">&#39;shell not allowed&#39;</span><span class="p">)</span>
+
+    <span class="c"># helper function</span></div>
+<div class="viewcode-block" id="BasicConsole.print_text"><a class="viewcode-back" href="../../../bacnet.console.html#bacnet.console.basic.BasicConsole.print_text">[docs]</a>    <span class="k">def</span> <span class="nf">print_text</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function prints help text.</span>
+
+<span class="sd">        :param text: help text</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># print help text</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%s</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">text</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+
+
+<span class="c"># add appropriate help text to BasicConsole</span></div></div>
+<span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">reference</span> <span class="ow">in</span> <span class="n">COMMAND_DICT</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="c"># read help text</span>
+    <span class="n">help_text</span> <span class="o">=</span> <span class="n">reference</span><span class="o">.</span><span class="n">__doc__</span>
+
+    <span class="c"># check if usage is defined</span>
+    <span class="k">if</span> <span class="s">&#39;Usage:&#39;</span> <span class="ow">in</span> <span class="n">help_text</span><span class="p">:</span>
+
+        <span class="c"># shorten help text</span>
+        <span class="n">help_text</span> <span class="o">=</span> <span class="n">help_text</span><span class="p">[</span><span class="n">help_text</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s">&#39;usage:&#39;</span><span class="p">):]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="c"># set help text</span>
+        <span class="nb">setattr</span><span class="p">(</span>
+            <span class="n">BasicConsole</span><span class="p">,</span>
+            <span class="s">&#39;help_</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">name</span><span class="p">,</span>
+            <span class="k">lambda</span> <span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">help_text</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">print_text</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">BasicConsole</span><span class="o">.</span><span class="n">_warning</span><span class="p">(</span><span class="s">&#39;missing help text for </span><span class="si">%s</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Tobias Grosch.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.3</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

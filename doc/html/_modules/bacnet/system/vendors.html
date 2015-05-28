@@ -1,0 +1,287 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>bacnet.system.vendors &mdash; Masterarbeit Grosch 0.4c0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '0.4c0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="Masterarbeit Grosch 0.4c0 documentation" href="../../../index.html" />
+    <link rel="up" title="bacnet.system" href="../system.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Masterarbeit Grosch 0.4c0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="../system.html" accesskey="U">bacnet.system</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for bacnet.system.vendors</h1><div class="highlight"><pre>
+<span class="c">#!/usr/bin/env python</span>
+<span class="c"># pylint: disable=unused-argument</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Vendors</span>
+<span class="sd">-------</span>
+
+<span class="sd">This module provides an updater for BACnet vendor IDs.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">formatter</span> <span class="kn">import</span> <span class="n">NullFormatter</span>
+<span class="kn">from</span> <span class="nn">htmllib</span> <span class="kn">import</span> <span class="n">HTMLParser</span>
+<span class="kn">from</span> <span class="nn">urllib2</span> <span class="kn">import</span> <span class="n">urlopen</span><span class="p">,</span> <span class="n">HTTPError</span>
+
+
+<span class="n">VENDOR_URL</span> <span class="o">=</span> <span class="s">&#39;http://www.bacnet.org/VendorID/BACnet%20Vendor%20IDs.htm&#39;</span>
+<span class="n">ROW_ORDER</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;id&#39;</span><span class="p">,</span> <span class="s">&#39;name&#39;</span><span class="p">,</span> <span class="s">&#39;contact&#39;</span><span class="p">,</span> <span class="s">&#39;address&#39;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="TableParser"><a class="viewcode-back" href="../../../bacnet.system.html#bacnet.system.vendors.TableParser">[docs]</a><span class="k">class</span> <span class="nc">TableParser</span><span class="p">(</span><span class="n">HTMLParser</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class implements a table parser for the BACnet vendor list.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function initiates the object.</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># call predecessor</span>
+        <span class="n">HTMLParser</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">NullFormatter</span><span class="p">())</span>
+
+        <span class="c"># reset column count</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">col</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c"># initialize vendor dictionary</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vendors</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c"># initialize vendor data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vendor</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c"># initialize tag handlers</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_tag</span> <span class="o">=</span> <span class="bp">None</span>
+
+<div class="viewcode-block" id="TableParser.handle_starttag"><a class="viewcode-back" href="../../../bacnet.system.html#bacnet.system.vendors.TableParser.handle_starttag">[docs]</a>    <span class="k">def</span> <span class="nf">handle_starttag</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">attrs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function is called on every start tag.</span>
+
+<span class="sd">        :param tag: full tag</span>
+<span class="sd">        :param method: tag function</span>
+<span class="sd">        :param attrs: tag attributes</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># check if tag is not break line</span>
+        <span class="k">if</span> <span class="n">tag</span> <span class="o">!=</span> <span class="s">&#39;br&#39;</span><span class="p">:</span>
+
+            <span class="c"># set current tag</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">current_tag</span> <span class="o">=</span> <span class="n">tag</span>
+
+        <span class="c"># call predecessor</span>
+        <span class="n">HTMLParser</span><span class="o">.</span><span class="n">handle_starttag</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">attrs</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="TableParser.start_td"><a class="viewcode-back" href="../../../bacnet.system.html#bacnet.system.vendors.TableParser.start_td">[docs]</a>    <span class="k">def</span> <span class="nf">start_td</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attrs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function handles a new column.</span>
+
+<span class="sd">        :param attrs: tag attributes</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># add to column count</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">col</span> <span class="o">+=</span> <span class="mi">1</span>
+</div>
+<div class="viewcode-block" id="TableParser.end_tr"><a class="viewcode-back" href="../../../bacnet.system.html#bacnet.system.vendors.TableParser.end_tr">[docs]</a>    <span class="k">def</span> <span class="nf">end_tr</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function handles the end of a column.</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># check if id was defined</span>
+        <span class="k">if</span> <span class="s">&#39;id&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">vendor</span><span class="p">:</span>
+
+            <span class="c"># read id</span>
+            <span class="n">identifier</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vendor</span><span class="p">[</span><span class="s">&#39;id&#39;</span><span class="p">]</span>
+
+            <span class="c"># check if id is integer</span>
+            <span class="k">if</span> <span class="n">identifier</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+
+                <span class="c"># cast to integer</span>
+                <span class="n">identifier</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">identifier</span><span class="p">)</span>
+
+                <span class="c"># remove id from vendor data</span>
+                <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">vendor</span><span class="p">[</span><span class="s">&#39;id&#39;</span><span class="p">]</span>
+
+                <span class="c"># store vendor</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">vendors</span><span class="p">[</span><span class="n">identifier</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vendor</span>
+
+        <span class="c"># reset column count</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">col</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c"># reset vendor</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vendor</span> <span class="o">=</span> <span class="p">{}</span>
+</div>
+<div class="viewcode-block" id="TableParser.handle_data"><a class="viewcode-back" href="../../../bacnet.system.html#bacnet.system.vendors.TableParser.handle_data">[docs]</a>    <span class="k">def</span> <span class="nf">handle_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function handles tag data.</span>
+
+<span class="sd">        :param data: tag data</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># check if object has handler function for tag</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_tag</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;handle_</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_tag</span><span class="p">):</span>
+
+            <span class="c"># call handler</span>
+            <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;handle_</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_tag</span><span class="p">)(</span><span class="n">data</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\r\n</span><span class="s">&#39;</span><span class="p">))</span>
+
+        <span class="c"># call predecessor</span>
+        <span class="n">HTMLParser</span><span class="o">.</span><span class="n">handle_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="TableParser.handle_td"><a class="viewcode-back" href="../../../bacnet.system.html#bacnet.system.vendors.TableParser.handle_td">[docs]</a>    <span class="k">def</span> <span class="nf">handle_td</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function handles a new column.</span>
+
+<span class="sd">        :param data: tag content</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># check if column was defined in order</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">col</span> <span class="o">&lt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ROW_ORDER</span><span class="p">):</span>
+
+            <span class="c"># read current vendor data</span>
+            <span class="n">current_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vendor</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ROW_ORDER</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">col</span> <span class="o">-</span> <span class="mi">1</span><span class="p">],</span> <span class="s">&#39;&#39;</span><span class="p">)</span>
+
+            <span class="c"># check if data and current data exist</span>
+            <span class="k">if</span> <span class="n">current_data</span> <span class="ow">and</span> <span class="n">data</span><span class="p">:</span>
+
+                <span class="c"># add line break</span>
+                <span class="n">current_data</span> <span class="o">+=</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span>
+
+            <span class="c"># add to current data</span>
+            <span class="n">current_data</span> <span class="o">+=</span> <span class="n">data</span>
+
+            <span class="c"># store to vendor data</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">vendor</span><span class="p">[</span><span class="n">ROW_ORDER</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">col</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="n">current_data</span>
+
+</div></div>
+<div class="viewcode-block" id="get_vendors"><a class="viewcode-back" href="../../../bacnet.system.html#bacnet.system.vendors.get_vendors">[docs]</a><span class="k">def</span> <span class="nf">get_vendors</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function requests the current vendor list and returns a parsed dictionary</span>
+
+<span class="sd">    :return: vendor dictionary</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">try</span><span class="p">:</span>
+
+        <span class="c"># open url</span>
+        <span class="n">opener</span> <span class="o">=</span> <span class="n">urlopen</span><span class="p">(</span><span class="n">VENDOR_URL</span><span class="p">)</span>
+
+        <span class="c"># download page</span>
+        <span class="n">page</span> <span class="o">=</span> <span class="n">opener</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+
+        <span class="c"># create parser</span>
+        <span class="n">parser</span> <span class="o">=</span> <span class="n">TableParser</span><span class="p">()</span>
+
+        <span class="c"># parse page</span>
+        <span class="n">parser</span><span class="o">.</span><span class="n">feed</span><span class="p">(</span><span class="n">page</span><span class="p">)</span>
+
+        <span class="c"># return vendor dictionary</span>
+        <span class="k">return</span> <span class="n">parser</span><span class="o">.</span><span class="n">vendors</span>
+
+    <span class="k">except</span> <span class="n">HTTPError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+
+        <span class="c"># check if main</span>
+        <span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+
+            <span class="c"># print error</span>
+            <span class="k">print</span> <span class="n">error</span>
+
+        <span class="c"># return empty dictionary</span>
+        <span class="k">return</span> <span class="p">{}</span>
+
+
+<span class="c"># execute if main</span></div>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+
+    <span class="c"># import pretty print</span>
+    <span class="kn">from</span> <span class="nn">pprint</span> <span class="kn">import</span> <span class="n">pprint</span>
+
+    <span class="c"># pretty print vendors</span>
+    <span class="n">pprint</span><span class="p">(</span><span class="n">get_vendors</span><span class="p">())</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Tobias Grosch.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.3</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

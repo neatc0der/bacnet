@@ -1,0 +1,676 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>bacnet.console package &mdash; Masterarbeit Grosch 0.4c0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.4c0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Masterarbeit Grosch 0.4c0 documentation" href="index.html" />
+    <link rel="up" title="bacnet package" href="bacnet.html" />
+    <link rel="next" title="bacnet.console.creator package" href="bacnet.console.creator.html" />
+    <link rel="prev" title="bacnet.app.handler package" href="bacnet.app.handler.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="bacnet.console.creator.html" title="bacnet.console.creator package"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="bacnet.app.handler.html" title="bacnet.app.handler package"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Masterarbeit Grosch 0.4c0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="bacnet.html" accesskey="U">bacnet package</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="bacnet-console-package">
+<h1>bacnet.console package<a class="headerlink" href="#bacnet-console-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="bacnet.console.creator.html">bacnet.console.creator package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="bacnet.console.creator.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bacnet.console.creator.html#module-bacnet.console.creator.events">bacnet.console.creator.events module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="bacnet.console.creator.html#event-handler-module">Event Handler Module</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="bacnet.console.creator.html#module-bacnet.console.creator.fileaccess">bacnet.console.creator.fileaccess module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="bacnet.console.creator.html#file-access-handler-module">File Access Handler Module</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="bacnet.console.creator.html#module-bacnet.console.creator.local">bacnet.console.creator.local module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="bacnet.console.creator.html#local-handler-module">Local Handler Module</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="bacnet.console.creator.html#module-bacnet.console.creator.objects">bacnet.console.creator.objects module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="bacnet.console.creator.html#objects-handler-module">Objects Handler Module</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="bacnet.console.creator.html#module-bacnet.console.creator.simple">bacnet.console.creator.simple module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="bacnet.console.creator.html#simple-handler-module">Simple Handler Module</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="bacnet.console.creator.html#module-bacnet.console.creator">Module contents</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="bacnet.console.creator.html#console-handler-module">Console Handler Module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="bacnet.console.parser.html">bacnet.console.parser package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="bacnet.console.parser.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="bacnet.console.parser.html#module-bacnet.console.parser.events">bacnet.console.parser.events module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="bacnet.console.parser.html#event-parser-module">Event Parser Module</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="bacnet.console.parser.html#module-bacnet.console.parser.fileaccess">bacnet.console.parser.fileaccess module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="bacnet.console.parser.html#file-access-parser-module">File Access Parser Module</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="bacnet.console.parser.html#module-bacnet.console.parser.simple">bacnet.console.parser.simple module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="bacnet.console.parser.html#simple-parser-module">Simple Parser Module</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="bacnet.console.parser.html#module-bacnet.console.parser">Module contents</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="bacnet.console.parser.html#acknowledgement-parser-module">Acknowledgement Parser Module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-bacnet.console.basic">
+<span id="bacnet-console-basic-module"></span><h2>bacnet.console.basic module<a class="headerlink" href="#module-bacnet.console.basic" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="console-basic-module">
+<h3>Console Basic Module<a class="headerlink" href="#console-basic-module" title="Permalink to this headline">¶</a></h3>
+<p>This module provides a basic BACpypes console commands object.</p>
+<dl class="class">
+<dt id="bacnet.console.basic.BasicConsole">
+<em class="property">class </em><code class="descclassname">bacnet.console.basic.</code><code class="descname">BasicConsole</code><span class="sig-paren">(</span><em>device</em>, <em>application</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/console/basic.html#BasicConsole"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.console.basic.BasicConsole" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">cmd.Cmd</span></code>, <code class="xref py py-class docutils literal"><span class="pre">multiprocessing.process.Process</span></code></p>
+<p>This class describes a basic BACpypes shell including simple commands.</p>
+<dl class="attribute">
+<dt id="bacnet.console.basic.BasicConsole.application">
+<code class="descname">application</code><em class="property"> = None</em><a class="headerlink" href="#bacnet.console.basic.BasicConsole.application" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bacnet.console.basic.BasicConsole.callback">
+<code class="descname">callback</code><span class="sig-paren">(</span><em>apdu</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/console/basic.html#BasicConsole.callback"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.console.basic.BasicConsole.callback" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function provides a callback for command executions.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>apdu</strong> &#8211; message</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.console.basic.BasicConsole.check_queue">
+<code class="descname">check_queue</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/console/basic.html#BasicConsole.check_queue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.console.basic.BasicConsole.check_queue" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function checks for queued outgoing requests.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.console.basic.BasicConsole.console_interrupt">
+<code class="descname">console_interrupt</code><span class="sig-paren">(</span><em>*args</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/console/basic.html#BasicConsole.console_interrupt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.console.basic.BasicConsole.console_interrupt" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function is the catch for interrupts.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.console.basic.BasicConsole.default">
+<code class="descname">default</code><span class="sig-paren">(</span><em>line</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/console/basic.html#BasicConsole.default"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.console.basic.BasicConsole.default" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function handles the command line if no command was found.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>line</strong> &#8211; command line</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="bacnet.console.basic.BasicConsole.device">
+<code class="descname">device</code><em class="property"> = None</em><a class="headerlink" href="#bacnet.console.basic.BasicConsole.device" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bacnet.console.basic.BasicConsole.do_EOF">
+<code class="descname">do_EOF</code><span class="sig-paren">(</span><em>args</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/console/basic.html#BasicConsole.do_EOF"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.console.basic.BasicConsole.do_EOF" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function provides an exit.</p>
+<p>Usage: EOF</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>args</strong> &#8211; string of parameters</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.console.basic.BasicConsole.do_buggers">
+<code class="descname">do_buggers</code><span class="sig-paren">(</span><em>args</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/console/basic.html#BasicConsole.do_buggers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.console.basic.BasicConsole.do_buggers" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function lists all buggers.</p>
+<p>Usage: buggers [ &lt;prefix&gt; ]</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>args</strong> &#8211; string of parameters</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.console.basic.BasicConsole.do_bugin">
+<code class="descname">do_bugin</code><span class="sig-paren">(</span><em>args</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/console/basic.html#BasicConsole.do_bugin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.console.basic.BasicConsole.do_bugin" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function activates debugging for mentioned buggers.</p>
+<p>Usage: bugin ( &lt;bugger&gt; )+</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>args</strong> &#8211; string of parameters</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.console.basic.BasicConsole.do_bugout">
+<code class="descname">do_bugout</code><span class="sig-paren">(</span><em>args</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/console/basic.html#BasicConsole.do_bugout"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.console.basic.BasicConsole.do_bugout" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function deactivates debugging for mentioned buggers.</p>
+<p>Usage: bugout ( &lt;bugger&gt; )+</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>args</strong> &#8211; string of parameters</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.console.basic.BasicConsole.do_exit">
+<code class="descname">do_exit</code><span class="sig-paren">(</span><em>args</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/console/basic.html#BasicConsole.do_exit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.console.basic.BasicConsole.do_exit" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function provides an exit.</p>
+<p>Usage: exit</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>args</strong> &#8211; string of parameters</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.console.basic.BasicConsole.do_gc">
+<code class="descname">do_gc</code><span class="sig-paren">(</span><em>args</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/console/basic.html#BasicConsole.do_gc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.console.basic.BasicConsole.do_gc" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function prints current garbage collection information.</p>
+<p>Usage: gc</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>args</strong> &#8211; string of parameters</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.console.basic.BasicConsole.do_info">
+<code class="descname">do_info</code><span class="sig-paren">(</span><em>args</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/console/basic.html#BasicConsole.do_info"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.console.basic.BasicConsole.do_info" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function adjusts package output.</p>
+<p>Usage: info [ ( on | off ) ( &lt;msg_type&gt; )* ]</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>args</strong> &#8211; string of parameters</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.console.basic.BasicConsole.do_shell">
+<code class="descname">do_shell</code><span class="sig-paren">(</span><em>args</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/console/basic.html#BasicConsole.do_shell"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.console.basic.BasicConsole.do_shell" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function provides an access to shell execution.</p>
+<p>Usage: ! &lt;command&gt;</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>args</strong> &#8211; string of parameters</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.console.basic.BasicConsole.do_version">
+<code class="descname">do_version</code><span class="sig-paren">(</span><em>args</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/console/basic.html#BasicConsole.do_version"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.console.basic.BasicConsole.do_version" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function prints current software version.</p>
+<p>Usage: version</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>args</strong> &#8211; string of parameters</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.console.basic.BasicConsole.emptyline">
+<code class="descname">emptyline</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/console/basic.html#BasicConsole.emptyline"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.console.basic.BasicConsole.emptyline" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function ignores empty lines.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.console.basic.BasicConsole.get_names">
+<code class="descname">get_names</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/console/basic.html#BasicConsole.get_names"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.console.basic.BasicConsole.get_names" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function collects all attributes.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">list of attributes</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.console.basic.BasicConsole.help_create">
+<code class="descname">help_create</code><span class="sig-paren">(</span><em>text='Usage: create &lt;address&gt; &lt;type&gt; [ &lt;vendor&gt; ] ( &lt;property&gt; &lt;value&gt; [ &lt;index&gt; [ priority ] ] )* ...'</em><span class="sig-paren">)</span><a class="headerlink" href="#bacnet.console.basic.BasicConsole.help_create" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bacnet.console.basic.BasicConsole.help_delete">
+<code class="descname">help_delete</code><span class="sig-paren">(</span><em>text='Usage: delete &lt;address&gt; &lt;type&gt; &lt;instance&gt;'</em><span class="sig-paren">)</span><a class="headerlink" href="#bacnet.console.basic.BasicConsole.help_delete" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bacnet.console.basic.BasicConsole.help_iam">
+<code class="descname">help_iam</code><span class="sig-paren">(</span><em>text='Usage: iam [ &lt;address&gt; ]'</em><span class="sig-paren">)</span><a class="headerlink" href="#bacnet.console.basic.BasicConsole.help_iam" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bacnet.console.basic.BasicConsole.help_ihave">
+<code class="descname">help_ihave</code><span class="sig-paren">(</span><em>text='Usage: ihave [ &lt;address&gt; ] ( &lt;name&gt; | &lt;type&gt; &lt;instance&gt; )'</em><span class="sig-paren">)</span><a class="headerlink" href="#bacnet.console.basic.BasicConsole.help_ihave" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bacnet.console.basic.BasicConsole.help_rdrec">
+<code class="descname">help_rdrec</code><span class="sig-paren">(</span><em>text='Usage: rdrec &lt;address&gt; &lt;instance&gt; &lt;start&gt; &lt;count&gt;'</em><span class="sig-paren">)</span><a class="headerlink" href="#bacnet.console.basic.BasicConsole.help_rdrec" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bacnet.console.basic.BasicConsole.help_rdstr">
+<code class="descname">help_rdstr</code><span class="sig-paren">(</span><em>text='Usage: rdstr &lt;address&gt; &lt;instance&gt; &lt;start&gt; &lt;count&gt;'</em><span class="sig-paren">)</span><a class="headerlink" href="#bacnet.console.basic.BasicConsole.help_rdstr" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bacnet.console.basic.BasicConsole.help_read">
+<code class="descname">help_read</code><span class="sig-paren">(</span><em>text='Usage: read &lt;address&gt; ( &lt;type&gt; &lt;instance&gt; ( &lt;property&gt; [ &lt;index&gt; ] )+ ... )+ ...'</em><span class="sig-paren">)</span><a class="headerlink" href="#bacnet.console.basic.BasicConsole.help_read" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bacnet.console.basic.BasicConsole.help_subscribe">
+<code class="descname">help_subscribe</code><span class="sig-paren">(</span><em>text='Usage: subscribe &lt;address&gt; &lt;lifetime&gt; &lt;confirmed&gt; &lt;type&gt; &lt;instance&gt; [ &lt;property&gt; &lt;increment&gt; [ &lt;index&gt; ] ]'</em><span class="sig-paren">)</span><a class="headerlink" href="#bacnet.console.basic.BasicConsole.help_subscribe" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bacnet.console.basic.BasicConsole.help_whohas">
+<code class="descname">help_whohas</code><span class="sig-paren">(</span><em>text='Usage: whohas [ &lt;address&gt; ] ( &lt;name&gt; | &lt;type&gt; &lt;instance&gt; ) [ &lt;lowlimit&gt; &lt;highlimit&gt; ]'</em><span class="sig-paren">)</span><a class="headerlink" href="#bacnet.console.basic.BasicConsole.help_whohas" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bacnet.console.basic.BasicConsole.help_whois">
+<code class="descname">help_whois</code><span class="sig-paren">(</span><em>text='Usage: whois [ &lt;address&gt; ] [ &lt;lowlimit&gt; &lt;highlimit&gt; ]'</em><span class="sig-paren">)</span><a class="headerlink" href="#bacnet.console.basic.BasicConsole.help_whois" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bacnet.console.basic.BasicConsole.help_write">
+<code class="descname">help_write</code><span class="sig-paren">(</span><em>text='Usage: write &lt;address&gt; ( &lt;type&gt; &lt;instance&gt; ( &lt;property&gt; &lt;value&gt; [ &lt;index&gt; [ &lt;priority&gt; ] ] )+ ... )+ ...'</em><span class="sig-paren">)</span><a class="headerlink" href="#bacnet.console.basic.BasicConsole.help_write" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bacnet.console.basic.BasicConsole.help_wrrec">
+<code class="descname">help_wrrec</code><span class="sig-paren">(</span><em>text='Usage: wrrec &lt;address&gt; &lt;instance&gt; &lt;start&gt; &lt;count&gt; ( &lt;data&gt; )* ...'</em><span class="sig-paren">)</span><a class="headerlink" href="#bacnet.console.basic.BasicConsole.help_wrrec" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bacnet.console.basic.BasicConsole.help_wrstr">
+<code class="descname">help_wrstr</code><span class="sig-paren">(</span><em>text='Usage: wrstr &lt;address&gt; &lt;instance&gt; &lt;start&gt; &lt;data&gt;'</em><span class="sig-paren">)</span><a class="headerlink" href="#bacnet.console.basic.BasicConsole.help_wrstr" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="bacnet.console.basic.BasicConsole.onecmd">
+<code class="descname">onecmd</code><span class="sig-paren">(</span><em>line</em>, <em>queue=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/console/basic.html#BasicConsole.onecmd"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.console.basic.BasicConsole.onecmd" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function interprets the command line.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>line</strong> &#8211; user command line</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">command result</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.console.basic.BasicConsole.postloop">
+<code class="descname">postloop</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/console/basic.html#BasicConsole.postloop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.console.basic.BasicConsole.postloop" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function wraps up readline history after loop has finished.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.console.basic.BasicConsole.preloop">
+<code class="descname">preloop</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/console/basic.html#BasicConsole.preloop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.console.basic.BasicConsole.preloop" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function prepares loop by loading readline history file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.console.basic.BasicConsole.print_text">
+<code class="descname">print_text</code><span class="sig-paren">(</span><em>text</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/console/basic.html#BasicConsole.print_text"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.console.basic.BasicConsole.print_text" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function prints help text.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>text</strong> &#8211; help text</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.console.basic.BasicConsole.run">
+<code class="descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/console/basic.html#BasicConsole.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.console.basic.BasicConsole.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function initiates processing.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.console.basic.BasicConsole.shutdown">
+<code class="descname">shutdown</code><span class="sig-paren">(</span><em>*args</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/console/basic.html#BasicConsole.shutdown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.console.basic.BasicConsole.shutdown" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function shuts down the process.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="bacnet.console.basic.BasicConsole.terminate">
+<code class="descname">terminate</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/console/basic.html#BasicConsole.terminate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.console.basic.BasicConsole.terminate" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function terminates processing.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">None</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="module-bacnet.console.define">
+<span id="bacnet-console-define-module"></span><h2>bacnet.console.define module<a class="headerlink" href="#module-bacnet.console.define" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="console-define-module">
+<h3>Console Define Module<a class="headerlink" href="#console-define-module" title="Permalink to this headline">¶</a></h3>
+<p>This module is an empty shell.</p>
+<dl class="class">
+<dt id="bacnet.console.define.Console">
+<em class="property">class </em><code class="descclassname">bacnet.console.define.</code><code class="descname">Console</code><span class="sig-paren">(</span><em>device</em>, <em>application</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/console/define.html#Console"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.console.define.Console" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#bacnet.console.basic.BasicConsole" title="bacnet.console.basic.BasicConsole"><code class="xref py py-class docutils literal"><span class="pre">bacnet.console.basic.BasicConsole</span></code></a></p>
+<p>This Class describes the user specific Console Commands including basic builtin functions like
+&#8220;read&#8221; and &#8220;write&#8221;.</p>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="module-bacnet.console">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-bacnet.console" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="console-module">
+<h3>Console Module<a class="headerlink" href="#console-module" title="Permalink to this headline">¶</a></h3>
+<p>This module contains just a single public function for creating an object for a set of console
+commands to ensure BACnet conform communications by using BACpypes.</p>
+<dl class="docutils">
+<dt>Function for creating console commands:</dt>
+<dd>create_console(application)</dd>
+</dl>
+<dl class="function">
+<dt id="bacnet.console.create_console">
+<code class="descclassname">bacnet.console.</code><code class="descname">create_console</code><span class="sig-paren">(</span><em>device</em>, <em>application</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/bacnet/console.html#create_console"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#bacnet.console.create_console" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function creates a single BACpypes object to support a shell to control BACnet messages.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>device</strong> &#8211; device object</li>
+<li><strong>application</strong> &#8211; application object</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">console object</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">bacnet.console package</a><ul>
+<li><a class="reference internal" href="#subpackages">Subpackages</a></li>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-bacnet.console.basic">bacnet.console.basic module</a><ul>
+<li><a class="reference internal" href="#console-basic-module">Console Basic Module</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-bacnet.console.define">bacnet.console.define module</a><ul>
+<li><a class="reference internal" href="#console-define-module">Console Define Module</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-bacnet.console">Module contents</a><ul>
+<li><a class="reference internal" href="#console-module">Console Module</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="bacnet.app.handler.html"
+                        title="previous chapter">bacnet.app.handler package</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="bacnet.console.creator.html"
+                        title="next chapter">bacnet.console.creator package</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/bacnet.console.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Tobias Grosch.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.3</a>
+      
+      |
+      <a href="_sources/bacnet.console.txt"
+          rel="nofollow">Page source</a></li>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,22 @@
+bacnet.debugging package
+========================
+
+Submodules
+----------
+
+bacnet.debugging.log module
+---------------------------
+
+.. automodule:: bacnet.debugging.log
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: bacnet.debugging
+    :members:
+    :undoc-members:
+    :show-inheritance:

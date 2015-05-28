@@ -1,0 +1,445 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>bacnet.object.hardware.terra &mdash; Masterarbeit Grosch 0.4c0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.4c0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="Masterarbeit Grosch 0.4c0 documentation" href="../../../../index.html" />
+    <link rel="up" title="bacnet.object.hardware" href="../hardware.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">Masterarbeit Grosch 0.4c0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="../../object.html" >bacnet.object</a> &raquo;</li>
+          <li class="nav-item nav-item-3"><a href="../hardware.html" accesskey="U">bacnet.object.hardware</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for bacnet.object.hardware.terra</h1><div class="highlight"><pre>
+<span class="c"># pylint: disable=invalid-name, unused-variable, too-few-public-methods, import-error, broad-except</span>
+<span class="c"># pylint: disable=no-name-in-module</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Terra Module</span>
+<span class="sd">------------------</span>
+
+<span class="sd">This module contains Terra Board specific objects.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">from</span> <span class="nn">bacnet.object.properties</span> <span class="kn">import</span> <span class="n">HardwareAccessObject</span>
+<span class="kn">from</span> <span class="nn">bacnet.object.primitivedata</span> <span class="kn">import</span> <span class="n">RingList</span>
+
+<span class="kn">from</span> <span class="nn">bacnet.debugging</span> <span class="kn">import</span> <span class="n">ModuleLogger</span>
+
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">ModuleLogger</span><span class="p">(</span><span class="n">formatter</span><span class="o">=</span><span class="s">&#39;</span><span class="si">%(levelname)s</span><span class="s">:hardware:terra: </span><span class="si">%(message)s</span><span class="s">&#39;</span><span class="p">)</span>
+
+
+<span class="n">USE_DUMMY</span> <span class="o">=</span> <span class="bp">True</span>
+
+
+<div class="viewcode-block" id="New_Daisy20"><a class="viewcode-back" href="../../../../bacnet.object.hardware.terra.html#bacnet.object.hardware.terra.New_Daisy20">[docs]</a><span class="k">class</span> <span class="nc">New_Daisy20</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    DAISY-20 (ADC module)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">max_voltage</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">volt_per_point</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">adc_path</span> <span class="o">=</span> <span class="s">&#39;/sys/bus/iio/devices/iio:device0/&#39;</span>
+    <span class="n">chan_file</span> <span class="o">=</span> <span class="s">&#39;in_voltage</span><span class="si">%i</span><span class="s">_raw&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">max_voltage</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">bits</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        init</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_voltage</span> <span class="o">=</span> <span class="n">max_voltage</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">volt_per_point</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">max_voltage</span><span class="p">)</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="mi">2</span><span class="o">**</span><span class="n">bits</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">last_value_set</span> <span class="o">=</span> <span class="mf">0.0</span>
+
+<div class="viewcode-block" id="New_Daisy20.get"><a class="viewcode-back" href="../../../../bacnet.object.hardware.terra.html#bacnet.object.hardware.terra.New_Daisy20.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ch</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        get</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">adc_path</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chan_file</span> <span class="o">%</span> <span class="n">ch</span><span class="p">)),</span> <span class="s">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fd</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">fd</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="New_Daisy20.convert"><a class="viewcode-back" href="../../../../bacnet.object.hardware.terra.html#bacnet.object.hardware.terra.New_Daisy20.convert">[docs]</a>    <span class="k">def</span> <span class="nf">convert</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bit_value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        convert</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">bit_value</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">volt_per_point</span>
+
+</div></div>
+<span class="k">try</span><span class="p">:</span>
+    <span class="c"># load Terra Board Library</span>
+    <span class="kn">import</span> <span class="nn">ablib</span>
+
+    <span class="c"># check if hardware can be accessed</span>
+    <span class="n">DAISY24</span> <span class="o">=</span> <span class="n">ablib</span><span class="o">.</span><span class="n">Daisy24</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mh">0x3F</span><span class="p">)</span>
+
+    <span class="c"># store original Daisy20 (ADC)</span>
+    <span class="n">Old_Daisy20</span> <span class="o">=</span> <span class="n">ablib</span><span class="o">.</span><span class="n">Daisy20</span>
+
+    <span class="c"># check if path to new daisy20 exists</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">Old_Daisy20</span><span class="o">.</span><span class="n">adcpath</span><span class="p">):</span>
+        <span class="c"># override Daisy20 adc path</span>
+        <span class="n">New_Daisy20</span><span class="o">.</span><span class="n">adc_path</span> <span class="o">=</span> <span class="n">Old_Daisy20</span><span class="o">.</span><span class="n">adcpath</span>
+
+        <span class="c"># override Daisy20 chan file</span>
+        <span class="n">New_Daisy20</span><span class="o">.</span><span class="n">chan_file</span> <span class="o">=</span> <span class="s">&#39;chan</span><span class="si">%i</span><span class="s">&#39;</span>
+
+    <span class="c"># replace original Daisy20 (ADC)</span>
+    <span class="n">ablib</span><span class="o">.</span><span class="n">Daisy20</span> <span class="o">=</span> <span class="n">New_Daisy20</span>
+
+<span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+    <span class="c"># print warning</span>
+    <span class="k">if</span> <span class="n">USE_DUMMY</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&#39;using ablib_dummy&#39;</span><span class="p">)</span>
+
+    <span class="c"># load dummy library</span>
+    <span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">ablib_dummy</span> <span class="k">as</span> <span class="n">ablib</span>
+
+    <span class="c"># create dummy</span>
+    <span class="n">DAISY24</span> <span class="o">=</span> <span class="n">ablib</span><span class="o">.</span><span class="n">Daisy24</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mh">0x3F</span><span class="p">)</span>
+
+
+<span class="n">DAISY20</span> <span class="o">=</span> <span class="n">ablib</span><span class="o">.</span><span class="n">Daisy20</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="AbstractDaisy20"><a class="viewcode-back" href="../../../../bacnet.object.hardware.terra.html#bacnet.object.hardware.terra.AbstractDaisy20">[docs]</a><span class="k">class</span> <span class="nc">AbstractDaisy20</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class is an abstraction of the ablib.Daisy20 class.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">identifier</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identifier</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function is a constructor for the adc dummies.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">identifier</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">4</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;identifier out of range&#39;</span><span class="p">)</span>
+
+        <span class="c"># store identifier</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">identifier</span> <span class="o">=</span> <span class="n">identifier</span>
+
+        <span class="c"># get buffer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span> <span class="o">=</span> <span class="n">RingList</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+
+<div class="viewcode-block" id="AbstractDaisy20.get"><a class="viewcode-back" href="../../../../bacnet.object.hardware.terra.html#bacnet.object.hardware.terra.AbstractDaisy20.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function is a wrapper for the get function.</span>
+
+<span class="sd">        :return: voltage</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># get bit value without the last 3 bits</span>
+        <span class="n">bit_value</span> <span class="o">=</span> <span class="n">DAISY20</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">identifier</span><span class="p">)</span> <span class="o">&amp;</span> <span class="mh">0x3f8</span>
+
+        <span class="c"># append value to buffer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">bit_value</span><span class="p">)</span>
+
+        <span class="c"># get buffer</span>
+        <span class="n">bfr</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">buf</span> <span class="k">for</span> <span class="n">buf</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">buffer</span> <span class="k">if</span> <span class="n">buf</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">)</span>
+
+        <span class="c"># set mask to 2^10 - 1</span>
+        <span class="n">mask</span> <span class="o">=</span> <span class="mh">0x03ff</span>
+
+        <span class="c"># loop through buffer</span>
+        <span class="k">for</span> <span class="n">buffer_value</span> <span class="ow">in</span> <span class="n">bfr</span><span class="p">:</span>
+            <span class="c"># mask and buffer value</span>
+            <span class="n">mask</span> <span class="o">=</span> <span class="n">mask</span> <span class="o">&amp;</span> <span class="n">buffer_value</span>
+
+        <span class="c"># check if masked bit value is smaller than 0.2</span>
+        <span class="k">if</span> <span class="n">DAISY20</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="n">mask</span> <span class="o">^</span> <span class="n">bit_value</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">0.2</span><span class="p">:</span>
+            <span class="c"># set value to bit value</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">bit_value</span>
+
+            <span class="c"># store value as last set</span>
+            <span class="n">DAISY20</span><span class="o">.</span><span class="n">last_value_set</span> <span class="o">=</span> <span class="n">value</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c"># get last value</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">DAISY20</span><span class="o">.</span><span class="n">last_value_set</span>
+
+        <span class="c"># return updated value</span>
+        <span class="k">return</span> <span class="n">DAISY20</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="AbstractDaisy24Button"><a class="viewcode-back" href="../../../../bacnet.object.hardware.terra.html#bacnet.object.hardware.terra.AbstractDaisy24Button">[docs]</a><span class="k">class</span> <span class="nc">AbstractDaisy24Button</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class is an abstraction for buttons of the ablib.Daisy24 class.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">identifier</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identifier</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function is a constructor for the button dummies.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">identifier</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">4</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;identifier out of range&#39;</span><span class="p">)</span>
+
+        <span class="c"># store identifier</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">identifier</span> <span class="o">=</span> <span class="n">identifier</span>
+
+<div class="viewcode-block" id="AbstractDaisy24Button.get"><a class="viewcode-back" href="../../../../bacnet.object.hardware.terra.html#bacnet.object.hardware.terra.AbstractDaisy24Button.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function is a wrapper for the pressed function.</span>
+
+<span class="sd">        :return: button pressed</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># return actual value</span>
+        <span class="k">return</span> <span class="n">DAISY24</span><span class="o">.</span><span class="n">pressed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">identifier</span><span class="p">)</span>
+
+</div></div>
+<div class="viewcode-block" id="AbstractDaisy24LCD"><a class="viewcode-back" href="../../../../bacnet.object.hardware.terra.html#bacnet.object.hardware.terra.AbstractDaisy24LCD">[docs]</a><span class="k">class</span> <span class="nc">AbstractDaisy24LCD</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class is an abstraction for lcd of the ablib.Daisy24 class.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">identifier</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">value</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identifier</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function is a constructor for the lcd dummies.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># store identifier</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">identifier</span> <span class="o">=</span> <span class="n">identifier</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+
+<div class="viewcode-block" id="AbstractDaisy24LCD.get"><a class="viewcode-back" href="../../../../bacnet.object.hardware.terra.html#bacnet.object.hardware.terra.AbstractDaisy24LCD.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function is a providing a value buffer.</span>
+
+<span class="sd">        :return: button pressed/not pressed</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># return actual value</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span>
+</div>
+<div class="viewcode-block" id="AbstractDaisy24LCD.write"><a class="viewcode-back" href="../../../../bacnet.object.hardware.terra.html#bacnet.object.hardware.terra.AbstractDaisy24LCD.write">[docs]</a>    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function is a wrapper for the putstring and setcurpos function</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># format string</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="p">[:</span><span class="mi">32</span><span class="p">]</span><span class="o">.</span><span class="n">ljust</span><span class="p">(</span><span class="mi">32</span><span class="p">)</span>
+
+        <span class="c"># write to display</span>
+        <span class="n">DAISY24</span><span class="o">.</span><span class="n">setcurpos</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">DAISY24</span><span class="o">.</span><span class="n">putstring</span><span class="p">(</span><span class="n">value</span><span class="p">[:</span><span class="mi">16</span><span class="p">])</span>
+        <span class="n">DAISY24</span><span class="o">.</span><span class="n">setcurpos</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">DAISY24</span><span class="o">.</span><span class="n">putstring</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="mi">16</span><span class="p">:])</span>
+
+        <span class="c"># store value</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span>
+
+        <span class="c"># return value</span>
+        <span class="k">return</span> <span class="n">value</span>
+
+</div></div>
+<div class="viewcode-block" id="AbstractDaisy24Backlight"><a class="viewcode-back" href="../../../../bacnet.object.hardware.terra.html#bacnet.object.hardware.terra.AbstractDaisy24Backlight">[docs]</a><span class="k">class</span> <span class="nc">AbstractDaisy24Backlight</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="c"># pylint: disable=no-self-use</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This class is an abstraction for backlight of the ablib.Daisy24 class.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">identifier</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function is a constructor for the backlight dummies.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># store identifier</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">identifier</span> <span class="o">=</span> <span class="n">identifier</span>
+
+<div class="viewcode-block" id="AbstractDaisy24Backlight.get"><a class="viewcode-back" href="../../../../bacnet.object.hardware.terra.html#bacnet.object.hardware.terra.AbstractDaisy24Backlight.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function is a wrapper for the backled.get function.</span>
+
+<span class="sd">        :return: led on/off</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># return actual value</span>
+        <span class="k">return</span> <span class="n">DAISY24</span><span class="o">.</span><span class="n">backled</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="AbstractDaisy24Backlight.on"><a class="viewcode-back" href="../../../../bacnet.object.hardware.terra.html#bacnet.object.hardware.terra.AbstractDaisy24Backlight.on">[docs]</a>    <span class="k">def</span> <span class="nf">on</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function is a wrapper for the backled.on function.</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># turn on backlight</span>
+        <span class="k">return</span> <span class="n">DAISY24</span><span class="o">.</span><span class="n">backled</span><span class="o">.</span><span class="n">on</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="AbstractDaisy24Backlight.off"><a class="viewcode-back" href="../../../../bacnet.object.hardware.terra.html#bacnet.object.hardware.terra.AbstractDaisy24Backlight.off">[docs]</a>    <span class="k">def</span> <span class="nf">off</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function is a wrapper for the backled.off function.</span>
+
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># turn off backlight</span>
+        <span class="k">return</span> <span class="n">DAISY24</span><span class="o">.</span><span class="n">backled</span><span class="o">.</span><span class="n">off</span><span class="p">()</span>
+
+
+<span class="c"># check if hardware is supported or dummies are allowed</span></div></div>
+<span class="k">if</span> <span class="n">USE_DUMMY</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">ablib</span><span class="p">,</span> <span class="s">&#39;ABLIB_Dummy&#39;</span><span class="p">):</span>
+    <span class="n">HARDWARE_LIST</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="p">{</span>
+            <span class="c"># TODO: trigger support</span>
+            <span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="s">&#39;ADC&#39;</span><span class="p">,</span>
+            <span class="s">&#39;hardware&#39;</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">(</span>
+                <span class="n">HardwareAccessObject</span><span class="p">(</span><span class="n">AbstractDaisy20</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+            <span class="p">),</span>
+            <span class="s">&#39;objectType&#39;</span><span class="p">:</span> <span class="s">&#39;analogInput&#39;</span><span class="p">,</span>
+            <span class="s">&#39;poll&#39;</span><span class="p">:</span> <span class="mf">0.2</span><span class="p">,</span>
+            <span class="s">&#39;initials&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s">&#39;objectName&#39;</span><span class="p">:</span> <span class="s">&#39;{module}_adc_ad{index}&#39;</span><span class="p">,</span>
+                <span class="s">&#39;description&#39;</span><span class="p">:</span> <span class="s">&#39;{Module} Daisy20 ADC AD{index}&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="s">&#39;Button&#39;</span><span class="p">,</span>
+            <span class="s">&#39;hardware&#39;</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">(</span>
+                <span class="n">HardwareAccessObject</span><span class="p">(</span><span class="n">AbstractDaisy24Button</span><span class="p">(</span><span class="n">i</span><span class="p">))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+            <span class="p">),</span>
+            <span class="s">&#39;objectType&#39;</span><span class="p">:</span> <span class="s">&#39;binaryInput&#39;</span><span class="p">,</span>
+            <span class="s">&#39;poll&#39;</span><span class="p">:</span> <span class="mf">0.05</span><span class="p">,</span>
+            <span class="s">&#39;initials&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s">&#39;objectName&#39;</span><span class="p">:</span> <span class="s">&#39;{module}_button_key{index}&#39;</span><span class="p">,</span>
+                <span class="s">&#39;description&#39;</span><span class="p">:</span> <span class="s">&#39;{Module} Daisy24 Button {index}&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="s">&#39;Backlight&#39;</span><span class="p">,</span>
+            <span class="s">&#39;hardware&#39;</span><span class="p">:</span> <span class="n">HardwareAccessObject</span><span class="p">(</span><span class="n">AbstractDaisy24Backlight</span><span class="p">(),</span> <span class="n">write</span><span class="o">=</span><span class="bp">True</span><span class="p">),</span>
+            <span class="s">&#39;objectType&#39;</span><span class="p">:</span> <span class="s">&#39;binaryOutput&#39;</span><span class="p">,</span>
+            <span class="s">&#39;initials&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s">&#39;objectName&#39;</span><span class="p">:</span> <span class="s">&#39;{module}_led_backlight&#39;</span><span class="p">,</span>
+                <span class="s">&#39;description&#39;</span><span class="p">:</span> <span class="s">&#39;{Module} Daisy24 Backlight LED&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="s">&#39;LED&#39;</span><span class="p">,</span>
+            <span class="s">&#39;hardware&#39;</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">(</span>
+                <span class="n">HardwareAccessObject</span><span class="p">(</span><span class="n">ablib</span><span class="o">.</span><span class="n">Daisy11</span><span class="p">(</span><span class="s">&#39;D11&#39;</span><span class="p">,</span> <span class="s">&#39;L</span><span class="si">%i</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">i</span><span class="p">),</span> <span class="n">write</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">9</span><span class="p">)</span>
+            <span class="p">),</span>
+            <span class="s">&#39;objectType&#39;</span><span class="p">:</span> <span class="s">&#39;binaryOutput&#39;</span><span class="p">,</span>
+            <span class="s">&#39;initials&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s">&#39;objectName&#39;</span><span class="p">:</span> <span class="s">&#39;{module}_led_l{index1}&#39;</span><span class="p">,</span>
+                <span class="s">&#39;description&#39;</span><span class="p">:</span> <span class="s">&#39;{Module} Daisy11 LED L{index1}&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="s">&#39;Switch&#39;</span><span class="p">,</span>
+            <span class="s">&#39;hardware&#39;</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">(</span>
+                <span class="n">HardwareAccessObject</span><span class="p">(</span><span class="n">ablib</span><span class="o">.</span><span class="n">Daisy19</span><span class="p">(</span><span class="s">&#39;D14&#39;</span><span class="p">,</span> <span class="s">&#39;first&#39;</span><span class="p">,</span> <span class="s">&#39;CH</span><span class="si">%i</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">i</span><span class="p">))</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+            <span class="p">),</span>
+            <span class="s">&#39;objectType&#39;</span><span class="p">:</span> <span class="s">&#39;binaryOutput&#39;</span><span class="p">,</span>
+            <span class="s">&#39;initials&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s">&#39;objectName&#39;</span><span class="p">:</span> <span class="s">&#39;{module}_switch_ch{index1}&#39;</span><span class="p">,</span>
+                <span class="s">&#39;description&#39;</span><span class="p">:</span> <span class="s">&#39;{Module} Daisy19 Switch CH{index1}&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s">&#39;name&#39;</span><span class="p">:</span> <span class="s">&#39;LCD&#39;</span><span class="p">,</span>
+            <span class="s">&#39;hardware&#39;</span><span class="p">:</span> <span class="n">HardwareAccessObject</span><span class="p">(</span><span class="n">AbstractDaisy24LCD</span><span class="p">(),</span> <span class="n">write</span><span class="o">=</span><span class="bp">True</span><span class="p">),</span>
+            <span class="s">&#39;objectType&#39;</span><span class="p">:</span> <span class="s">&#39;characterstringValue&#39;</span><span class="p">,</span>
+            <span class="s">&#39;initials&#39;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s">&#39;objectName&#39;</span><span class="p">:</span> <span class="s">&#39;{module}_lcd&#39;</span><span class="p">,</span>
+                <span class="s">&#39;description&#39;</span><span class="p">:</span> <span class="s">&#39;{Module} Daisy24 LCD 16x2&#39;</span><span class="p">,</span>
+            <span class="p">},</span>
+        <span class="p">},</span>
+    <span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Tobias Grosch.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.3</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

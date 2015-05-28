@@ -1,0 +1,337 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>bacnet.console.creator.fileaccess &mdash; Masterarbeit Grosch 0.4c0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.4c0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="Masterarbeit Grosch 0.4c0 documentation" href="../../../../index.html" />
+    <link rel="up" title="bacnet.console.creator" href="../creator.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">Masterarbeit Grosch 0.4c0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="../../console.html" >bacnet.console</a> &raquo;</li>
+          <li class="nav-item nav-item-3"><a href="../creator.html" accesskey="U">bacnet.console.creator</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for bacnet.console.creator.fileaccess</h1><div class="highlight"><pre>
+<span class="c"># pylint: disable=unused-argument</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">File Access Handler Module</span>
+<span class="sd">--------------------------</span>
+
+<span class="sd">This module provides file access requests.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+
+<span class="kn">from</span> <span class="nn">bacpypes.pdu</span> <span class="kn">import</span> <span class="n">Address</span>
+<span class="kn">from</span> <span class="nn">bacpypes.apdu</span> <span class="kn">import</span> <span class="n">AtomicReadFileRequest</span><span class="p">,</span> <span class="n">AtomicReadFileRequestAccessMethodChoice</span><span class="p">,</span> \
+    <span class="n">AtomicReadFileRequestAccessMethodChoiceStreamAccess</span><span class="p">,</span> <span class="n">AtomicWriteFileRequestAccessMethodChoice</span><span class="p">,</span> \
+    <span class="n">AtomicWriteFileRequestAccessMethodChoiceStreamAccess</span><span class="p">,</span> <span class="n">AtomicWriteFileRequest</span><span class="p">,</span> \
+    <span class="n">AtomicWriteFileRequestAccessMethodChoiceRecordAccess</span><span class="p">,</span> \
+    <span class="n">AtomicReadFileRequestAccessMethodChoiceRecordAccess</span>
+
+
+<span class="k">def</span> <span class="nf">__readfile_request</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">stream</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function creates a read file record/stream request.</span>
+
+<span class="sd">    :param args: list of parameters</span>
+<span class="sd">    :param stream: is stream access</span>
+<span class="sd">    :return: request</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># read address, instance, start record and record count</span>
+    <span class="n">address</span><span class="p">,</span> <span class="n">obj_inst</span><span class="p">,</span> <span class="n">start</span><span class="p">,</span> <span class="n">count</span> <span class="o">=</span> <span class="n">args</span>
+
+    <span class="c"># set type</span>
+    <span class="n">obj_type</span> <span class="o">=</span> <span class="s">&#39;file&#39;</span>
+
+    <span class="c"># check if object instance is correct</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">obj_inst</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;object instance invalid&#39;</span><span class="p">)</span>
+
+    <span class="c"># make object instance to integer</span>
+    <span class="n">obj_inst</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">obj_inst</span><span class="p">)</span>
+
+    <span class="c"># check if start record is correct</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">start</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;start record invalid&#39;</span><span class="p">)</span>
+
+    <span class="c"># make start record to integer</span>
+    <span class="n">start</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">start</span><span class="p">)</span>
+
+    <span class="c"># check if record count is correct</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">count</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;record count invalid&#39;</span><span class="p">)</span>
+
+    <span class="c"># make record count to integer</span>
+    <span class="n">count</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">count</span><span class="p">)</span>
+
+    <span class="c"># create request</span>
+    <span class="k">if</span> <span class="n">stream</span><span class="p">:</span>
+        <span class="n">request</span> <span class="o">=</span> <span class="n">AtomicReadFileRequest</span><span class="p">(</span>
+            <span class="n">fileIdentifier</span><span class="o">=</span><span class="p">(</span><span class="n">obj_type</span><span class="p">,</span> <span class="n">obj_inst</span><span class="p">),</span>
+            <span class="n">accessMethod</span><span class="o">=</span><span class="n">AtomicReadFileRequestAccessMethodChoice</span><span class="p">(</span>
+                <span class="n">streamAccess</span><span class="o">=</span><span class="n">AtomicReadFileRequestAccessMethodChoiceStreamAccess</span><span class="p">(</span>
+                    <span class="n">fileStartPosition</span><span class="o">=</span><span class="n">start</span><span class="p">,</span>
+                    <span class="n">requestedOctetCount</span><span class="o">=</span><span class="n">count</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">request</span> <span class="o">=</span> <span class="n">AtomicReadFileRequest</span><span class="p">(</span>
+            <span class="n">fileIdentifier</span><span class="o">=</span><span class="p">(</span><span class="n">obj_type</span><span class="p">,</span> <span class="n">obj_inst</span><span class="p">),</span>
+            <span class="n">accessMethod</span><span class="o">=</span><span class="n">AtomicReadFileRequestAccessMethodChoice</span><span class="p">(</span>
+                <span class="n">recordAccess</span><span class="o">=</span><span class="n">AtomicReadFileRequestAccessMethodChoiceRecordAccess</span><span class="p">(</span>
+                    <span class="n">fileStartRecord</span><span class="o">=</span><span class="n">start</span><span class="p">,</span>
+                    <span class="n">requestedRecordCount</span><span class="o">=</span><span class="n">count</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="c"># send to specified address</span>
+    <span class="n">request</span><span class="o">.</span><span class="n">pduDestination</span> <span class="o">=</span> <span class="n">Address</span><span class="p">(</span><span class="n">address</span><span class="p">)</span>
+
+    <span class="c"># return created request</span>
+    <span class="k">return</span> <span class="n">request</span>
+
+
+<span class="k">def</span> <span class="nf">__writefile_request</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">stream</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function creates a write file stream/record request.</span>
+
+<span class="sd">    :param args: list of parameters</span>
+<span class="sd">    :param stream: is stream access</span>
+<span class="sd">    :return: request</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># read address, instance and start record</span>
+    <span class="n">address</span><span class="p">,</span> <span class="n">obj_inst</span><span class="p">,</span> <span class="n">start</span> <span class="o">=</span> <span class="n">args</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span>
+
+    <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="c"># set type</span>
+    <span class="n">obj_type</span> <span class="o">=</span> <span class="s">&#39;file&#39;</span>
+
+    <span class="c"># check if object instance is correct</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">obj_inst</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;object instance invalid&#39;</span><span class="p">)</span>
+
+    <span class="c"># make object instance to integer</span>
+    <span class="n">obj_inst</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">obj_inst</span><span class="p">)</span>
+
+    <span class="c"># check if start record is correct</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">start</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;start record invalid&#39;</span><span class="p">)</span>
+
+    <span class="c"># make start record to integer</span>
+    <span class="n">start</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">start</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">stream</span><span class="p">:</span>
+        <span class="c"># read data</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c"># read record count</span>
+        <span class="n">count</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+
+        <span class="c"># check if record count is correct</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">count</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;record count invalid&#39;</span><span class="p">)</span>
+
+        <span class="c"># make record count to integer</span>
+        <span class="n">count</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">count</span><span class="p">)</span>
+
+        <span class="c"># read data</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">4</span><span class="p">:])</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">4</span> <span class="k">else</span> <span class="p">[]</span>
+
+    <span class="c"># create request</span>
+    <span class="k">if</span> <span class="n">stream</span><span class="p">:</span>
+        <span class="n">request</span> <span class="o">=</span> <span class="n">AtomicWriteFileRequest</span><span class="p">(</span>
+            <span class="n">fileIdentifier</span><span class="o">=</span><span class="p">(</span><span class="n">obj_type</span><span class="p">,</span> <span class="n">obj_inst</span><span class="p">),</span>
+            <span class="n">accessMethod</span><span class="o">=</span><span class="n">AtomicWriteFileRequestAccessMethodChoice</span><span class="p">(</span>
+                <span class="n">streamAccess</span><span class="o">=</span><span class="n">AtomicWriteFileRequestAccessMethodChoiceStreamAccess</span><span class="p">(</span>
+                    <span class="n">fileStartPosition</span><span class="o">=</span><span class="n">start</span><span class="p">,</span>
+                    <span class="n">fileData</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">request</span> <span class="o">=</span> <span class="n">AtomicWriteFileRequest</span><span class="p">(</span>
+            <span class="n">fileIdentifier</span><span class="o">=</span><span class="p">(</span><span class="n">obj_type</span><span class="p">,</span> <span class="n">obj_inst</span><span class="p">),</span>
+            <span class="n">accessMethod</span><span class="o">=</span><span class="n">AtomicWriteFileRequestAccessMethodChoice</span><span class="p">(</span>
+                <span class="n">recordAccess</span><span class="o">=</span><span class="n">AtomicWriteFileRequestAccessMethodChoiceRecordAccess</span><span class="p">(</span>
+                    <span class="n">fileStartRecord</span><span class="o">=</span><span class="n">start</span><span class="p">,</span>
+                    <span class="n">recordCount</span><span class="o">=</span><span class="n">count</span><span class="p">,</span>
+                    <span class="n">fileRecordData</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="c"># send to specified address</span>
+    <span class="n">request</span><span class="o">.</span><span class="n">pduDestination</span> <span class="o">=</span> <span class="n">Address</span><span class="p">(</span><span class="n">address</span><span class="p">)</span>
+
+    <span class="c"># return created request</span>
+    <span class="k">return</span> <span class="n">request</span>
+
+
+<div class="viewcode-block" id="rdstr_request"><a class="viewcode-back" href="../../../../bacnet.console.creator.html#bacnet.console.creator.fileaccess.rdstr_request">[docs]</a><span class="k">def</span> <span class="nf">rdstr_request</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">console</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function creates a read file stream request.</span>
+
+<span class="sd">    Usage: rdstr &lt;address&gt; &lt;instance&gt; &lt;start&gt; &lt;count&gt;</span>
+
+<span class="sd">    :param args: list of parameters</span>
+<span class="sd">    :param console: console object</span>
+<span class="sd">    :return: request</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># check if arguments were provided</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;too few arguments&#39;</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">4</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;too many arguments&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">__readfile_request</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">stream</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="rdrec_request"><a class="viewcode-back" href="../../../../bacnet.console.creator.html#bacnet.console.creator.fileaccess.rdrec_request">[docs]</a><span class="k">def</span> <span class="nf">rdrec_request</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">console</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function creates a read file record request.</span>
+
+<span class="sd">    Usage: rdrec &lt;address&gt; &lt;instance&gt; &lt;start&gt; &lt;count&gt;</span>
+
+<span class="sd">    :param args: list of parameters</span>
+<span class="sd">    :param console: console object</span>
+<span class="sd">    :return: request</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># check if arguments were provided</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;too few arguments&#39;</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">4</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;too many arguments&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">__readfile_request</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">stream</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="wrstr_request"><a class="viewcode-back" href="../../../../bacnet.console.creator.html#bacnet.console.creator.fileaccess.wrstr_request">[docs]</a><span class="k">def</span> <span class="nf">wrstr_request</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">console</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function creates a write file stream request.</span>
+
+<span class="sd">    Usage: wrstr &lt;address&gt; &lt;instance&gt; &lt;start&gt; &lt;data&gt;</span>
+
+<span class="sd">    :param args: list of parameters</span>
+<span class="sd">    :param console: console object</span>
+<span class="sd">    :return: request</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># check if arguments were provided</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;too few arguments&#39;</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">4</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;too many arguments&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">__writefile_request</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">stream</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="wrrec_request"><a class="viewcode-back" href="../../../../bacnet.console.creator.html#bacnet.console.creator.fileaccess.wrrec_request">[docs]</a><span class="k">def</span> <span class="nf">wrrec_request</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">console</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function creates a write file record request.</span>
+
+<span class="sd">    Usage: wrrec &lt;address&gt; &lt;instance&gt; &lt;start&gt; &lt;count&gt; ( &lt;data&gt; )* ...</span>
+
+<span class="sd">    :param args: list of parameters</span>
+<span class="sd">    :param console: console object</span>
+<span class="sd">    :return: request</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># check if arguments were provided</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;too few arguments&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">__writefile_request</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">stream</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Tobias Grosch.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.3</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

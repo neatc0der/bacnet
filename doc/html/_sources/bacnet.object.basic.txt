@@ -1,0 +1,54 @@
+bacnet.object.basic package
+===========================
+
+Submodules
+----------
+
+bacnet.object.basic.cov_support module
+--------------------------------------
+
+.. automodule:: bacnet.object.basic.cov_support
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+bacnet.object.basic.device module
+---------------------------------
+
+.. automodule:: bacnet.object.basic.device
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+bacnet.object.basic.fileaccess module
+-------------------------------------
+
+.. automodule:: bacnet.object.basic.fileaccess
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+bacnet.object.basic.general module
+----------------------------------
+
+.. automodule:: bacnet.object.basic.general
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+bacnet.object.basic.program module
+----------------------------------
+
+.. automodule:: bacnet.object.basic.program
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: bacnet.object.basic
+    :members:
+    :undoc-members:
+    :show-inheritance:

@@ -1,0 +1,356 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>bacnet.app.handler.fileaccess &mdash; Masterarbeit Grosch 0.4c0 documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '0.4c0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="Masterarbeit Grosch 0.4c0 documentation" href="../../../../index.html" />
+    <link rel="up" title="bacnet.app.handler" href="../handler.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">Masterarbeit Grosch 0.4c0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="../../app.html" >bacnet.app</a> &raquo;</li>
+          <li class="nav-item nav-item-3"><a href="../handler.html" accesskey="U">bacnet.app.handler</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for bacnet.app.handler.fileaccess</h1><div class="highlight"><pre>
+<span class="c"># pylint: disable=invalid-name</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">File Access Handler Module</span>
+<span class="sd">--------------------------</span>
+
+<span class="sd">This module provides file access handlers.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span>
+
+<span class="kn">from</span> <span class="nn">bacpypes.errors</span> <span class="kn">import</span> <span class="n">ExecutionError</span>
+
+<span class="kn">from</span> <span class="nn">bacpypes.apdu</span> <span class="kn">import</span> <span class="n">AtomicReadFileACK</span><span class="p">,</span> <span class="n">AtomicWriteFileACK</span><span class="p">,</span> \
+    <span class="n">AtomicReadFileACKAccessMethodChoice</span><span class="p">,</span> <span class="n">AtomicReadFileACKAccessMethodRecordAccess</span><span class="p">,</span> \
+    <span class="n">AtomicReadFileACKAccessMethodStreamAccess</span>
+
+<span class="kn">from</span> <span class="nn">bacnet.debugging</span> <span class="kn">import</span> <span class="n">ModuleLogger</span>
+
+
+<span class="c"># enable logging</span>
+<span class="n">ModuleLogger</span><span class="p">()</span>
+
+
+<span class="k">def</span> <span class="nf">__do_AtomicRecordAccess</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">apdu</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">write</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function reads data from record access and returns parsed data.</span>
+
+<span class="sd">    :param apdu: incoming message</span>
+<span class="sd">    :param obj: object</span>
+<span class="sd">    :param write: specify if a read or write request is handed over</span>
+<span class="sd">    :return: parsed data</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">result_dict</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;__do_AtomicRecordAccess </span><span class="si">%r</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">apdu</span><span class="p">)</span>
+
+    <span class="c"># check if file access method is correct</span>
+    <span class="k">if</span> <span class="n">obj</span><span class="o">.</span><span class="n">fileAccessMethod</span> <span class="o">!=</span> <span class="s">&#39;recordAccess&#39;</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">ExecutionError</span><span class="p">(</span>
+            <span class="n">errorClass</span><span class="o">=</span><span class="s">&#39;services&#39;</span><span class="p">,</span>
+            <span class="n">errorCode</span><span class="o">=</span><span class="s">&#39;invalidFileAccessMethod&#39;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="c"># check if start record is correct</span>
+    <span class="k">elif</span> <span class="ow">not</span> <span class="n">write</span> <span class="ow">and</span> <span class="p">(</span><span class="n">apdu</span><span class="o">.</span><span class="n">accessMethod</span><span class="o">.</span><span class="n">recordAccess</span><span class="o">.</span><span class="n">fileStartRecord</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span>
+                        <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s">&#39;__len__&#39;</span><span class="p">)</span> <span class="ow">or</span>
+                        <span class="n">apdu</span><span class="o">.</span><span class="n">accessMethod</span><span class="o">.</span><span class="n">recordAccess</span><span class="o">.</span><span class="n">fileStartRecord</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">obj</span><span class="p">)):</span>
+        <span class="k">raise</span> <span class="n">ExecutionError</span><span class="p">(</span>
+            <span class="n">errorClass</span><span class="o">=</span><span class="s">&#39;services&#39;</span><span class="p">,</span>
+            <span class="n">errorCode</span><span class="o">=</span><span class="s">&#39;invalidFileStartPosition&#39;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">write</span><span class="p">:</span>
+            <span class="c"># write file</span>
+            <span class="n">start_record</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">WriteFile</span><span class="p">(</span>
+                <span class="n">apdu</span><span class="o">.</span><span class="n">accessMethod</span><span class="o">.</span><span class="n">recordAccess</span><span class="o">.</span><span class="n">fileStartRecord</span><span class="p">,</span>
+                <span class="n">apdu</span><span class="o">.</span><span class="n">accessMethod</span><span class="o">.</span><span class="n">recordAccess</span><span class="o">.</span><span class="n">recordCount</span><span class="p">,</span>
+                <span class="n">apdu</span><span class="o">.</span><span class="n">accessMethod</span><span class="o">.</span><span class="n">recordAccess</span><span class="o">.</span><span class="n">fileRecordData</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="n">result_dict</span><span class="p">[</span><span class="s">&#39;start_pos&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">start_record</span>
+            <span class="n">result_dict</span><span class="p">[</span><span class="s">&#39;record_data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">apdu</span><span class="o">.</span><span class="n">accessMethod</span><span class="o">.</span><span class="n">recordAccess</span><span class="o">.</span><span class="n">fileRecordData</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;   - start_record: </span><span class="si">%r</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">start_record</span><span class="p">)</span>
+
+            <span class="c"># create acknowledgement</span>
+            <span class="n">result_dict</span><span class="p">[</span><span class="s">&#39;resp&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">AtomicWriteFileACK</span><span class="p">(</span>
+                <span class="n">context</span><span class="o">=</span><span class="n">apdu</span><span class="p">,</span>
+                <span class="n">fileStartRecord</span><span class="o">=</span><span class="n">start_record</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c"># read file</span>
+            <span class="n">end_of_file</span><span class="p">,</span> <span class="n">record_data</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">ReadFile</span><span class="p">(</span>
+                <span class="n">apdu</span><span class="o">.</span><span class="n">accessMethod</span><span class="o">.</span><span class="n">recordAccess</span><span class="o">.</span><span class="n">fileStartRecord</span><span class="p">,</span>
+                <span class="n">apdu</span><span class="o">.</span><span class="n">accessMethod</span><span class="o">.</span><span class="n">recordAccess</span><span class="o">.</span><span class="n">requestedRecordCount</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="n">result_dict</span><span class="p">[</span><span class="s">&#39;start_pos&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">apdu</span><span class="o">.</span><span class="n">accessMethod</span><span class="o">.</span><span class="n">recordAccess</span><span class="o">.</span><span class="n">fileStartRecord</span>
+            <span class="n">result_dict</span><span class="p">[</span><span class="s">&#39;record_data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">record_data</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;   - record_data: </span><span class="si">%r</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">record_data</span><span class="p">)</span>
+
+            <span class="c"># create acknowledgement</span>
+            <span class="n">result_dict</span><span class="p">[</span><span class="s">&#39;resp&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">AtomicReadFileACK</span><span class="p">(</span>
+                <span class="n">context</span><span class="o">=</span><span class="n">apdu</span><span class="p">,</span>
+                <span class="n">endOfFile</span><span class="o">=</span><span class="n">end_of_file</span><span class="p">,</span>
+                <span class="n">accessMethod</span><span class="o">=</span><span class="n">AtomicReadFileACKAccessMethodChoice</span><span class="p">(</span>
+                    <span class="n">recordAccess</span><span class="o">=</span><span class="n">AtomicReadFileACKAccessMethodRecordAccess</span><span class="p">(</span>
+                        <span class="n">fileStartRecord</span><span class="o">=</span><span class="n">apdu</span><span class="o">.</span><span class="n">accessMethod</span><span class="o">.</span><span class="n">recordAccess</span><span class="o">.</span><span class="n">fileStartRecord</span><span class="p">,</span>
+                        <span class="n">returnedRecordCount</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">record_data</span><span class="p">),</span>
+                        <span class="n">fileRecordData</span><span class="o">=</span><span class="n">record_data</span><span class="p">,</span>
+                    <span class="p">),</span>
+                <span class="p">),</span>
+            <span class="p">)</span>
+
+    <span class="c"># return result dict</span>
+    <span class="k">return</span> <span class="n">result_dict</span>
+
+
+<span class="k">def</span> <span class="nf">__do_AtomicStreamAccess</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">apdu</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">write</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function reads data from stream access and returns parsed data.</span>
+
+<span class="sd">    :param apdu: incoming message</span>
+<span class="sd">    :param obj: object</span>
+<span class="sd">    :param write: specify if a read or write request is handed over</span>
+<span class="sd">    :return: parsed data</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">result_dict</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;__do_AtomicStreamAccess </span><span class="si">%r</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">apdu</span><span class="p">)</span>
+
+    <span class="c"># check if file access method is correct</span>
+    <span class="k">if</span> <span class="n">obj</span><span class="o">.</span><span class="n">fileAccessMethod</span> <span class="o">!=</span> <span class="s">&#39;streamAccess&#39;</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">ExecutionError</span><span class="p">(</span>
+            <span class="n">errorClass</span><span class="o">=</span><span class="s">&#39;services&#39;</span><span class="p">,</span>
+            <span class="n">errorCode</span><span class="o">=</span><span class="s">&#39;invalidFileAccessMethod&#39;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="c"># check if start record is correct</span>
+    <span class="k">elif</span> <span class="ow">not</span> <span class="n">write</span> <span class="ow">and</span> <span class="p">(</span><span class="n">apdu</span><span class="o">.</span><span class="n">accessMethod</span><span class="o">.</span><span class="n">streamAccess</span><span class="o">.</span><span class="n">fileStartPosition</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span>
+                        <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s">&#39;__len__&#39;</span><span class="p">)</span> <span class="ow">or</span>
+                        <span class="n">apdu</span><span class="o">.</span><span class="n">accessMethod</span><span class="o">.</span><span class="n">streamAccess</span><span class="o">.</span><span class="n">fileStartPosition</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">obj</span><span class="p">)):</span>
+        <span class="k">raise</span> <span class="n">ExecutionError</span><span class="p">(</span>
+            <span class="n">errorClass</span><span class="o">=</span><span class="s">&#39;services&#39;</span><span class="p">,</span>
+            <span class="n">errorCode</span><span class="o">=</span><span class="s">&#39;invalidFileStartPosition&#39;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c"># read/write file</span>
+        <span class="k">if</span> <span class="n">write</span><span class="p">:</span>
+            <span class="n">start_position</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">WriteFile</span><span class="p">(</span>
+                <span class="n">apdu</span><span class="o">.</span><span class="n">accessMethod</span><span class="o">.</span><span class="n">streamAccess</span><span class="o">.</span><span class="n">fileStartPosition</span><span class="p">,</span>
+                <span class="n">apdu</span><span class="o">.</span><span class="n">accessMethod</span><span class="o">.</span><span class="n">streamAccess</span><span class="o">.</span><span class="n">fileData</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="n">result_dict</span><span class="p">[</span><span class="s">&#39;start_pos&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">start_position</span>
+            <span class="n">result_dict</span><span class="p">[</span><span class="s">&#39;record_data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">apdu</span><span class="o">.</span><span class="n">accessMethod</span><span class="o">.</span><span class="n">streamAccess</span><span class="o">.</span><span class="n">fileData</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;   - start_position: </span><span class="si">%r</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">start_position</span><span class="p">)</span>
+
+            <span class="c"># create acknowledgement</span>
+            <span class="n">result_dict</span><span class="p">[</span><span class="s">&#39;resp&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">AtomicWriteFileACK</span><span class="p">(</span>
+                <span class="n">context</span><span class="o">=</span><span class="n">apdu</span><span class="p">,</span>
+                <span class="n">fileStartPosition</span><span class="o">=</span><span class="n">start_position</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">end_of_file</span><span class="p">,</span> <span class="n">record_data</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">ReadFile</span><span class="p">(</span>
+                <span class="n">apdu</span><span class="o">.</span><span class="n">accessMethod</span><span class="o">.</span><span class="n">streamAccess</span><span class="o">.</span><span class="n">fileStartPosition</span><span class="p">,</span>
+                <span class="n">apdu</span><span class="o">.</span><span class="n">accessMethod</span><span class="o">.</span><span class="n">streamAccess</span><span class="o">.</span><span class="n">requestedOctetCount</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="n">result_dict</span><span class="p">[</span><span class="s">&#39;start_pos&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">apdu</span><span class="o">.</span><span class="n">accessMethod</span><span class="o">.</span><span class="n">streamAccess</span><span class="o">.</span><span class="n">fileStartPosition</span>
+            <span class="n">result_dict</span><span class="p">[</span><span class="s">&#39;record_data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">record_data</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;   - record_data: </span><span class="si">%r</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">record_data</span><span class="p">)</span>
+
+            <span class="c"># create acknowledgement</span>
+            <span class="n">result_dict</span><span class="p">[</span><span class="s">&#39;resp&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">AtomicReadFileACK</span><span class="p">(</span>
+                <span class="n">context</span><span class="o">=</span><span class="n">apdu</span><span class="p">,</span>
+                <span class="n">endOfFile</span><span class="o">=</span><span class="n">end_of_file</span><span class="p">,</span>
+                <span class="n">accessMethod</span><span class="o">=</span><span class="n">AtomicReadFileACKAccessMethodChoice</span><span class="p">(</span>
+                    <span class="n">streamAccess</span><span class="o">=</span><span class="n">AtomicReadFileACKAccessMethodStreamAccess</span><span class="p">(</span>
+                        <span class="n">fileStartPosition</span><span class="o">=</span><span class="n">apdu</span><span class="o">.</span><span class="n">accessMethod</span><span class="o">.</span><span class="n">streamAccess</span><span class="o">.</span><span class="n">fileStartPosition</span><span class="p">,</span>
+                        <span class="n">fileData</span><span class="o">=</span><span class="n">record_data</span><span class="p">,</span>
+                    <span class="p">),</span>
+                <span class="p">),</span>
+            <span class="p">)</span>
+
+    <span class="c"># return result dict</span>
+    <span class="k">return</span> <span class="n">result_dict</span>
+
+
+<span class="k">def</span> <span class="nf">__do_AtomicFileRequest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">apdu</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">write</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function reads data from request and returns parsed data.</span>
+
+<span class="sd">    :param apdu: incoming message</span>
+<span class="sd">    :param obj: object</span>
+<span class="sd">    :param write: specify if a read or write request is handed over</span>
+<span class="sd">    :return: parsed data</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">result_dict</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;__do_AtomicFileRequest </span><span class="si">%r</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">apdu</span><span class="p">)</span>
+
+    <span class="c"># check if object exists</span>
+    <span class="k">if</span> <span class="n">obj</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">ExecutionError</span><span class="p">(</span><span class="n">errorClass</span><span class="o">=</span><span class="s">&#39;object&#39;</span><span class="p">,</span> <span class="n">errorCode</span><span class="o">=</span><span class="s">&#39;unknownObject&#39;</span><span class="p">)</span>
+
+    <span class="c"># check if method is record access</span>
+    <span class="k">elif</span> <span class="n">apdu</span><span class="o">.</span><span class="n">accessMethod</span><span class="o">.</span><span class="n">recordAccess</span><span class="p">:</span>
+        <span class="c"># initiate atomic record access</span>
+        <span class="n">result_dict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">__do_AtomicRecordAccess</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">apdu</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">write</span><span class="p">))</span>
+
+    <span class="c"># check if method is stream access</span>
+    <span class="k">elif</span> <span class="n">apdu</span><span class="o">.</span><span class="n">accessMethod</span><span class="o">.</span><span class="n">streamAccess</span><span class="p">:</span>
+        <span class="c"># initiate atomic stream access</span>
+        <span class="n">result_dict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">__do_AtomicStreamAccess</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">apdu</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">write</span><span class="p">))</span>
+
+    <span class="c"># return result dict</span>
+    <span class="k">return</span> <span class="n">result_dict</span>
+
+
+<div class="viewcode-block" id="do_AtomicReadFileRequest"><a class="viewcode-back" href="../../../../bacnet.app.handler.html#bacnet.app.handler.fileaccess.do_AtomicReadFileRequest">[docs]</a><span class="k">def</span> <span class="nf">do_AtomicReadFileRequest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">apdu</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function reads data from read file request.</span>
+
+<span class="sd">    :param apdu: incoming message</span>
+<span class="sd">    :return: response</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;do_AtomicReadFileRequest </span><span class="si">%r</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">apdu</span><span class="p">)</span>
+
+    <span class="c"># check if file id is correct</span>
+    <span class="k">if</span> <span class="n">apdu</span><span class="o">.</span><span class="n">fileIdentifier</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="s">&#39;file&#39;</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">ExecutionError</span><span class="p">(</span><span class="n">errorClass</span><span class="o">=</span><span class="s">&#39;services&#39;</span><span class="p">,</span> <span class="n">errorCode</span><span class="o">=</span><span class="s">&#39;inconsistentObjectType&#39;</span><span class="p">)</span>
+
+    <span class="c"># get object</span>
+    <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_object_by_id</span><span class="p">(</span><span class="n">apdu</span><span class="o">.</span><span class="n">fileIdentifier</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;   - object: </span><span class="si">%r</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">obj</span><span class="p">)</span>
+
+    <span class="c"># initiate reading process</span>
+    <span class="n">result_dict</span> <span class="o">=</span> <span class="n">__do_AtomicFileRequest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">apdu</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">write</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+    <span class="n">resp</span> <span class="o">=</span> <span class="n">result_dict</span><span class="p">[</span><span class="s">&#39;resp&#39;</span><span class="p">]</span>
+
+    <span class="c"># return response</span>
+    <span class="k">return</span> <span class="n">resp</span>
+
+</div>
+<div class="viewcode-block" id="do_AtomicWriteFileRequest"><a class="viewcode-back" href="../../../../bacnet.app.handler.html#bacnet.app.handler.fileaccess.do_AtomicWriteFileRequest">[docs]</a><span class="k">def</span> <span class="nf">do_AtomicWriteFileRequest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">apdu</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function reads data from write file request.</span>
+
+<span class="sd">    :param apdu: incoming message</span>
+<span class="sd">    :return: response</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;do_AtomicWriteFileRequest </span><span class="si">%r</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">apdu</span><span class="p">)</span>
+
+    <span class="c"># check if file id is correct</span>
+    <span class="k">if</span> <span class="n">apdu</span><span class="o">.</span><span class="n">fileIdentifier</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="s">&#39;file&#39;</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">ExecutionError</span><span class="p">(</span><span class="n">errorClass</span><span class="o">=</span><span class="s">&#39;services&#39;</span><span class="p">,</span> <span class="n">errorCode</span><span class="o">=</span><span class="s">&#39;inconsistentObjectType&#39;</span><span class="p">)</span>
+
+    <span class="c"># get object</span>
+    <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_object_by_id</span><span class="p">(</span><span class="n">apdu</span><span class="o">.</span><span class="n">fileIdentifier</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s">&#39;   - object: </span><span class="si">%r</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">obj</span><span class="p">)</span>
+
+    <span class="c"># initiate writing process</span>
+    <span class="n">result_dict</span> <span class="o">=</span> <span class="n">__do_AtomicFileRequest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">apdu</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">write</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+    <span class="c"># set new size</span>
+    <span class="n">obj</span><span class="o">.</span><span class="n">WriteProperty</span><span class="p">(</span><span class="s">&#39;fileSize&#39;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">obj</span><span class="p">),</span> <span class="n">direct</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+    <span class="n">resp</span> <span class="o">=</span> <span class="n">result_dict</span><span class="p">[</span><span class="s">&#39;resp&#39;</span><span class="p">]</span>
+
+    <span class="c"># return response</span>
+    <span class="k">return</span> <span class="n">resp</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2015, Tobias Grosch.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.3</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,45 @@
+bacnet.system package
+=====================
+
+Subpackages
+-----------
+
+.. toctree::
+
+    bacnet.system.config
+
+Submodules
+----------
+
+bacnet.system.managing module
+-----------------------------
+
+.. automodule:: bacnet.system.managing
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+bacnet.system.vendors module
+----------------------------
+
+.. automodule:: bacnet.system.vendors
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+bacnet.system.version module
+----------------------------
+
+.. automodule:: bacnet.system.version
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: bacnet.system
+    :members:
+    :undoc-members:
+    :show-inheritance:
