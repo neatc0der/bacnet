@@ -95,7 +95,7 @@ def response_parser(apdu, console=None):
 
     # check if source is local
     if result['destination'].isdigit():
-        dst = u'local({0})'.format(apdu.pduDestination.addrTuple[1])
+        dst = u'local({0})'.format(result['destination'])
 
         # check if source is local
         if src.startswith('local'):

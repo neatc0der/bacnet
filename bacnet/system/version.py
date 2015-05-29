@@ -1,4 +1,4 @@
-# pylint: disable=bare-except, star-args
+# pylint: disable=broad-except, star-args
 
 """
 BACnet System Version Module
@@ -16,7 +16,7 @@ from verlib import NormalizedVersion
 
 __author__ = 'Tobias Grosch'
 __program__ = 'BACnet Controller Software'
-__version__ = ((0, 4), ('b', 0))
+__version__ = ((0, 4), ('c', 0))
 
 
 def create_version(version):
@@ -37,7 +37,7 @@ def create_version(version):
         )
         gitless_version = 'v%s' % str(NormalizedVersion.from_parts(*version))
 
-    except:
+    except Exception:
         git_commit = None
 
     # pack git information
@@ -54,7 +54,7 @@ def create_version(version):
             if not git_count.isdigit():
                 git_count = '0'
 
-        except:
+        except Exception:
             git_count = '0'
 
         git += (git_changes, git_count)
